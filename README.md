@@ -24,3 +24,12 @@
     <img align="center" alt="NodeJS Imagem" src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white"/>
     <img align="center" alt="MySQL Imagem" src="https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white"/>
 </div>
+
+</div>
+
+<a href="https://linkedin.com/in/nathatargino" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="Linkedin"></a>
+<a href="mailto:nathatargino.dev@gmail.com" target="_blank"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Gmail"></a>
+<a href="https://api.whatsapp.com/send?phone=5583993176446&text=Ol%C3%A1,%20vim%20pelo%20seu%20perfil%20do%20GitHub%20%F0%9F%91%8B" target="_blank"><img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Whatsapp"></a>
+<a href="https://www.instagram.com/nathatargino/" target="_blank"><img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram"></a>
+
+</div>
