@@ -14,10 +14,10 @@
 [![Blog](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/nathatargino/)
 
 <a href="https://github.com/nathatargino/github-readme-stats">
-  <img height=200 align="center" src="https://github-readme-stats.vercel.app/api?username=nathatargino&theme=highcontrast" />
+  <img height=180em align="center" src="https://github-readme-stats.vercel.app/api?username=nathatargino&theme=highcontrast" />
 </a>
 <a href="https://github.com/nathatargino/convoychat">
-  <img height=200 align="center" src="https://github-readme-stats.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&card_width=320&theme=highcontrast" />
+  <img height=180em align="center" src="https://github-readme-stats.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&card_width=320&theme=highcontrast" />
 </a>
 
   ## Tecnologias que uso no meu dia
