@@ -9,7 +9,7 @@
 - ⚡ Fato engraçado: Meu primeiro contato com HTML foi aos 13 anos tentando criar um site sobre games (não deu certo)
 
 [![Blog](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/nathatargino)
-[![Blog](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](https://api.whatsapp.com/send?phone=5583993176446&text=Ol%C3%A1,%20vim%20pelo%20seu%20perfil%20do%20GitHub%20%F0%9F%91%8B)
+[![Blog](https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:nathatargino.dev@gmail.com)
 [![Blog](https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://api.whatsapp.com/send?phone=5583993176446&text=Ol%C3%A1,%20vim%20pelo%20seu%20perfil%20do%20GitHub%20%F0%9F%91%8B)
 [![Blog](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/nathatargino/)
 
