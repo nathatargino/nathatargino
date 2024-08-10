@@ -70,6 +70,9 @@ const typed = new Typed ('.multiplo-texto',{
 document.getElementById("cvbtn").addEventListener("click", function() {
     // Caminho para o arquivo PDF
     const pdfPath = "assets/Nathã - Curriculo .pdf";
+
+    // Abre o PDF em uma nova janela/aba
+    window.open(pdfPath, "_blank");
     
     // Cria um link temporário
     const link = document.createElement("a");
