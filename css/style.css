@@ -469,6 +469,7 @@ span {
     .img-inicio {
         width: 70vw;
         margin-top: 4rem;
+        display: none;
     }
     .img-sobre {
         width: 70vw;
@@ -485,11 +486,33 @@ span {
     .conteudo-portfolio {
         grid-template-columns: repeat(2, 1fr);
     }
+    .social-media{
+        text-align: center;
+        justify-content: space-between;
+    }
+    #cvbtn {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        width: 79vw;
+        margin: 20px;
+    }
 }
 
 @media (max-width: 617px) {
     .conteudo-portfolio {
         grid-template-columns: 1fr;
+    }
+    .social-media{
+        text-align: center;
+        justify-content: space-between;
+    }
+    #cvbtn {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        width: 79vw;
+        margin: 20px;
     }
 }
 
@@ -501,11 +524,23 @@ span {
     .contato form .input-box input {
         width: 100%;
     }
+    .social-media{
+        text-align: center;
+        justify-content: space-between;
+    }
+    #cvbtn {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        width: 79vw;
+        margin: 20px;
+    }
 }
 
 @media (max-width: 365px){
     .img-inicio {
-        width: 90vw;
+        width: 80vw;
+        display: none;
 
     }
     .img-sobre {
@@ -518,5 +553,16 @@ span {
     .footer p {
         text-align: center;
         margin: 2rem;
+    }
+    .social-media{
+        text-align: center;
+        justify-content: space-between;
+    }
+    #cvbtn {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        width: 79vw;
+        margin: 20px;
     }
 }
