@@ -57,9 +57,31 @@ ScrollReveal().reveal('.conteudo-inicio p, .conteudo-sobre',{origin: 'right'});
 /*==================== typed js ====================*/
 
 const typed = new Typed ('.multiplo-texto',{
-    strings: ['Desenvolvedor FullStack', 'Gamer', 'Web Designer'],
+    strings: ['Front-End', 'Back-end', 'Full Stack'],
     typeSpeed: 100,
     backSpeed: 100,
     backDelay: 1000,
     loop: true
+});
+
+/*==================== Download CV ====================*/
+
+
+document.getElementById("cvbtn").addEventListener("click", function() {
+    // Caminho para o arquivo PDF
+    const pdfPath = "assets/Nathã - Curriculo .pdf";
+    
+    // Cria um link temporário
+    const link = document.createElement("a");
+    link.href = pdfPath;
+
+    // Nome do arquivo que será baixado
+    link.download = "Nathã - Curriculo.pdf";
+
+    // Add link ao documento e simula o clique
+    document.body.appendChild(link);
+    link.click();
+
+    // Remove o link do documento
+    document.body.removeChild(link);
 });
