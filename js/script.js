@@ -85,3 +85,21 @@ document.getElementById("cvbtn").addEventListener("click", function() {
     // Remove o link do documento
     document.body.removeChild(link);
 });
+
+// Mascara Input Phone
+
+const inputTelefone = document.getElementById('phone');
+
+inputTelefone.addEventListener('focus', function() {
+    this.placeholder = "Digite seu número";
+});
+
+inputTelefone.addEventListener('blur', function() {
+    this.placeholder = "Celular";
+});
+
+inputTelefone.addEventListener('input', function(e) {
+    var x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+    e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+});
+
