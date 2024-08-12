@@ -106,3 +106,9 @@ inputTelefone.addEventListener('input', function(e) {
     e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
 });
 
+
+// Alerta Mais Informações em Manutenção
+
+function showAlert(service) {
+    window.alert('Em manutenção, tente novamente mais tarde!');
+  }
