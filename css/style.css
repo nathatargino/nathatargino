@@ -100,9 +100,12 @@ span {
 
 }
 
+
 .img-inicio img {
     width: 29vw;
     animation: imagemFlutuante 4s ease-in-out infinite;
+    filter: drop-shadow(1px 1px 20px var(--cor-principal));
+
 }
 
 @keyframes imagemFlutuante {
@@ -168,6 +171,8 @@ span {
 }
 
 .img-sobre img {
+    filter: drop-shadow(1px 1px 20px var(--cor-principal));
+    border-radius: 50%;
     width: 29vw;
 }
 
