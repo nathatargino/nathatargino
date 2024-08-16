@@ -1,0 +1,75 @@
+/* Google Translate Widget CSS */
+  
+
+#google_translate_element {
+    padding: 0;
+    margin-right: 10px;
+    
+    
+  }
+  .goog-te-banner-frame.skiptranslate,
+  .goog-te-gadget-simple img,
+  img.goog-te-gadget-icon,
+  .goog-te-menu-value span {
+    display: none !important;
+  }
+  .goog-te-menu-frame {
+    box-shadow: none !important;
+  }
+
+
+  .goog-te-gadget-simple {
+    background-color: transparent !important;
+    background: url("assets/translate.svg") center / 12px no-repeat;
+    background-size: 20px 20px;
+    display: flex;
+    font-weight: 400;
+    line-height: 1.8;
+    padding: 0 6px;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    border-left: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-right: none !important;
+    border-radius: 4px;
+  }
+
+  .goog-te-gadget-simple:hover {
+    background: url("assets/translate2.svg") center / 12px no-repeat;
+    background-size: 20px 20px;
+
+  }
+
+  
+ 
+  /* Deixar Oculto */
+  .goog-te-gadget-simple .VIpgJd-ZVi9od-xl07Ob-lTBxed span {
+    text-decoration: none !important;
+    display: none !important;
+  }
+
+/* Barra Superior do Google (deixar oculto)*/
+
+  .VIpgJd-ZVi9od-ORHb-OEVmcd {
+    display: none !important;
+  }
+
+/* Seletor de Linguagens */
+.VIpgJd-ZVi9od-xl07Ob-OEVmcd {
+    transition: ease-in 1s;
+    margin-top: 55px;
+    color: blueviolet;
+    border-radius: 9px;
+    
+}
+
+

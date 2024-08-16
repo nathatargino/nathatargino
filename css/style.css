@@ -24,6 +24,7 @@ html {
 }
 
 body {
+    top: 0px !important;
     background-color: var(--cor-primaria);
     color: var(--cor-do-texto);
 }
@@ -52,10 +53,17 @@ body {
     cursor: default;
 }
 
+.navbar{
+    display: flex;
+    flex-direction: row;
+    
+}
+
 .navbar a {
     font-size: 1.7rem;
     color: var(--cor-do-texto);
     margin-left: 4rem;
+    
 }
 
 .navbar a:hover,
@@ -105,6 +113,8 @@ span {
     width: 29vw;
     animation: imagemFlutuante 4s ease-in-out infinite;
     filter: drop-shadow(1px 1px 20px var(--cor-principal));
+    max-width: 600px;
+    
 
 }
 
@@ -174,6 +184,7 @@ span {
     filter: drop-shadow(1px 1px 20px var(--cor-principal));
     border-radius: 50%;
     width: 29vw;
+    max-width: 600px;
 }
 
 .heading {

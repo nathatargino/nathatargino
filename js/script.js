@@ -69,7 +69,7 @@ const typed = new Typed ('.multiplo-texto',{
 
 document.getElementById("cvbtn").addEventListener("click", function() {
     // Caminho para o arquivo PDF
-    const pdfPath = "assets/Nathã - Curriculo .pdf";
+    const pdfPath = "css/assets/Nathã - Curriculo .pdf";
 
     // Abre o PDF em uma nova janela/aba
     window.open(pdfPath, "_blank");
@@ -112,3 +112,7 @@ inputTelefone.addEventListener('input', function(e) {
 function showAlert(service) {
     window.alert('Em manutenção, tente novamente mais tarde!');
   }
+
+
+
+  
