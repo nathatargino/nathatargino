@@ -113,7 +113,7 @@ span {
     width: 29vw;
     animation: imagemFlutuante 4s ease-in-out infinite;
     filter: drop-shadow(1px 1px 20px var(--cor-principal));
-    max-width: 600px;
+    max-width: 530px;
     
 
 }
@@ -184,7 +184,7 @@ span {
     filter: drop-shadow(1px 1px 20px var(--cor-principal));
     border-radius: 50%;
     width: 29vw;
-    max-width: 600px;
+    max-width: 530px;
 }
 
 .heading {
@@ -661,3 +661,11 @@ span {
         align-items: center; 
     }
 }
+
+
+
+
+
+
+
+

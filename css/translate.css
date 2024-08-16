@@ -1,5 +1,36 @@
 /* Google Translate Widget CSS */
   
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    border: none;
+    outline: none;
+    scroll-behavior: smooth;
+    font-family: 'Poppins', sans-serif;
+}
+
+:root {
+    --cor-primaria: #1f242d;
+    --cor-secundaria: #323946;
+    --cor-do-texto: #fff;
+    --cor-principal: #9956f6ef;
+}
+
+html {
+    font-size: 62.5%;
+    overflow-x: hidden;
+}
+
+body {
+    top: 0px !important;
+    background-color: var(--cor-primaria);
+    color: var(--cor-do-texto);
+}
+
 
 #google_translate_element {
     padding: 0;
@@ -65,11 +96,75 @@
 
 /* Seletor de Linguagens */
 .VIpgJd-ZVi9od-xl07Ob-OEVmcd {
-    transition: ease-in 1s;
-    margin-top: 55px;
-    color: blueviolet;
-    border-radius: 9px;
-    
+    margin-top: .2rem !important;
+    border-radius: 15px !important;
+    box-shadow:  0 0 .875rem var(--cor-principal)!important;
+    border: none !important;
 }
+
+/* Ocultar Icone do Google (lateral esquerda) */
+
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf  {
+  display: none !important;
+}
+
+.VIpgJd-ZVi9od-vH1Gmf {
+  background-color: var(--cor-principal);
+  z-index: 100 !important;
+  border: none !important;
+
+}
+
+/* Talvez tabela  */
+.VIpgJd-ZVi9od-vH1Gmf-ibnC6b {
+  background-color: var(--cor-primaria);
+}
+
+
+.VIpgJd-ZVi9od-vH1Gmf-ibnC6b, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b-gk6SMd {
+color: var(--cor-primaria) !important;
+text-decoration: underline !important;
+
+}
+
+.VIpgJd-ZVi9od-xl07Ob-OEVmcd {
+  z-index: 100 !important;
+}
+
+
+
+
+@media (max-width: 768px) {
+  .goog-te-gadget-simple {
+    display: none!important;
+   }
+
+}
+
+@media (max-width: 617px) {
+  .goog-te-gadget-simple {
+    display: none!important;
+   }
+}
+
+@media (max-width: 450px) { 
+  .goog-te-gadget-simple {
+    display: none!important;
+   }
+
+}
+
+@media (max-width: 365px){
+  .goog-te-gadget-simple {
+    display: none!important;
+   }
+
+}
+
+
+
+
+
+
 
 
