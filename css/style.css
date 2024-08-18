@@ -71,6 +71,13 @@ body {
     color: var(--cor-principal);
 }
 
+#translateImage {
+    margin-top: .4vh;
+    margin-left: .8vw;
+    width: 2rem;
+    height: 2rem;
+}
+
 #icone-menu {
     font-size: 3.6rem;
     color: var(--cor-do-texto);
