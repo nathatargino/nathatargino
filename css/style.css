@@ -556,6 +556,11 @@ span {
         width: 79vw;
         margin: 20px;
     }
+    
+    #translateImage {
+        display: none;
+    }
+    
 }
 
 @media (max-width: 617px) {
@@ -589,6 +594,11 @@ span {
         justify-content: center; 
         align-items: center; 
     } 
+
+    #translateImage {
+        display: none;
+    }
+    
     
 
 }
@@ -625,6 +635,11 @@ span {
         justify-content: center; 
         align-items: center; 
     } 
+
+    #translateImage {
+        display: none;
+    }
+    
     
 
 }
@@ -667,6 +682,10 @@ span {
         justify-content: center; 
         align-items: center; 
     }
+    #translateImage {
+        display: none;
+    }
+    
 }
 
 
