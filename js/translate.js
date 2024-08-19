@@ -1,4 +1,5 @@
-document.getElementById('translateImage').addEventListener('click', function() {
+// Função de tradução
+function handleTranslation() {
     const img = document.getElementById('translateImage');
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, span, button');
 
@@ -10,7 +11,7 @@ document.getElementById('translateImage').addEventListener('click', function() {
         'Contato': 'Contact',
         'Olá, eu me chamo': 'Hello, my name is',
         'E sou um Desenvolvedor': 'And I am a Developer',
-        'Sou um desenvolvedor FullStack apaixonado por criar soluções web dinâmicas e inovadoras. Com experiência em diversas tecnologias de front-end e back-end, estou sempre em busca de novos desafios para aprimorar minhas habilidades e contribuir com projetos impactantes.': 
+        'Sou um desenvolvedor FullStack apaixonado por criar soluções web dinâmicas e inovadoras. Com experiência em diversas tecnologias de front-end e back-end, estou sempre em busca de novos desafios para aprimorar minhas habilidades e contribuir com projetos impactantes.':
             'I am a FullStack developer passionate about creating dynamic and innovative web solutions. With experience in various front-end and back-end technologies, I am always looking for new challenges to enhance my skills and contribute to impactful projects.',
         'Baixar CV': 'Download CV',
         'Sobre mim': 'About me',
@@ -58,4 +59,18 @@ document.getElementById('translateImage').addEventListener('click', function() {
         });
         img.src = 'css/assets/translate.png';
     }
+}
+
+// Adiciona o evento de clique a múltiplos IDs
+document.querySelectorAll('#translateImage, #outroId1, #outroId2').forEach(element => {
+    element.addEventListener('click', handleTranslation);
+});
+
+// Flip Active (Girar icone)
+document.addEventListener('DOMContentLoaded', () => {
+    const imgContainer = document.getElementById('flip-img');
+
+    imgContainer.addEventListener('click', () => {
+        imgContainer.classList.toggle('flip-active');
+    });
 });
