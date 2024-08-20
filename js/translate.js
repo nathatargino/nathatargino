@@ -1,7 +1,9 @@
-// Função de tradução
 function handleTranslation() {
     const img = document.getElementById('translateImage');
-    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, span, button');
+    const elements = document.querySelectorAll(`
+        h1, h2, h3, h4, h5, h6, p, a, span, button, 
+        input, textarea, placeholder, label, div, footer, i, .multiplo-texto
+    `);
 
     const translations = {
         'Início': 'Home',
@@ -12,7 +14,7 @@ function handleTranslation() {
         'Olá, eu me chamo': 'Hello, my name is',
         'E sou um Desenvolvedor': 'And I am a Developer',
         'Sou um desenvolvedor FullStack apaixonado por criar soluções web dinâmicas e inovadoras. Com experiência em diversas tecnologias de front-end e back-end, estou sempre em busca de novos desafios para aprimorar minhas habilidades e contribuir com projetos impactantes.':
-            'I am a FullStack developer passionate about creating dynamic and innovative web solutions. With experience in various front-end and back-end technologies, I am always looking for new challenges to enhance my skills and contribute to impactful projects.',
+            'I am a FullStack developer passionate about creating dynamic and innovative web solutions. With experience in several front-end and back-end technologies, I am always looking for new challenges to improve my skills and contribute to impactful projects.',
         'Baixar CV': 'Download CV',
         'Sobre mim': 'About me',
         'Desenvolvedor FullStack': 'FullStack Developer',
@@ -30,9 +32,21 @@ function handleTranslation() {
         'Gerenciamento e otimização de bancos de dados relacionais e não relacionais. Experiência em PostgreSQL, MongoDB e MySQL para garantir desempenho e integridade dos dados.':
             'Management and optimization of relational and non-relational databases. Experience in PostgreSQL, MongoDB, and MySQL to ensure performance and data integrity.',
         'Ultimos Projetos': 'Latest Projects',
+        'Este projeto apresenta uma Pokédex interativa com carregamento infinito, integrando dados com a PokeAPI. Os usuários podem explorar uma lista de Pokémons. A Pokédex exibe informações essenciais de cada Pokémon.':'This project features an interactive Pokédex with infinite loading, integrating data with the PokeAPI. Users can browse a list of Pokémon. The Pokédex displays essential information about each Pokémon.',
+        'Página de login moderna com efeito de blur, oferecendo uma estética sofisticada e minimalista, com um fundo suavizado que destaca elegantemente o formulário.':'Modern login page with blur effect, offering a sophisticated and minimalist aesthetic, with a smoothed background that elegantly highlights the form.',
+        'Página de login com efeito flutuante em SVG, proporcionando um movimento dinâmico e um toque moderno à interface, melhorando o engajamento do usuário.':'Login page with floating effect in SVG, providing a dynamic movement and a modern touch to the interface, improving user engagement.',
+        'Jogo web desenvolvido em JavaScript que une a jogabilidade simples com a interface do Super Mario, proporcionando uma experiência divertida e retrô.':'Web game developed in JavaScript that combines simple gameplay with the Super Mario interface, providing a fun and retro experience.',
+        'Projeto de portfólio simples com um menu lateral, demonstrando uma navegação clara e intuitiva em um layout minimalista.':'Simple portfolio design with a side menu, demonstrating clear and intuitive navigation in a minimalist layout.',
+        'Blog sobre a história do mascote do Android. O projeto integra vídeo do YouTube para enriquecer o conteúdo e demonstrar técnicas de implementação e design.':'Blog about the history of the Android mascot. The project integrates YouTube videos to enrich the content and demonstrate implementation and design techniques.',
         'Contate-me!': 'Contact Me!',
         'Enviar mensagem': 'Send Message',
-        'Desenvolvido por Nathã Targino &copy; 2024 | Todos Direitos Reservados': 'Developed by Nathã Targino &copy; 2024 | All Rights Reserved',
+        'Desenvolvido por Nathã Targino': 'Developed by Nathã Targino',
+        '2024 | Todos Direitos Reservados':'2024 | All Rights Reserved',
+        'Nome completo':'Full Name',
+        'Celular':'Phone Numer',
+        'E-mail alternativo':'Alternative E-mail',
+        'Escreva sua mensagem':'Write your message',
+        
     };
 
     const reverseTranslations = Object.entries(translations).reduce((obj, [key, value]) => {
@@ -43,20 +57,60 @@ function handleTranslation() {
     if (img.src.includes('translate.png')) {
         // Muda para o inglês e altera a imagem
         elements.forEach(element => {
-            const text = element.innerText.trim();
-            if (translations[text]) {
-                element.innerText = translations[text];
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                // Traduz placeholders dos campos de entrada
+                const placeholder = element.getAttribute('placeholder');
+                if (placeholder && translations[placeholder]) {
+                    element.setAttribute('placeholder', translations[placeholder]);
+                }
+                // Traduz value dos inputs tipo submit
+                if (element.type === 'submit' && translations[element.value]) {
+                    element.value = translations[element.value];
+                }
+            } else {
+                // Traduz o texto dos outros elementos
+                const text = element.innerText.trim();
+                if (translations[text]) {
+                    element.innerText = translations[text];
+                }
             }
         });
+
+        // Traduza o texto específico do h3
+        const headerText = document.getElementById('headerText');
+        if (headerText) {
+            headerText.innerHTML = '<span style="color: #fff;">And I am a </span> <span>Full Stack Developer </span>';
+        }
+
         img.src = 'css/assets/translate2.png';
     } else {
         // Volta para o português e altera a imagem
         elements.forEach(element => {
-            const text = element.innerText.trim();
-            if (reverseTranslations[text]) {
-                element.innerText = reverseTranslations[text];
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                // Volta aos placeholders em português
+                const placeholder = element.getAttribute('placeholder');
+                if (placeholder && reverseTranslations[placeholder]) {
+                    element.setAttribute('placeholder', reverseTranslations[placeholder]);
+                }
+                // Volta ao value do input tipo submit
+                if (element.type === 'submit' && reverseTranslations[element.value]) {
+                    element.value = reverseTranslations[element.value];
+                }
+            } else {
+                // Volta ao texto dos outros elementos
+                const text = element.innerText.trim();
+                if (reverseTranslations[text]) {
+                    element.innerText = reverseTranslations[text];
+                }
             }
         });
+
+        // Volta ao texto específico do h3 em português
+        const headerText = document.getElementById('headerText');
+        if (headerText) {
+            headerText.innerHTML = '<span style="color: #fff;">E sou um </span> <span>Desenvolvedor Full Stack </span>';
+        }
+
         img.src = 'css/assets/translate.png';
     }
 }
