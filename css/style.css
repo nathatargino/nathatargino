@@ -73,6 +73,13 @@ body {
 
 .flip-container {
     perspective: 1000px; 
+    
+}
+
+.flip-container img{
+    max-width: 17px;   
+    max-height: 17px;   
+    height: auto;    
 }
 
 .flip {
@@ -457,25 +464,37 @@ span {
     html {
         font-size: 55%;
     }
+    img#translateImage{
+        width: 95%;
+        transform: translate(-10%, -15%);
+    }
      
 }
 
 @media (max-width: 1315px) {
     html {
-        font-size: 52%;
+        font-size: 60%;
     }
-}
+    .flip-container  {
+        transform: translate(-50%, -50%);
+        transform: scale(1.296); 
+    transform-origin: center;
+    margin-left: 9px;
+         
+    }
 
-@media (max-width: 1315px) {
-    html {
-        font-size: 48%;
-    }
 }
 
 @media (max-width: 1150px) {
     
     html {
         font-size: 40%;
+    }
+    .flip-container  {
+    transform: translate(-50%, -50%);
+    transform: scale(1.27); 
+    transform-origin: center;
+         
     }
 }
 
