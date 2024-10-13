@@ -32,21 +32,21 @@ function handleTranslation() {
         'Gerenciamento e otimização de bancos de dados relacionais e não relacionais. Experiência em PostgreSQL, MongoDB e MySQL para garantir desempenho e integridade dos dados.':
             'Management and optimization of relational and non-relational databases. Experience in PostgreSQL, MongoDB, and MySQL to ensure performance and data integrity.',
         'Ultimos Projetos': 'Latest Projects',
-        'Este projeto apresenta uma Pokédex interativa com carregamento infinito, integrando dados com a PokeAPI. Os usuários podem explorar uma lista de Pokémons. A Pokédex exibe informações essenciais de cada Pokémon.':'This project features an interactive Pokédex with infinite loading, integrating data with the PokeAPI. Users can browse a list of Pokémon. The Pokédex displays essential information about each Pokémon.',
-        'Página de login moderna com efeito de blur, oferecendo uma estética sofisticada e minimalista, com um fundo suavizado que destaca elegantemente o formulário.':'Modern login page with blur effect, offering a sophisticated and minimalist aesthetic, with a smoothed background that elegantly highlights the form.',
-        'Página de login com efeito flutuante em SVG, proporcionando um movimento dinâmico e um toque moderno à interface, melhorando o engajamento do usuário.':'Login page with floating effect in SVG, providing a dynamic movement and a modern touch to the interface, improving user engagement.',
-        'Jogo web desenvolvido em JavaScript que une a jogabilidade simples com a interface do Super Mario, proporcionando uma experiência divertida e retrô.':'Web game developed in JavaScript that combines simple gameplay with the Super Mario interface, providing a fun and retro experience.',
-        'Projeto de portfólio simples com um menu lateral, demonstrando uma navegação clara e intuitiva em um layout minimalista.':'Simple portfolio design with a side menu, demonstrating clear and intuitive navigation in a minimalist layout.',
-        'Blog sobre a história do mascote do Android. O projeto integra vídeo do YouTube para enriquecer o conteúdo e demonstrar técnicas de implementação e design.':'Blog about the history of the Android mascot. The project integrates YouTube videos to enrich the content and demonstrate implementation and design techniques.',
+        'Este projeto apresenta uma Pokédex interativa com carregamento infinito, integrando dados com a PokeAPI. Os usuários podem explorar uma lista de Pokémons. A Pokédex exibe informações essenciais de cada Pokémon.': 'This project features an interactive Pokédex with infinite loading, integrating data with the PokeAPI. Users can browse a list of Pokémon. The Pokédex displays essential information about each Pokémon.',
+        'Página de login moderna com efeito de blur, oferecendo uma estética sofisticada e minimalista, com um fundo suavizado que destaca elegantemente o formulário.': 'Modern login page with blur effect, offering a sophisticated and minimalist aesthetic, with a smoothed background that elegantly highlights the form.',
+        'Página de login com efeito flutuante em SVG, proporcionando um movimento dinâmico e um toque moderno à interface, melhorando o engajamento do usuário.': 'Login page with floating effect in SVG, providing a dynamic movement and a modern touch to the interface, improving user engagement.',
+        'Jogo web desenvolvido em JavaScript que une a jogabilidade simples com a interface do Super Mario, proporcionando uma experiência divertida e retrô.': 'Web game developed in JavaScript that combines simple gameplay with the Super Mario interface, providing a fun and retro experience.',
+        'Projeto de portfólio simples com um menu lateral, demonstrando uma navegação clara e intuitiva em um layout minimalista.': 'Simple portfolio design with a side menu, demonstrating clear and intuitive navigation in a minimalist layout.',
+        'Blog sobre a história do mascote do Android. O projeto integra vídeo do YouTube para enriquecer o conteúdo e demonstrar técnicas de implementação e design.': 'Blog about the history of the Android mascot. The project integrates YouTube videos to enrich the content and demonstrate implementation and design techniques.',
         'Contate-me!': 'Contact Me!',
         'Enviar mensagem': 'Send Message',
         'Desenvolvido por Nathã Targino': 'Developed by Nathã Targino',
-        '2024 | Todos Direitos Reservados':'2024 | All Rights Reserved',
-        'Nome completo':'Full Name',
-        'Celular':'Phone Numer',
-        'E-mail alternativo':'Alternative E-mail',
-        'Escreva sua mensagem':'Write your message',
-        
+        '2024 | Todos Direitos Reservados': '2024 | All Rights Reserved',
+        'Nome completo': 'Full Name',
+        'Celular': 'Phone Numer',
+        'E-mail alternativo': 'Alternative E-mail',
+        'Escreva sua mensagem': 'Write your message',
+
     };
 
     const reverseTranslations = Object.entries(translations).reduce((obj, [key, value]) => {
@@ -82,6 +82,12 @@ function handleTranslation() {
             headerText.innerHTML = '<span style="color: #fff;">And I am a </span> <span>Full Stack Developer </span>';
         }
 
+        // Traduza o texto específico do parágrafo
+        const footerText = document.getElementById('footerText');
+        if (footerText) {
+            footerText.innerHTML = '<p id="footerText">Developed by Nathã Targino &copy; 2024 | All Rights Reserved';
+        }
+
         img.src = 'css/assets/translate2.png';
     } else {
         // Volta para o português e altera a imagem
@@ -109,6 +115,11 @@ function handleTranslation() {
         const headerText = document.getElementById('headerText');
         if (headerText) {
             headerText.innerHTML = '<span style="color: #fff;">E sou um </span> <span>Desenvolvedor Full Stack </span>';
+        }
+        // Volta o texto específico do parágrafo
+        const footerText = document.getElementById('footerText');
+        if (footerText) {
+            footerText.innerHTML = '<p id="footerText">Desenvolvido por Nathã Targino &copy; 2024 | Todos Direitos Reservados</p>';
         }
 
         img.src = 'css/assets/translate.png';
