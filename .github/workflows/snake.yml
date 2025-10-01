@@ -15,11 +15,12 @@ jobs:
         uses: Platane/snk@v3
         with:
           github_user_name: ${{ github.repository_owner }}
-          github_snake_theme: "github-dark" 
+          # Usamos o parâmetro 'palette' para forçar as cores do tema escuro/transparente
+          palette: github-dark
           outputs: |
             dist/github-contribution-grid-snake.svg
             dist/github-contribution-grid-snake.gif
-
+            
       - name: Fazer push da animação para o branch 'output'
         uses: crazy-max/ghaction-github-pages@v2.1.3
         with:
