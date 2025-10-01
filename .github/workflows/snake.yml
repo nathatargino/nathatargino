@@ -1,11 +1,9 @@
 name: Generate Snake Game
 
 on:
-  # Gatilho para execução manual
   workflow_dispatch:
-  # Ou para execução automática a cada 12 horas
   schedule:
-    - cron: "0 */12 * * *"  # Executa a cada 12 horas
+    - cron: "0 */12 * * *"
 
 jobs:
   build:
@@ -15,8 +13,8 @@ jobs:
         uses: Platane/snk@v3
         with:
           github_user_name: ${{ github.repository_owner }}
-          # Usamos o parâmetro 'palette' para forçar as cores do tema escuro/transparente
           palette: github-dark
+          color_snake: "#FFFFFF00" 
           outputs: |
             dist/github-contribution-grid-snake.svg
             dist/github-contribution-grid-snake.gif
