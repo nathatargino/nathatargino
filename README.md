@@ -38,7 +38,7 @@
 </div>
 
 <p align="center">
-  ![Snake animation](https://github.com/nathatargino/nathatargino/blob/output/github-contribution-grid-snake.svg)
+  ![Snake animation](https://raw.githubusercontent.com/nathatargino/nathatargino/output/github-contribution-grid-snake.svg)
 </p>
 
 
