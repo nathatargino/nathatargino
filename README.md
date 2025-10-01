@@ -37,4 +37,6 @@
     <img alt="MySQL Imagem" src="https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white"/>
 </div>
 
-![Snake animation](https://raw.githubusercontent.com/nathatargino/nathatargino/output/github-contribution-grid-snake.svg#gh-dark-mode-only)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nathatargino/nathatargino/output/github-contribution-grid-snake.svg#gh-dark-mode-only" alt="Snake animation" />
+</p>
