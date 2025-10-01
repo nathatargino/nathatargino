@@ -17,12 +17,14 @@
 
 </div>
 
+<div style="display: inline_block" align="center">
 <a href="https://github.com/nathatargino/github-readme-stats">
   <img height=180em align="center" src="https://github-readme-stats.vercel.app/api?username=nathatargino&theme=highcontrast" />
 </a>
 <a href="https://github.com/nathatargino/convoychat">
   <img height=180em align="center" src="https://github-readme-stats.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&card_width=320&theme=highcontrast" />
 </a>
+</div>
 
   ## Tecnologias que uso no meu dia
 
