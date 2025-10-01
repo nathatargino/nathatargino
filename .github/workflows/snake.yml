@@ -1,34 +1,34 @@
 name: Generate Snake Game
 
-# Controla quando a ação será executada. Esta ação roda a cada 6 horas.
 on:
   schedule:
-      # a cada 6 horas
     - cron: "0 */6 * * *"
-
-# Este comando permite executar a Action manualmente pela aba 'Actions'.
   workflow_dispatch:
+
+# Permissão obrigatória para ler sua grade de contribuição e fazer o push
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Gerar animação da cobrinha
+      - uses: actions/checkout@v4
+
+      - name: Gerar a Cobra (Light e Dark)
         uses: Platane/snk@v3
         with:
           github_user_name: ${{ github.repository_owner }}
-          # Usamos a paleta escura (para cores da cobra)
-          palette: github-dark
-          
-         
+          # 🚨 NOVO: Saídas com nomes diferentes (para light e dark)
+          outputs: |
+            dist/github-snake.svg
+            dist/github-snake-dark.svg
+          # Força as cores da cobra a serem transparentes
           color_snake: "#FFFFFF00" 
           
-          outputs: |
-            dist/github-contribution-grid-snake.svg
-            dist/github-contribution-grid-snake.gif
-            
-      - name: Fazer push da animação para o branch 'output'
-        uses: crazy-max/ghaction-github-pages@v2.1.3
+      # Faz o push dos arquivos gerados para o branch 'output'
+      - name: Fazer push para 'output'
+        uses: crazy-max/ghaction-github-pages@v3
         with:
           target_branch: output
           build_dir: dist
