@@ -1,9 +1,11 @@
 name: Generate Snake Game
 
 on:
+  # Gatilho para execução manual
+  workflow_dispatch:
+  # Ou para execução automática a cada 12 horas
   schedule:
     - cron: "0 */12 * * *"  # Executa a cada 12 horas
-  workflow_dispatch:
 
 jobs:
   build:
