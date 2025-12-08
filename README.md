@@ -1,12 +1,16 @@
-## Olá, me chamo Nathã Targino, seja bem-vindo ao meu perfil! 👋
+🖖 Olá! Sou Nathã Targino
 
-- 🔭 Atualmente estou trabalhando em projetos Back-End com foco em C# e JAVA
-- 🌱 Atualmente estou estudando C#, JAVA e focado em outras demandas PL/SQL
-- 👯 Pretendo colaborar em projetos Back-end ou FullStack
-- 🤔 Estou procurando uma oportunidade de emprego
-- 📫 Como entrar em contato comigo: nathatargino.dev@gmail.com
-- 😄 Pronome: Ele/Dele
-- ⚡ Fato engraçado: Meu primeiro contato com HTML foi aos 13 anos tentando criar um site sobre games (não deu certo)
+💻 Desenvolvedor Back-End com foco em C# (.NET) e Java
+
+📚 Atualmente estudando e me aperfeiçoando em C#, Java e PL/SQL
+
+🤝 Aberto a colaborar em projetos Back-End e Full Stack
+
+🚀 Em busca de uma oportunidade profissional para continuar evoluindo na área
+
+📬 Contato: nathatargino.dev@gmail.com
+
+🎮 Curiosidade: Meu primeiro contato com programação foi aos 13 anos, tentando criar um site de games, foi aí que tudo começou!
 
 <div style="display: inline_block" align="center">
   
@@ -28,13 +32,12 @@
 
   ## Tecnologias que uso no meu dia
 
-
 <div style="display: inline_block" align="center">
+    <img alt="C# Imagem" src="https://img.shields.io/badge/C%23-007ACC?style=for-the-badge&logo=c%23&logoColor=white"/>
+    <img alt="ASP.NET Imagem" src="https://img.shields.io/badge/ASP.NET-5C2D91?style=for-the-badge&logo=dot-net&logoColor=white"/>
+    <img alt="SQL Server" src="https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white"/>
     <img alt="HTML5 Imagem" src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white"/>
     <img alt="CSS3 Imagem" src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white"/>
-    <img alt="JavaScript Imagem" src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"/>
-    <img alt="NodeJS Imagem" src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white"/>
-    <img alt="MySQL Imagem" src="https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white"/>
 </div>
 
 <div align="center">
