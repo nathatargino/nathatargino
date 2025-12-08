@@ -1,34 +1,35 @@
-name: Generate Snake Game
+<img src="https://raw.githubusercontent.com/gitUser/gitrepo/output/snake.svg" alt="Snake animation" />
+
+Sbake.yml:
+name: Generate snake animation
 
 on:
-  schedule:
-    - cron: "0 */6 * * *"
+  schedule: # execute every 12 hours
+    - cron: "* */12 * * *"
+
   workflow_dispatch:
 
-# Permissão obrigatória para ler sua grade de contribuição e fazer o push
-permissions:
-  contents: write
+  push:
+    branches:
+    - master
 
 jobs:
-  build:
+  generate:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    timeout-minutes: 5
 
-      - name: Gerar a Cobra (Light e Dark)
-        uses: Platane/snk@v3
+    steps:
+      - name: generate snake.svg
+        uses: Platane/snk/svg-only@v3
         with:
           github_user_name: ${{ github.repository_owner }}
-          # 🚨 NOVO: Saídas com nomes diferentes (para light e dark)
-          outputs: |
-            dist/github-snake.svg
-            dist/github-snake-dark.svg
-          # Força as cores da cobra a serem transparentes
-          color_snake: "#FFFFFF00" 
-          
-      # Faz o push dos arquivos gerados para o branch 'output'
-      - name: Fazer push para 'output'
-        uses: crazy-max/ghaction-github-pages@v3
+          outputs: dist/snake.svg?palette=github-dark
+
+
+      - name: push snake.svg to the output branch
+        uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
           target_branch: output
           build_dir: dist
