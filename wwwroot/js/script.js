@@ -29,7 +29,7 @@ window.onscroll = () => {
 
     header.classList.toggle('sticky', window.scrollY > 100);
 
-    /*==================== remove toggle icon and navbar when click navbar link (scroll) ====================*/
+    /*==================== Alterna o ícone (menu/fechar) e exibe/oculta a barra de navegação no mobile ====================*/
     menuIcon.onclick = () => {
         menuIcon.classList.toggle('bx-x');
         navbar.classList.toggle('active');
@@ -107,10 +107,10 @@ inputTelefone.addEventListener('input', function(e) {
 });
 
 
-// Alerta Mais Informações em Manutenção
+// Alerta ao clicar em Mais Informações 
 
 function showAlert(service) {
-    window.alert('Em manutenção, tente novamente mais tarde!');
+    window.alert('Em breve!');
   }
 
 

@@ -1,0 +1,65 @@
+﻿@{
+
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nathã Targino | Portfólio</title>
+
+    <link rel="icon" type="image/x-icon" href="~/images/favicon.png" />
+
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo">Portfólio</a>
+        <i class='bx bx-menu' id="icone-menu"></i>
+        <nav class="navbar">
+            <a href="#" class="active">Início</a>
+            <a href="#sobre">Sobre</a>
+            <a href="#servicos">Serviços</a>
+            <a href="#portfolio">Portfólio</a>
+            <a href="#contato">Contato</a>
+
+            <!-- Botão de tradução -->
+
+            <div class="flip-container">
+                <div id="flip-img" class="flip">
+                    <div class="front">
+                        <img id="translateImage" src="css/assets/translate.png" alt="">
+                    </div>
+                    <div class="back">
+                        <img src="css/assets/translate2.png" id="translateImage" alt="">
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="footer-text">
+            <p>Copyright &copy; 2024 por Nathã Targino | Todos os Direitos Reservados.</p>
+        </div>
+
+        <div class="footer-iconTop">
+            <a href="#"><i class="bx bx-up-arrow-alt"></i></a>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+
+    <script src="~/js/script.js" asp-append-version="true"></script>
+    <script src="~/js/translate.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

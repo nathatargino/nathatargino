@@ -1,0 +1,15 @@
+## Ignorar pastas de compilação (Arquivos temporários)
+bin/
+obj/
+
+## Ignorar configurações locais que contêm senhas
+appsettings.json
+appsettings.Development.json
+
+## Ignorar arquivos de cache do Visual Studio
+.vs/
+*.user
+*.suo
+
+## Ignorar arquivos de publicação
+publish/

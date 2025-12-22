@@ -1,0 +1,15 @@
+﻿@{
+    Layout = "_Layout";
+}
+<link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/email.css" asp-append-version="true" />
+
+<section class="contato" style="text-align: center; padding-top: 8rem; min-height: 100vh;">
+    <h2 class="heading">Email Enviado com <span>Sucesso!</span></h2>
+
+    <div style="margin: 2rem 0;">
+        <img src="~/images/confirmed-animate.svg" alt="Sucesso">
+    </div>
+
+    <a asp-controller="Home" asp-action="Index" class="btn">Voltar ao Portfólio</a>
+</section>
