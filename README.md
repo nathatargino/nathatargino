@@ -45,10 +45,10 @@
 
 <div align="center">
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://github-readme-stats-git-masterorgs-github-readme-stats-team.vercel.app/api?username=nathatargino&theme=highcontrast&show_icons=true" alt="Nathã's GitHub Stats"/>
+    <img height="180em" src="https://github-readme-stats.vercel.app/api?username=nathatargino&theme=highcontrast&show_icons=true" alt="Nathã's GitHub Stats"/>
   </a>
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://github-readme-stats-git-masterorgs-github-readme-stats-team.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&card_width=320&theme=highcontrast" alt="Top Languages"/>
+    <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&card_width=320&theme=highcontrast" alt="Top Languages"/>
   </a>
 </div>
 
