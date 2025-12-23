@@ -40,6 +40,10 @@
 </div>
 
 <br/>
+### 🌐 Meu Portfólio
+
+🔗 Confira meu portfólio completo:  
+👉 [https://nathatargino.azurewebsites.net](https://nathatargino.azurewebsites.net)
 
 ### 📊 Estatísticas do GitHub
 
