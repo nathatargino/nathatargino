@@ -3,8 +3,8 @@
   <h3>Desenvolvedor Back-End</h3>
   <p>C# .NET | Java | SQL SERVER</p>
 
- <a href="https://nathatargino.azurewebsites.net" target="_blank">
-  <img src="https://img.shields.io/badge/Portfólio-000000?style=for-the-badge&logo=About.me&logoColor=white" alt="Portfolio Badge"/></a>
+  <a href="https://nathatargino.azurewebsites.net" target="_blank">
+  <img src="https://img.shields.io/badge/🌐%20Portfólio-6A0DAD?style=for-the-badge&logoColor=white" alt="Portfolio Badge"/></a>
   <a href="https://linkedin.com/in/nathatargino">
     <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Badge"/></a>
   
