@@ -2,7 +2,7 @@ name: Generate Stats Images
 
 on:
   schedule:
-    - cron: "0 */12 * * *" 
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 jobs:
@@ -12,22 +12,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Generate Stats Card
-        uses: vn7n24fzkq/github-readme-stats-action@v1
-        with:
-          GH_TOKEN: ${{ secrets.METRICS_TOKEN }}
-          REPOSITORY: ${{ github.repository }}
-          THEME: highcontrast 
-          SHOW_ICONS: true
+      - name: Download Stats Images
+        run: |
+          mkdir -p generated
+          # Baixa o Card de Estatísticas Gerais
+          curl -o ./generated/overview.svg "https://github-readme-stats.vercel.app/api?username=nathatargino&theme=highcontrast&show_icons=true"
+          # Baixa o Card de Linguagens
+          curl -o ./generated/languages.svg "https://github-readme-stats.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&theme=highcontrast"
 
       - name: Push generated files
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          mkdir -p generated # Garante que a pasta existe
-          # Move os arquivos para a pasta que o seu README espera
-          mv github-stats.svg ./generated/overview.svg || true
-          mv top-langs.svg ./generated/languages.svg || true
           git add .
           git commit -m "Update stats cards" || exit 0
           git push
