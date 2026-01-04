@@ -10,25 +10,40 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
 
-      - name: Download Stats Images
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Generate stats images
         run: |
           mkdir -p generated
-          # Baixa o Card de Estatísticas usando seu METRICS_TOKEN para evitar o erro de limite
-          curl -L -H "Authorization: bearer ${{ secrets.METRICS_TOKEN }}" -o ./generated/overview.svg "https://github-readme-stats.vercel.app/api?username=nathatargino&theme=highcontrast&show_icons=true"
-          
-          # Baixa o Card de Linguagens
-          curl -L -H "Authorization: bearer ${{ secrets.METRICS_TOKEN }}" -o ./generated/languages.svg "https://github-readme-stats.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&theme=highcontrast"
-          
-          # Verifica se o arquivo baixado é um SVG real ou um erro
-          cat ./generated/overview.svg
 
-      - name: Push generated files
+          curl -L -o ./generated/overview.svg \
+            "https://github-readme-stats-eight-theta.vercel.app/api?username=nathatargino&theme=highcontrast&show_icons=true"
+
+          curl -L -o ./generated/languages.svg \
+            "https://github-readme-stats-eight-theta.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&theme=highcontrast"
+
+          echo "Overview SVG:"
+          head -n 1 ./generated/overview.svg
+
+          echo "Languages SVG:"
+          head -n 1 ./generated/languages.svg
+
+      - name: Commit and push generated files
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
           git add generated/*.svg
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update stats cards" && git push)
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update GitHub stats cards"
+            git push origin main
+          fi
