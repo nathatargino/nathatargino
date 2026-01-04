@@ -30,27 +30,14 @@
 
 ---
 
-### 🛠️ Tecnologias e Ferramentas
-
-<div align="center">
-  <img alt="C#" src="https://img.shields.io/badge/C%23-007ACC?style=for-the-badge&logo=c%23&logoColor=white"/>
-  <img alt=".NET" src="https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white"/>
-  <img alt="Java" src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white"/>
-  <img alt="SQL Server" src="https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white"/>
-  <img alt="HTML5" src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white"/>
-  <img alt="CSS3" src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white"/>
-</div>
-
-<br/>
-
 ### 📊 Estatísticas do GitHub
 
 <div align="center">
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://github-readme-stats.vercel.app/api?username=nathatargino&theme=highcontrast&show_icons=true" alt="Nathã's GitHub Stats"/>
+    <img height="180em" src="https://raw.githubusercontent.com/nathatargino/nathatargino/main/generated/overview.svg?v=1" alt="Stats"/>
   </a>
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&card_width=320&theme=highcontrast" alt="Top Languages"/>
+    <img height="180em" src="https://raw.githubusercontent.com/nathatargino/nathatargino/main/generated/languages.svg?v=1" alt="Top Languages"/>
   </a>
 </div>
 
