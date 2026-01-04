@@ -34,10 +34,19 @@
 
 <div align="center">
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://raw.githubusercontent.com/nathatargino/nathatargino/main/generated/overview.svg?v=1" alt="Stats"/>
+    <img
+      height="180em"
+      src="https://raw.githubusercontent.com/nathatargino/nathatargino/main/generated/overview.svg?v=1"
+      alt="GitHub Stats"
+    />
   </a>
+
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://raw.githubusercontent.com/nathatargino/nathatargino/main/generated/languages.svg?v=1" alt="Top Languages"/>
+    <img
+      height="180em"
+      src="https://raw.githubusercontent.com/nathatargino/nathatargino/main/generated/languages.svg?v=1"
+      alt="Top Languages"
+    />
   </a>
 </div>
 
