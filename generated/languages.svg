@@ -65,7 +65,7 @@
             data-testid="lang-progress"
             x="0" 
             y="0"
-            width="158.08" 
+            width="156.05" 
             height="8"
             fill="#178600"
           />
@@ -73,9 +73,9 @@
           <rect
             mask="url(#rect-mask)" 
             data-testid="lang-progress"
-            x="158.08" 
+            x="156.05" 
             y="0"
-            width="112.86" 
+            width="115.90" 
             height="8"
             fill="#e34c26"
           />
@@ -83,9 +83,9 @@
           <rect
             mask="url(#rect-mask)" 
             data-testid="lang-progress"
-            x="270.94" 
+            x="271.95000000000005" 
             y="0"
-            width="19.39" 
+            width="18.72" 
             height="8"
             fill="#663399"
           />
@@ -93,9 +93,9 @@
           <rect
             mask="url(#rect-mask)" 
             data-testid="lang-progress"
-            x="290.33" 
+            x="290.6700000000001" 
             y="0"
-            width="19.67" 
+            width="19.33" 
             height="8"
             fill="#f1e05a"
           />
@@ -104,28 +104,28 @@
     <g transform="translate(0, 25)">
       <circle cx="5" cy="6" r="5" fill="#178600" />
       <text data-testid="lang-name" x="15" y="10" class='lang-name'>
-        C# (52.69%)
+        C# (52.02%)
       </text>
     </g>
   
     <g transform="translate(150, 25)">
       <circle cx="5" cy="6" r="5" fill="#e34c26" />
       <text data-testid="lang-name" x="15" y="10" class='lang-name'>
-        HTML (37.62%)
+        HTML (38.63%)
       </text>
     </g>
   
     <g transform="translate(0, 50)">
       <circle cx="5" cy="6" r="5" fill="#663399" />
       <text data-testid="lang-name" x="15" y="10" class='lang-name'>
-        CSS (6.46%)
+        CSS (6.24%)
       </text>
     </g>
   
     <g transform="translate(150, 50)">
       <circle cx="5" cy="6" r="5" fill="#f1e05a" />
       <text data-testid="lang-name" x="15" y="10" class='lang-name'>
-        JavaScript (3.22%)
+        JavaScript (3.11%)
       </text>
     </g>
   
