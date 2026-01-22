@@ -65,7 +65,7 @@
             data-testid="lang-progress"
             x="0" 
             y="0"
-            width="152.99" 
+            width="152.96" 
             height="8"
             fill="#178600"
           />
@@ -73,9 +73,9 @@
           <rect
             mask="url(#rect-mask)" 
             data-testid="lang-progress"
-            x="152.99" 
+            x="152.96" 
             y="0"
-            width="118.95" 
+            width="118.99" 
             height="8"
             fill="#e34c26"
           />
@@ -83,9 +83,9 @@
           <rect
             mask="url(#rect-mask)" 
             data-testid="lang-progress"
-            x="271.94" 
+            x="271.95" 
             y="0"
-            width="18.75" 
+            width="18.74" 
             height="8"
             fill="#663399"
           />
@@ -95,7 +95,7 @@
             data-testid="lang-progress"
             x="290.69" 
             y="0"
-            width="19.32" 
+            width="19.310000000000002" 
             height="8"
             fill="#f1e05a"
           />
@@ -104,14 +104,14 @@
     <g transform="translate(0, 25)">
       <circle cx="5" cy="6" r="5" fill="#178600" />
       <text data-testid="lang-name" x="15" y="10" class='lang-name'>
-        C# (51.00%)
+        C# (50.99%)
       </text>
     </g>
   
     <g transform="translate(150, 25)">
       <circle cx="5" cy="6" r="5" fill="#e34c26" />
       <text data-testid="lang-name" x="15" y="10" class='lang-name'>
-        HTML (39.65%)
+        HTML (39.66%)
       </text>
     </g>
   
@@ -125,7 +125,7 @@
     <g transform="translate(150, 50)">
       <circle cx="5" cy="6" r="5" fill="#f1e05a" />
       <text data-testid="lang-name" x="15" y="10" class='lang-name'>
-        JavaScript (3.11%)
+        JavaScript (3.10%)
       </text>
     </g>
   
