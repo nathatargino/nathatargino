@@ -13,7 +13,7 @@ namespace Portfolio.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken] // Adicione isso aqui para testar!
+        [IgnoreAntiforgeryToken]
        
         public IActionResult EnviarContato(ContatoModel contato)
         {
@@ -43,13 +43,11 @@ namespace Portfolio.Controllers
                     client.Disconnect(true);
                 }
 
-                // Se chegar aqui, ele VAI mudar de página
-                return RedirectToAction("EmailSucesso");
+                return Ok();
             }
-            catch (System.Exception ex)
+            catch
             {
-                // Se der erro no envio, ele vai mostrar o erro na tela em vez de apenas recarregar
-                return Content("Erro detalhado: " + ex.Message + " | StackTrace: " + ex.StackTrace);
+                return BadRequest();
             }
         }
 

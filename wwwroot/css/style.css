@@ -753,5 +753,73 @@ span {
     }
 }
 
+/*==================== MODAL CENTRALIZADO COM EFEITO GLASS ====================*/
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px); /* Suporte para Safari/iOS */
+
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+}
+
+    /* Centraliza o Modal quando JS aciona*/
+    .modal.active {
+        display: flex !important;
+    }
+
+.modal-conteudo {
+    /* Efeito vidro no card */
+    background: rgba(31, 36, 45, 0.7);
+    padding: 4rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(153, 86, 246, 0.4);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    text-align: center;
+    max-width: 450px;
+    width: 90%;
+    animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+#spinner {
+    font-size: 2.2rem;
+    color: var(--cor-secundaria);
+    font-weight: bolder;
+    vertical-align: middle;
+    margin-right: 16px;
+    padding: 0;
+    
+}
+
+.btn span,
+#btn-enviar span {
+    color: var(--cor-secundaria) !important;
+    padding: 0;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.8;
+    color: var(--cor-secundaria) !important;
+}
 
 
