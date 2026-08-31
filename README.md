@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>Olá, sou Nathã Targino! 🖖</h1>
+  <h1>Olá, sou Nathã Targino! 🖖🏾</h1>
   <h3>Desenvolvedor Back-End</h3>
   <p>C# .NET | Java | SQL SERVER</p>
 
@@ -45,13 +45,12 @@
 
 <div align="center">
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://github-readme-stats-virid-eight-31.vercel.app/api?username=nathatargino&theme=highcontrast&show_icons=true" alt="Nathã Stats"/>
+    <img src="https://github-profile-summary-cards.vercel.app/api/cards/stats?username=nathatargino&theme=2077" alt="Nathã Stats"/>
   </a>
   <a href="https://github.com/nathatargino">
-    <img height="180em" src="https://github-readme-stats-virid-eight-31.vercel.app/api/top-langs?username=nathatargino&layout=compact&langs_count=8&card_width=320&theme=highcontrast" alt="Nathã Languages"/>
+    <img src="https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=nathatargino&theme=2077" alt="Nathã Languages"/>
   </a>
 </div>
-
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/nathatargino/nathatargino/output/snake.svg" alt="Snake Animation" width="100%"/>
