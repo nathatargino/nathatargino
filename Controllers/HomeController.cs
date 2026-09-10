@@ -38,7 +38,7 @@ namespace Portfolio.Controllers
                 using (var client = new SmtpClient())
                 {
                     client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                    client.Authenticate("nathatargino.dev@gmail.com", "ncpg izcw qdzi ozgk");
+                    client.Authenticate("nathatargino.dev@gmail.com", "xczu qtuc vjmb wuwo");
                     client.Send(mensagem);
                     client.Disconnect(true);
                 }
