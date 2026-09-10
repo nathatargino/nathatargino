@@ -45,9 +45,10 @@ namespace Portfolio.Controllers
 
                 return Ok();
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest();
+                Console.WriteLine(ex.ToString());
+                return BadRequest(ex.Message);
             }
         }
 

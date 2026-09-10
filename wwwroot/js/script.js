@@ -149,7 +149,8 @@ if (contatoForm) {
                 modal.classList.add('active');
                 contatoForm.reset();
             } else {
-                alert("Erro no servidor. Verifique o Controller.");
+                const errorText = await response.text();
+                alert("Erro no servidor: " + errorText);
             }
         } catch (error) {
             console.error("Erro na requisição:", error);
