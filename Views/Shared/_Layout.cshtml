@@ -1,4 +1,4 @@
-﻿@{
+@{
 
 }
 <!DOCTYPE html>
@@ -6,24 +6,44 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nathã Targino | Portfólio</title>
+    <title>Nathã Targino | Desenvolvedor Full Stack .NET</title>
+    <meta name="description" content="Portfólio de Nathã Targino - Desenvolvedor Full Stack especializado em .NET, C#, ASP.NET Core, SQL Server e automações modernas." />
 
     <link rel="icon" type="image/x-icon" href="~/images/favicon.png" />
 
+    <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Boxicons -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
-
 </head>
 <body>
+    <!-- Background Ambient Light Glows -->
+    <div class="bg-glow-container" aria-hidden="true">
+        <div class="glow-orb glow-orb-1"></div>
+        <div class="glow-orb glow-orb-2"></div>
+        <div class="glow-orb glow-orb-3"></div>
+    </div>
+
+    <!-- Floating Navigation Bar -->
     <header class="header">
-        <a href="#" class="logo">Portfólio</a>
-        <i class='bx bx-menu' id="icone-menu"></i>
+        <a href="#inicio" class="logo">
+            <span class="logo-bracket">&lt;</span>Nathã<span class="logo-accent">.dev</span><span class="logo-bracket">/&gt;</span>
+        </a>
+
+        <div class="menu-toggle-wrap">
+            <i class='bx bx-menu' id="icone-menu" aria-label="Abrir menu"></i>
+        </div>
+
         <nav class="navbar">
-            <a href="#" class="active">Início</a>
-            <a href="#sobre">Sobre</a>
-            <a href="#servicos">Serviços</a>
-            <a href="#portfolio">Portfólio</a>
-            <a href="#contato">Contato</a>
+            <a href="#inicio" class="nav-item active"><i class='bx bx-home-alt'></i> <span>Início</span></a>
+            <a href="#sobre" class="nav-item"><i class='bx bx-user'></i> <span>Sobre</span></a>
+            <a href="#servicos" class="nav-item"><i class='bx bx-layer'></i> <span>Habilidades</span></a>
+            <a href="#portfolio" class="nav-item"><i class='bx bx-grid-alt'></i> <span>Projetos</span></a>
+            <a href="#contato" class="nav-item nav-btn-contato"><i class='bx bx-envelope'></i> <span>Contato</span></a>
         </nav>
     </header>
 
@@ -32,18 +52,41 @@
     </main>
 
     <footer class="footer">
-        <div class="footer-text">
-            <p>Copyright &copy; 2024 por Nathã Targino | Todos os Direitos Reservados.</p>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <a href="#inicio" class="logo">
+                    <span class="logo-bracket">&lt;</span>Nathã<span class="logo-accent">.dev</span><span class="logo-bracket">/&gt;</span>
+                </a>
+                <p>Construindo soluções robustas, escaláveis e de alta performance com .NET e arquiteturas modernas.</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="#inicio">Início</a>
+                <a href="#sobre">Sobre</a>
+                <a href="#servicos">Habilidades</a>
+                <a href="#portfolio">Projetos</a>
+                <a href="#contato">Contato</a>
+            </div>
+
+            <div class="footer-social">
+                <a href="https://linkedin.com/in/nathatargino" target="_blank" title="LinkedIn" aria-label="LinkedIn"><i class='bx bxl-linkedin'></i></a>
+                <a href="https://github.com/nathatargino" target="_blank" title="GitHub" aria-label="GitHub"><i class='bx bxl-github'></i></a>
+                <a href="mailto:nathatargino.dev@gmail.com" title="E-mail" aria-label="E-mail"><i class='bx bxl-gmail'></i></a>
+                <a href="https://api.whatsapp.com/send?phone=5583993176446" target="_blank" title="WhatsApp" aria-label="WhatsApp"><i class='bx bxl-whatsapp'></i></a>
+            </div>
         </div>
 
-        <div class="footer-iconTop">
-            <a href="#"><i class="bx bx-up-arrow-alt"></i></a>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Nathã Targino. Todos os direitos reservados.</p>
+            <a href="#inicio" class="btn-top" title="Voltar ao topo" aria-label="Voltar ao topo">
+                <i class="bx bx-up-arrow-alt"></i>
+            </a>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-
     <script src="~/js/script.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)

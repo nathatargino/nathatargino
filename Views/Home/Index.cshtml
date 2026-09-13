@@ -3,166 +3,580 @@
     Layout = "_Layout";
 }
 
+<!-- ==================== HERO SECTION (INÍCIO) ==================== -->
 <section class="inicio" id="inicio">
-    <div class="conteudo-inicio">
-        <h3>Olá, eu me chamo</h3>
-        <h1>Nathã Targino</h1>
-        <h3 id="headerText"><span style="color: #fff;">E sou um </span> <span>Desenvolvedor </span><span class="multiplo-texto"></span></h3>
-        <p>Desenvolvedor Full Stack com foco no ecossistema .NET, atuando no desenvolvimento de soluções modernas utilizando C#, ASP.NET MVC e SQL Server.</p>
-        <div class="social-media">
-            <a href="https://linkedin.com/in/nathatargino" target="_blank"><i class='bx bxl-linkedin'></i></a>
-            <a href="mailto:nathatargino.dev@gmail.com"><i class='bx bxl-gmail'></i></a>
-            <a href="https://www.instagram.com/nathatargino/" target="_blank"><i class='bx bxl-instagram'></i></a>
-            <a href="https://api.whatsapp.com/send?phone=5583993176446&text=Ol%C3%A1%2C%20Nath%C3%A3!%20Acessei%20seu%20portf%C3%B3lio%20e%20tive%20interesse%20no%20seu%20perfil%20como%20Desenvolvedor%20Full%20Stack.%20Gostaria%20de%20conversar%20com%20voc%C3%AA%20sobre%20um%20projeto%20espec%C3%ADfico.%20Voc%C3%AA%20teria%20disponibilidade%3F" target="_blank"><i class='bx bxl-whatsapp'></i></a>
+    <div class="hero-container">
+        <div class="conteudo-inicio">
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span class="status-text">Disponível para novos projetos & contratações</span>
+            </div>
+
+            <h3 class="hero-greeting">Olá, meu nome é</h3>
+            <h1 class="hero-title">Nathã <span class="text-gradient">Targino</span></h1>
+            <h2 class="hero-role">Desenvolvedor <span class="multiplo-texto text-accent"></span></h2>
+
+            <p class="hero-description">
+                Especialista no ecossistema <strong>.NET (C#, ASP.NET Core MVC & Web APIs, SQL Server)</strong>, focado no desenvolvimento de sistemas robustos, escaláveis, integrações em tempo real e automações inteligentes com excelência técnica e visual de ponta.
+            </p>
+
+            <div class="hero-tech-pills">
+                <span class="tech-pill"><i class='bx bxl-visual-studio'></i> .NET 8</span>
+                <span class="tech-pill"><i class='bx bx-code-alt'></i> C#</span>
+                <span class="tech-pill"><i class='bx bx-server'></i> ASP.NET Core</span>
+                <span class="tech-pill"><i class='bx bx-data'></i> SQL Server</span>
+                <span class="tech-pill"><i class='bx bx-broadcast'></i> SignalR & WebRTC</span>
+                <span class="tech-pill"><i class='bx bx-bot'></i> n8n & IA</span>
+                <span class="tech-pill"><i class='bx bxl-azure'></i> Azure Cloud</span>
+            </div>
+
+            <div class="hero-actions">
+                <a href="#portfolio" class="btn btn-glow">
+                    <i class='bx bx-grid-alt'></i> Explorar Projetos
+                </a>
+                <a href="#contato" class="btn btn-glass">
+                    <i class='bx bx-envelope'></i> Fale Comigo
+                </a>
+                <a href="javascript:void(0)" class="btn btn-outline" id="cvbtn" title="Baixar Currículo em PDF">
+                    <i class='bx bx-download'></i> Baixar CV
+                </a>
+            </div>
+
+            <div class="social-media">
+                <a href="https://linkedin.com/in/nathatargino" target="_blank" title="LinkedIn" aria-label="LinkedIn">
+                    <i class='bx bxl-linkedin'></i>
+                </a>
+                <a href="https://github.com/nathatargino" target="_blank" title="GitHub" aria-label="GitHub">
+                    <i class='bx bxl-github'></i>
+                </a>
+                <a href="mailto:nathatargino.dev@gmail.com" title="E-mail" aria-label="E-mail">
+                    <i class='bx bxl-gmail'></i>
+                </a>
+                <a href="https://api.whatsapp.com/send?phone=5583993176446&text=Ol%C3%A1%2C%20Nath%C3%A3!%20Acessei%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar%20sobre%20uma%20oportunidade." target="_blank" title="WhatsApp" aria-label="WhatsApp">
+                    <i class='bx bxl-whatsapp'></i>
+                </a>
+            </div>
         </div>
-        <a href="" class="btn" id="cvbtn">Baixar CV</a>
     </div>
-
 </section>
 
+<!-- ==================== SOBRE MIM (BENTO GRID) ==================== -->
 <section class="sobre" id="sobre">
-    <div class="conteudo-sobre">
-        <h2 class="heading">Sobre <span>mim</span></h2>
-        <h3>Desenvolvedor FullStack</h3>
-        <p>Especialista no desenvolvimento de aplicações web robustas e escaláveis utilizando o ecossistema .NET.
-            Construo soluções completas, desde back-ends performáticos com C# e ASP.NET MVC até interfaces modernas e responsivas. Com sólida experiência em SQL Server, entrego sistemas seguros e otimizados, 
-            focados na melhor experiência do usuário e na eficiência dos processos de negócio.</p>
-        <a href="#contato" class="btn">Mais informações</a>
+    <div class="section-header">
+        <span class="section-subtitle">Conheça Minha Trajetória</span>
+        <h2 class="heading">Sobre <span class="text-gradient">Mim</span></h2>
+    </div>
+
+    <div class="bento-container">
+        <!-- Card 1: Perfil & Resumo -->
+        <div class="bento-card bento-profile">
+            <div class="bento-badge"><i class='bx bx-code-block'></i> Full Stack .NET Developer</div>
+            <h3>Transformando requisitos complexos em arquiteturas escaláveis</h3>
+            <p>
+                Desenvolvedor focado na construção de aplicações web de ponta a ponta. Atuo desde a concepção de back-ends resilientes e APIs performáticas com <strong>C# e ASP.NET Core</strong> até a modelagem avançada de dados relacionais com <strong>SQL Server</strong>.
+            </p>
+            <p>
+                Comprometido com código limpo (Clean Code), boas práticas de arquitetura, integridade de dados e interfaces modernas que encantam os usuários finais e geram valor real para o negócio.
+            </p>
+            <div class="bento-tags">
+                <span>Clean Code</span>
+                <span>RESTful APIs</span>
+                <span>SignalR</span>
+                <span>LINQ</span>
+                <span>SQL Server</span>
+                <span>n8n Workflows</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Interactive Terminal Widget -->
+        <div class="bento-card bento-terminal">
+            <div class="terminal-bar">
+                <div class="terminal-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                </div>
+                <span class="terminal-title">NathaTargino.cs — .NET 8</span>
+            </div>
+            <pre class="terminal-code"><code><span class="kwd">public class</span> <span class="cls">FullStackDeveloper</span>
+{
+    <span class="kwd">public string</span> Name =&gt; <span class="str">"Nathã Targino"</span>;
+    <span class="kwd">public string[]</span> MainStack =&gt; [
+        <span class="str">"C#"</span>, <span class="str">".NET 8"</span>, <span class="str">"ASP.NET Core"</span>, 
+        <span class="str">"SQL Server"</span>, <span class="str">"SignalR"</span>
+    ];
+    <span class="kwd">public string[]</span> CoreValues =&gt; [
+        <span class="str">"Alta Performance"</span>, 
+        <span class="str">"Segurança"</span>, 
+        <span class="str">"UX de Primeira Linha"</span>
+    ];
+    <span class="kwd">public bool</span> OpenToOpportunities =&gt; <span class="kwd">true</span>;
+}</code></pre>
+        </div>
+
+        <!-- Card 3: Métricas & Conquistas -->
+        <div class="bento-card bento-stats">
+            <div class="stat-item">
+                <span class="stat-number">+3</span>
+                <span class="stat-label">Anos de dedicação ao ecossistema .NET</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">Compromisso com arquitetura e qualidade</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">6+</span>
+                <span class="stat-label">Projetos autorais em produção</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Foco & Diferenciais -->
+        <div class="bento-card bento-pillars">
+            <h3>Pilares Técnicos</h3>
+            <div class="pillars-grid">
+                <div class="pillar">
+                    <i class='bx bx-check-shield'></i>
+                    <div>
+                        <strong>Integridade & Segurança</strong>
+                        <p>Validações rigorosas de dados e autenticação segura.</p>
+                    </div>
+                </div>
+                <div class="pillar">
+                    <i class='bx bx-tachometer'></i>
+                    <div>
+                        <strong>Alta Performance</strong>
+                        <p>Consultas LINQ otimizadas e consultas SQL velozes.</p>
+                    </div>
+                </div>
+                <div class="pillar">
+                    <i class='bx bx-network-chart'></i>
+                    <div>
+                        <strong>Comunicação em Tempo Real</strong>
+                        <p>WebSockets com SignalR e conexões peer-to-peer WebRTC.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
+<!-- ==================== HABILIDADES & SERVIÇOS ==================== -->
 <section class="servicos" id="servicos">
-    <h2 class="heading">Meus <span>Serviços</span></h2>
+    <div class="section-header">
+        <span class="section-subtitle">O Que Eu Domino</span>
+        <h2 class="heading">Especialidades & <span class="text-gradient">Habilidades</span></h2>
+    </div>
 
     <div class="conteudo-servicos">
         <div class="caixa-de-servicos">
-            <i class='bx bx-code-alt'></i>
+            <div class="servico-icon-wrap">
+                <i class='bx bx-code-curly'></i>
+            </div>
             <h3>Full Stack .NET</h3>
-            <p>Criação de aplicações web completas utilizando o ecossistema .NET. Desenvolvo interfaces dinâmicas e back-end estruturado com C# e ASP.NET MVC, focando em código limpo, funcional e soluções robustas para problemas complexos.</p>
-            <a href="#contato" class="btn">Mais informações</a>
+            <p>Construção de aplicações completas com C# e ASP.NET Core MVC / Web APIs. Estruturação em camadas, injeção de dependência, persistência fluida e foco total em sustentabilidade de software.</p>
+            <div class="servico-techs">
+                <span>C#</span>
+                <span>.NET 8</span>
+                <span>ASP.NET Core</span>
+                <span>Entity Framework</span>
+            </div>
         </div>
 
         <div class="caixa-de-servicos">
-            <i class='bx bx-link'></i>
-            <h3>APIs e Serviços Back-end</h3>
-            <p>Construção de APIs com ASP.NET Core para integração entre sistemas. Foco total na organização da lógica de negócio e na garantia de que todos os dados sejam processados, validados e entregues de forma segura, performática e  eficiente.</p>
-            <a href="#contato" class="btn">Mais informações</a>
+            <div class="servico-icon-wrap">
+                <i class='bx bx-data'></i>
+            </div>
+            <h3>Banco de Dados & SQL Server</h3>
+            <p>Modelagem relacional, normalização de bases, criação de tabelas, consultas otimizadas e índices para garantir integridade, consistência e respostas instantâneas mesmo sob grande volume.</p>
+            <div class="servico-techs">
+                <span>SQL Server</span>
+                <span>T-SQL</span>
+                <span>Modelagem</span>
+                <span>Consultas Otimizadas</span>
+            </div>
         </div>
 
         <div class="caixa-de-servicos">
-            <i class='bx bx-data'></i>
-            <h3>Banco de Dados SQL</h3>
-            <p>Experiência na modelagem manipulação de bancos de dados relacionais com SQL Server. Atuo na criação de consultas, tabelas e estruturação de dados para garantir a total persistência, segurança e integridade das informações vitais da aplicação.</p>
-            <a href="#contato" class="btn">Mais informações</a>
+            <div class="servico-icon-wrap">
+                <i class='bx bx-broadcast'></i>
+            </div>
+            <h3>Tempo Real & Automação Inteligente</h3>
+            <p>Implementação de chamadas e streams via SignalR e WebRTC, além de fluxos automatizados de dados com n8n, webhooks e integrações com inteligência artificial e Google Sheets.</p>
+            <div class="servico-techs">
+                <span>SignalR</span>
+                <span>WebRTC</span>
+                <span>n8n</span>
+                <span>Webhooks</span>
+            </div>
+        </div>
+
+        <div class="caixa-de-servicos">
+            <div class="servico-icon-wrap">
+                <i class='bx bx-layout'></i>
+            </div>
+            <h3>Front-End Reativo & UX/UI</h3>
+            <p>Criação de interfaces elegantes com Glassmorphism, micro-animações, design responsivo fluido, consumo assíncrono de APIs (Fetch/AJAX) e alta fidelidade visual.</p>
+            <div class="servico-techs">
+                <span>HTML5 / CSS3</span>
+                <span>JavaScript ES6+</span>
+                <span>Glassmorphism</span>
+                <span>Design Responsivo</span>
+            </div>
         </div>
     </div>
 </section>
 
+<!-- ==================== ÚLTIMOS PROJETOS ==================== -->
 <section class="portfolio" id="portfolio">
-    <h2 class="heading">Ultimos <span>Projetos</span></h2>
+    <div class="section-header">
+        <span class="section-subtitle">Aplicações Reais & Portfólio</span>
+        <h2 class="heading">Últimos <span class="text-gradient">Projetos</span></h2>
+        <p class="section-desc">Clique em qualquer projeto para abrir os detalhes completos, arquitetura e stack técnica.</p>
+    </div>
 
     <div class="conteudo-portfolio">
-        <div class="caixa-do-portfolio">
-            <img src="~/images/dtom.png" alt="DTOM.net">
+        <!-- 1. Concord -->
+        <div class="caixa-do-portfolio" onclick="abrirModalProjeto('concord')">
+            <div class="portfolio-img-wrap">
+                <img src="~/images/concord.png" alt="Concord" loading="lazy">
+                <span class="badge-card-categoria">Web & Desktop (Electron)</span>
+            </div>
             <div class="camada-portfolio">
+                <div class="card-tags">
+                    <span>React</span>
+                    <span>Electron</span>
+                    <span>.NET</span>
+                    <span>WebRTC</span>
+                </div>
                 <h4>Concord</h4>
-                <p>Plataforma de chat e call com música sincronizada via SignalR e WebRTC.</p>
-                <div class="conteudo-icones">
-                    <a href="https://dtom.azurewebsites.net/" target="_blank"><i class='bx bxs-show'></i></a>
-                    <a href="https://github.com/nathatargino/DTOM" target="_blank"><i class='bx bxl-github'></i></a>
+                <p>Plataforma de voz e chat multiplataforma (Web e Desktop com Electron), evoluída de .NET para React com WebRTC e SignalR.</p>
+                <div class="card-acoes-wrapper" onclick="event.stopPropagation()">
+                    <button class="btn-ver-detalhes" onclick="abrirModalProjeto('concord')">
+                        <i class='bx bx-info-circle'></i> Ver Detalhes
+                    </button>
+                    <div class="conteudo-icones">
+                        <a href="https://concord-olive.vercel.app/" target="_blank" title="Acessar Concord Online"><i class='bx bxs-show'></i></a>
+                        <a href="https://github.com/nathatargino/Concord-Repo/" target="_blank" title="Repositório no GitHub"><i class='bx bxl-github'></i></a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="caixa-do-portfolio">
-            <img src="~/images/portfolio3.jpg" alt="Blurred Login">
+        <!-- 2. Deskjet AI -->
+        <div class="caixa-do-portfolio" onclick="abrirModalProjeto('deskjet-ai')">
+            <div class="portfolio-img-wrap">
+                <img src="~/images/deskjet-ai.png" alt="Deskjet AI" loading="lazy">
+                <span class="badge-card-categoria">Automação Multimodal & IA</span>
+            </div>
             <div class="camada-portfolio">
-                <h4>Blurred Login</h4>
-                <p>Login interface com estética Glassmorphism e foco em UX minimalista.</p>
-                <div class="conteudo-icones">
-                    <a href="https://nathatargino.github.io/Pagina-de-Login-Transparente/" target="_blank"><i class='bx bxs-show'></i></a>
-                    <a href="https://github.com/nathatargino/Pagina-de-Login-Transparente" target="_blank"><i class='bx bxl-github'></i></a>
+                <div class="card-tags">
+                    <span>Gemini AI</span>
+                    <span>n8n</span>
+                    <span>Multimodal</span>
+                    <span>Sheets</span>
+                </div>
+                <h4>Deskjet AI</h4>
+                <p>Bot financeiro multimodal no WhatsApp com Gemini e n8n: lê áudio, voz, texto e notas fiscais com registro no Sheets e dashboard em tempo real.</p>
+                <div class="card-acoes-wrapper" onclick="event.stopPropagation()">
+                    <button class="btn-ver-detalhes" onclick="abrirModalProjeto('deskjet-ai')">
+                        <i class='bx bx-info-circle'></i> Ver Detalhes
+                    </button>
+                    <div class="conteudo-icones">
+                        <a href="https://financeai-sigma-six.vercel.app/" target="_blank" title="Acessar Deskjet AI"><i class='bx bxs-show'></i></a>
+                        <span class="icone-privado" data-tooltip="Repositório Privado" title="Repositório Privado"><i class='bx bxs-lock-alt'></i></span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="caixa-do-portfolio">
-            <img src="~/images/portfolio4.png" alt="Floating Login">
+        <!-- 3. Server Master -->
+        <div class="caixa-do-portfolio" onclick="abrirModalProjeto('servermaster')">
+            <div class="portfolio-img-wrap">
+                <img src="~/images/servermaster.png" alt="Server Master" loading="lazy">
+                <span class="badge-card-categoria">Desktop .NET (Avalonia UI)</span>
+            </div>
             <div class="camada-portfolio">
-                <h4>Floating Login</h4>
-                <p>Interface com temática espacial e elemento SVG dinâmico.</p>
-                <div class="conteudo-icones">
-                    <a href="https://nathatargino.github.io/Pagina-de-Login-Gato-Astronauta/" target="_blank"><i class='bx bxs-show'></i></a>
-                    <a href="https://github.com/nathatargino/Pagina-de-Login-Gato-Astronauta" target="_blank"><i class='bx bxl-github'></i></a>
+                <div class="card-tags">
+                    <span>C# .NET 8</span>
+                    <span>Avalonia UI</span>
+                    <span>Playit.gg</span>
+                    <span>Google Drive</span>
+                </div>
+                <h4>Server Master</h4>
+                <p>Gerenciador Desktop de servidores de jogos (Minecraft e Hytale) com túneis Playit.gg, telemetria em tempo real e backup local/Google Drive.</p>
+                <div class="card-acoes-wrapper" onclick="event.stopPropagation()">
+                    <button class="btn-ver-detalhes" onclick="abrirModalProjeto('servermaster')">
+                        <i class='bx bx-info-circle'></i> Ver Detalhes
+                    </button>
+                    <div class="conteudo-icones">
+                        <a href="https://github.com/nathatargino/ServerMaster/releases/download/v1.0.7-20260903211230/ServerMaster-Setup.exe" target="_blank" title="Baixar Aplicação Desktop (ServerMaster-Setup.exe)"><i class='bx bx-download'></i></a>
+                        <a href="https://github.com/nathatargino/ServerMaster/" target="_blank" title="Repositório no GitHub"><i class='bx bxl-github'></i></a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="caixa-do-portfolio">
-            <img src="~/images/portfolio1.png" alt="AuraCommerce">
-            <div class="camada-portfolio">
-                <h4>AuraCommerce</h4>
-                <p>Sistema de gestão de vendas com ASP.NET Core MVC, relatórios LINQ e deploy Azure.</p>
-                <div class="conteudo-icones">
-                    <a href="https://auracommerce.azurewebsites.net/" target="_blank"><i class='bx bxs-show'></i></a>
-                    <a href="https://github.com/nathatargino/AuraCommerce" target="_blank"><i class='bx bxl-github'></i></a>
-                </div>
+        <!-- 4. AuraScale -->
+        <div class="caixa-do-portfolio" onclick="abrirModalProjeto('aurascale')">
+            <div class="portfolio-img-wrap">
+                <img src="~/images/aurascale.png" alt="AuraScale" loading="lazy">
+                <span class="badge-card-categoria">Gestão & Escalas</span>
             </div>
-        </div>
-
-        <div class="caixa-do-portfolio">
-            <img src="~/images/aurascale.png" alt="AuraScale">
             <div class="camada-portfolio">
+                <div class="card-tags">
+                    <span>C# .NET</span>
+                    <span>Gestão 5x2 / 6x1</span>
+                    <span>Rodízios</span>
+                    <span>SQL Server</span>
+                </div>
                 <h4>AuraScale</h4>
-                <p>Gestão inteligente de escalas e automação de turnos com .NET e Azure.</p>
-                <div class="conteudo-icones">
-                    <a href="https://aurascale.azurewebsites.net/" target="_blank"><i class='bx bxs-show'></i></a>
-                    <a href="https://github.com/nathatargino/AuraScale" target="_blank"><i class='bx bxl-github'></i></a>
+                <p>Gestão de escalas corporativas e rodízios (5x2 ao 6x1), controle de folgas e horas extras em C# .NET e SQL Server.</p>
+                <div class="card-acoes-wrapper" onclick="event.stopPropagation()">
+                    <button class="btn-ver-detalhes" onclick="abrirModalProjeto('aurascale')">
+                        <i class='bx bx-info-circle'></i> Ver Detalhes
+                    </button>
+                    <div class="conteudo-icones">
+                        <span class="icone-pausado" data-tooltip="Aplicação Temporariamente Pausada" title="Aplicação Temporariamente Pausada" onclick="mostrarToastAviso('AuraScale: A hospedagem online está temporariamente pausada para manutenção. O código segue aberto no GitHub!')">
+                            <i class='bx bx-pause-circle'></i>
+                        </span>
+                        <a href="https://github.com/nathatargino/AuraScale" target="_blank" title="Repositório no GitHub"><i class='bx bxl-github'></i></a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="caixa-do-portfolio">
-            <img src="~/images/portfolio2.png" alt="InfiniteDex">
+        <!-- 5. AuraCommerce -->
+        <div class="caixa-do-portfolio" onclick="abrirModalProjeto('auracommerce')">
+            <div class="portfolio-img-wrap">
+                <img src="~/images/auracommerce.png" alt="AuraCommerce" loading="lazy">
+                <span class="badge-card-categoria">Full Stack .NET</span>
+            </div>
             <div class="camada-portfolio">
+                <div class="card-tags">
+                    <span>ASP.NET MVC</span>
+                    <span>C#</span>
+                    <span>LINQ</span>
+                    <span>SQL Server</span>
+                </div>
+                <h4>AuraCommerce</h4>
+                <p>Gestão comercial corporativa em ASP.NET Core MVC: controle de departamentos, equipe de vendedores, pedidos e relatórios de vendas com LINQ.</p>
+                <div class="card-acoes-wrapper" onclick="event.stopPropagation()">
+                    <button class="btn-ver-detalhes" onclick="abrirModalProjeto('auracommerce')">
+                        <i class='bx bx-info-circle'></i> Ver Detalhes
+                    </button>
+                    <div class="conteudo-icones">
+                        <a href="https://auracommerce.azurewebsites.net/" target="_blank" title="Acessar AuraCommerce"><i class='bx bxs-show'></i></a>
+                        <a href="https://github.com/nathatargino/AuraCommerce" target="_blank" title="Repositório no GitHub"><i class='bx bxl-github'></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. InfiniteDex -->
+        <div class="caixa-do-portfolio" onclick="abrirModalProjeto('infinitedex')">
+            <div class="portfolio-img-wrap">
+                <img src="~/images/infinitedex.png" alt="InfiniteDex" loading="lazy">
+                <span class="badge-card-categoria">Consumo de API & Front-End</span>
+            </div>
+            <div class="camada-portfolio">
+                <div class="card-tags">
+                    <span>JavaScript</span>
+                    <span>PokéAPI</span>
+                    <span>Dark/Light</span>
+                    <span>UI/UX</span>
+                </div>
                 <h4>InfiniteDex</h4>
-                <p>Catálogo de Pokémons com consumo de API em tempo real e performance otimizada.</p>
-                <div class="conteudo-icones">
-                    <a href="https://nathatargino.github.io/Pokedex-integrado-ao-PokeApi-/" target="_blank"><i class='bx bxs-show'></i></a>
-                    <a href="https://github.com/nathatargino/Pokedex-integrado-ao-PokeApi-" target="_blank"><i class='bx bxl-github'></i></a>
+                <p>Pokédex interativa com consumo em tempo real da PokéAPI, alternância de temas (Dark/Light) e busca instantânea com filtros dinâmicos.</p>
+                <div class="card-acoes-wrapper" onclick="event.stopPropagation()">
+                    <button class="btn-ver-detalhes" onclick="abrirModalProjeto('infinitedex')">
+                        <i class='bx bx-info-circle'></i> Ver Detalhes
+                    </button>
+                    <div class="conteudo-icones">
+                        <a href="https://nathatargino.github.io/Pokedex-integrado-ao-PokeApi-/" target="_blank" title="Acessar InfiniteDex"><i class='bx bxs-show'></i></a>
+                        <a href="https://github.com/nathatargino/Pokedex-integrado-ao-PokeApi-" target="_blank" title="Repositório no GitHub"><i class='bx bxl-github'></i></a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="contato" id="contato">
-    <h2 class="heading">Contate-<span style="color: #9956f6ef;">me!</span></h2>
-
-    <form action="/Home/EnviarContato" method="post">
-        <div class="input-box">
-            <input type="text" name="Nome" placeholder="Nome completo" required>
-            <input type="email" name="Email" placeholder="E-mail" required>
-        </div>
-        <div class="input-box">
-            <input type="tel" name="Telefone" id="phone" placeholder="Celular">
-            <input type="text" name="EmailAlternativo" placeholder="E-mail alternativo">
-        </div>
-        <textarea name="Mensagem" cols="30" rows="10" placeholder="Escreva sua mensagem" required></textarea>
-
-        <button type="submit" class="btn" id="btn-enviar">
-            <span class="btn-text">Enviar mensagem</span>
-            <i class='bx bx-loader-alt bx-spin' id="spinner" style="display: none;"></i>
+<!-- ==================== MODAL DE DETALHES DO PROJETO ==================== -->
+<div id="modalProjeto" class="modal-projeto-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-projeto-card">
+        <button class="modal-fechar-btn" onclick="fecharModalProjeto()" aria-label="Fechar janela de detalhes">
+            <i class='bx bx-x'></i>
         </button>
-    </form>
+
+        <div class="modal-projeto-scroll">
+            <div class="modal-projeto-banner-wrap" id="modalBannerWrap">
+                <div class="modal-carousel-track" id="modalCarouselTrack">
+                    <!-- Slides gerados dinamicamente via script.js -->
+                </div>
+                
+                <button class="carousel-nav-btn carousel-prev" id="carouselPrev" onclick="mudarSlideManual(-1)" aria-label="Imagem anterior">
+                    <i class='bx bx-chevron-left'></i>
+                </button>
+                <button class="carousel-nav-btn carousel-next" id="carouselNext" onclick="mudarSlideManual(1)" aria-label="Próxima imagem">
+                    <i class='bx bx-chevron-right'></i>
+                </button>
+                
+                <div class="carousel-dots" id="modalCarouselDots"></div>
+                <span class="modal-banner-badge" id="modalCategoria"></span>
+            </div>
+
+            <div class="modal-projeto-conteudo">
+                <div class="modal-header-info">
+                    <h3 id="modalTitulo" class="modal-projeto-titulo"></h3>
+                    <div id="modalTags" class="modal-projeto-tags"></div>
+                </div>
+
+                <div class="modal-secao">
+                    <h4 class="modal-secao-titulo"><i class='bx bx-book-open'></i> Visão Geral & Desafio</h4>
+                    <p id="modalDescricao" class="modal-projeto-desc"></p>
+                </div>
+
+                <div class="modal-secao">
+                    <h4 class="modal-secao-titulo"><i class='bx bx-check-shield'></i> Funcionalidades Principais</h4>
+                    <ul id="modalRecursos" class="modal-recursos-lista"></ul>
+                </div>
+
+                <div class="modal-secao">
+                    <h4 class="modal-secao-titulo"><i class='bx bx-code-block'></i> Arquitetura & Tecnologias</h4>
+                    <div id="modalStack" class="modal-stack-grid"></div>
+                </div>
+
+                <div class="modal-acoes">
+                    <a id="modalLinkDemo" href="#" target="_blank" class="btn btn-glow">
+                        <i class='bx bx-link-external'></i> Acessar Aplicação Online
+                    </a>
+                    <a id="modalLinkGithub" href="#" target="_blank" class="btn btn-glass">
+                        <i class='bx bxl-github'></i> Repositório no GitHub
+                    </a>
+                    <div id="modalAvisoPrivado" class="modal-badge-privado" style="display: none;">
+                        <i class='bx bxs-lock-alt'></i> Projeto Proprietário / Repositório Privado
+                    </div>
+                    <div id="modalAvisoPausado" class="modal-badge-pausado" style="display: none;" title="Clique para mais informações">
+                        <i class='bx bx-time-five'></i>
+                        <span>Aplicação Temporariamente Pausada</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== CONTATO ==================== -->
+<section class="contato" id="contato">
+    <div class="section-header">
+        <span class="section-subtitle">Vamos Criar Algo Incrível?</span>
+        <h2 class="heading">Fale <span class="text-gradient">Comigo</span></h2>
+        <p class="section-desc">Disponível para oportunidades como desenvolvedor, projetos freelance ou consultoria técnica.</p>
+    </div>
+
+    <div class="contato-container">
+        <!-- Coluna de Informações Diretas -->
+        <div class="contato-info-card">
+            <h3>Vamos conversar!</h3>
+            <p>Sinta-se à vontade para me enviar uma mensagem direta ou preencher o formulário. Respondo com máxima rapidez.</p>
+
+            <div class="contato-canais">
+                <a href="https://api.whatsapp.com/send?phone=5583993176446&text=Ol%C3%A1%2C%20Nath%C3%A3!%20Acessei%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20conversar." target="_blank" class="canal-item">
+                    <div class="canal-icon"><i class='bx bxl-whatsapp'></i></div>
+                    <div class="canal-dados">
+                        <span class="canal-nome">WhatsApp</span>
+                        <span class="canal-valor">+55 (83) 99317-6446</span>
+                    </div>
+                </a>
+
+                <a href="mailto:nathatargino.dev@gmail.com" class="canal-item">
+                    <div class="canal-icon"><i class='bx bxl-gmail'></i></div>
+                    <div class="canal-dados">
+                        <span class="canal-nome">E-mail Direto</span>
+                        <span class="canal-valor">nathatargino.dev@gmail.com</span>
+                    </div>
+                </a>
+
+                <a href="https://linkedin.com/in/nathatargino" target="_blank" class="canal-item">
+                    <div class="canal-icon"><i class='bx bxl-linkedin'></i></div>
+                    <div class="canal-dados">
+                        <span class="canal-nome">LinkedIn</span>
+                        <span class="canal-valor">in/nathatargino</span>
+                    </div>
+                </a>
+
+                <div class="canal-item">
+                    <div class="canal-icon"><i class='bx bx-map-pin'></i></div>
+                    <div class="canal-dados">
+                        <span class="canal-nome">Localização</span>
+                        <span class="canal-valor">Brasil / Remoto</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna do Formulário -->
+        <div class="contato-form-card">
+            <form action="/Home/EnviarContato" method="post" id="formContato">
+                <div class="input-grupo">
+                    <div class="campo-wrap">
+                        <label for="campoNome">Seu Nome *</label>
+                        <div class="input-com-icone">
+                            <i class='bx bx-user'></i>
+                            <input type="text" id="campoNome" name="Nome" placeholder="Ex: Lucas Silva" required>
+                        </div>
+                    </div>
+                    <div class="campo-wrap">
+                        <label for="campoEmail">Seu E-mail *</label>
+                        <div class="input-com-icone">
+                            <i class='bx bx-envelope'></i>
+                            <input type="email" id="campoEmail" name="Email" placeholder="exemplo@dominio.com" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-grupo">
+                    <div class="campo-wrap">
+                        <label for="phone">Telefone / WhatsApp</label>
+                        <div class="input-com-icone">
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" name="Telefone" id="phone" placeholder="(83) 99999-9999">
+                        </div>
+                    </div>
+                    <div class="campo-wrap">
+                        <label for="campoEmailAlt">E-mail Alternativo</label>
+                        <div class="input-com-icone">
+                            <i class='bx bx-at'></i>
+                            <input type="email" id="campoEmailAlt" name="EmailAlternativo" placeholder="outro@email.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="campo-wrap">
+                    <label for="campoMensagem">Sua Mensagem *</label>
+                    <div class="input-com-icone textarea-icone">
+                        <i class='bx bx-message-detail'></i>
+                        <textarea id="campoMensagem" name="Mensagem" rows="5" placeholder="Conte-me sobre seu projeto, desafio técnico ou proposta de oportunidade..." required></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-glow btn-enviar-full" id="btn-enviar">
+                    <span class="btn-text"><i class='bx bx-send'></i> Enviar Mensagem</span>
+                    <i class='bx bx-loader-alt bx-spin' id="spinner" style="display: none;"></i>
+                </button>
+            </form>
+        </div>
+    </div>
 </section>
+
+<!-- ==================== MODAL DE SUCESSO ==================== -->
 <div id="modalSucesso" class="modal">
     <div class="modal-conteudo">
-        <div class="modal-header">
-            <i class='bx bx-check-circle' style="font-size: 8rem; color: #9956f6ef; margin-bottom: 2rem; display: block;"></i>
+        <div class="modal-header-icon">
+            <i class='bx bx-check-circle'></i>
         </div>
-        <h3 style="font-size: 2.8rem; margin-bottom: 1rem;">Mensagem Enviada!</h3>
-        <p style="font-size: 1.6rem; margin-bottom: 2.5rem; color: #eee;">Obrigado pelo contato. Responderei o mais breve possível.</p>
-        <button onclick="fecharModal()" class="btn">Fechar</button>
+        <h3>Mensagem Enviada!</h3>
+        <p>Obrigado pelo contato. Recebi sua mensagem e retornarei o mais breve possível.</p>
+        <button onclick="fecharModal()" class="btn btn-glow">Fechar</button>
     </div>
 </div>
