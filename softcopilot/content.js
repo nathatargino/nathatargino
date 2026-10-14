@@ -2896,15 +2896,39 @@
             const strTexto = typeof texto === 'string' ? texto : '';
             if (strTexto.trim().length > 0) {
                 mapaRascunhosPorChat.set(String(chave), strTexto);
+                const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
+                if (ticket) {
+                    mapaRascunhosPorChat.set('ticket_' + String(ticket), strTexto);
+                }
             } else {
                 mapaRascunhosPorChat.delete(String(chave));
+                const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
+                if (ticket) {
+                    mapaRascunhosPorChat.delete('ticket_' + String(ticket));
+                }
             }
             persistirRascunhosSessao();
         }
 
         function obterRascunhoChat(chave) {
             if (!chave) return '';
-            return mapaRascunhosPorChat.get(String(chave)) || '';
+            const direto = mapaRascunhosPorChat.get(String(chave));
+            if (direto) return direto;
+
+            const nome = (typeof obterNomeClienteParaSaudacao === 'function') ? obterNomeClienteParaSaudacao() : null;
+            if (nome && nome.length >= 2) {
+                const slug = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+                const porNome = mapaRascunhosPorChat.get('cliente_' + slug) || mapaRascunhosPorChat.get('card_' + slug);
+                if (porNome) return porNome;
+            }
+
+            const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
+            if (ticket) {
+                const porTicket = mapaRascunhosPorChat.get('ticket_' + String(ticket)) || mapaRascunhosPorChat.get(String(ticket));
+                if (porTicket) return porTicket;
+            }
+
+            return '';
         }
 
         function limparRascunhoChat(chave) {
@@ -3333,14 +3357,19 @@
                     mensagemTexto = `${textoPrefix}. Me chamo ${nomeAtendente}, e irei iniciar seu atendimento. Com quem eu falo?`;
                 }
 
-                // Insere diretamente o texto completo e exato no campo nativo
-                colocarTextoNoCampo(mensagemTexto);
+                // Insere diretamente o texto completo e exato no campo nativo mantendo foco
+                colocarTextoNoCampo(mensagemTexto, true);
 
                 // Aguarda 150ms para o React registrar o valor no estado interno
                 await new Promise(r => setTimeout(r, 150));
 
                 // Dispara o envio UMA ÚNICA VEZ
                 enviarMensagemDoCampo();
+
+                // Limpa resíduos de input nativo para não virar rascunho
+                setTimeout(() => {
+                    try { limparCampoNativo(); } catch (_) { }
+                }, 300);
 
                 console.log(`[Extensão Softcom] Saudação (${textoPrefix}) enviada com sucesso para o chat #${ticketId}!`);
                 mostrarNotificacao(`⚡ Saudação (${textoPrefix}) enviada ao chat #${ticketId}!`, '#2ecc71');
@@ -3360,23 +3389,49 @@
         let gerandoSugestaoGemini = false;
         let enviandoMensagemNativaAgora = false;
 
-        // Coloca o texto no campo de resposta nativo do Workdesk com máxima compatibilidade com React
-        function colocarTextoNoCampo(texto) {
+        // Coloca o texto no campo de resposta nativo do Workdesk (execCommand + React Value Tracker + setter nativo)
+        function colocarTextoNoCampo(texto, manterFocoNoCampo = false) {
             const campo = obterCampoMensagem();
             if (!campo) return;
 
+            const textareaAtiva = document.getElementById('gemini-suggestion-text');
+            const estavaFocadoNaNossaTextarea = (document.activeElement === textareaAtiva);
+
+            // 1. Desfoca nossa textarea temporariamente para que o foco vá obrigatoriamente para o campo nativo
+            if (estavaFocadoNaNossaTextarea && textareaAtiva) {
+                try { textareaAtiva.blur(); } catch (_) { }
+            }
+
+            // 2. Garante foco e seleção no campo nativo
+            try {
+                campo.focus();
+                if (campo.select) campo.select();
+            } catch (_) { }
+
+            // 3. Execução de execCommand para inserção nativa (essencial para o React/Workdesk registrar o evento sintético)
+            try {
+                document.execCommand('selectAll', false, null);
+                document.execCommand('insertText', false, texto);
+            } catch (_) { }
+
+            // 4. Setter nativo do protótipo com bypass do _valueTracker do React
             try {
                 if (campo.value !== undefined) {
-                    const prototype = (typeof HTMLTextAreaElement !== 'undefined' && campo instanceof HTMLTextAreaElement)
-                        ? window.HTMLTextAreaElement.prototype
-                        : window.HTMLInputElement.prototype;
-                    const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set ||
-                        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set ||
-                        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                    const prototype = Object.getPrototypeOf(campo);
+                    const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value') ||
+                        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value') ||
+                        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+                    const setter = descriptor ? descriptor.set : null;
                     if (setter) {
                         setter.call(campo, texto);
                     } else {
                         campo.value = texto;
+                    }
+
+                    // Força o tracker do React a registrar diferença de valor para disparar onChange
+                    const tracker = campo._valueTracker;
+                    if (tracker) {
+                        tracker.setValue(texto === '' ? '__softcom_force_reset__' : '');
                     }
                 } else {
                     campo.innerText = texto;
@@ -3385,11 +3440,22 @@
                 try { campo.value = texto; } catch (__) { }
             }
 
-            campo.dispatchEvent(new Event('input', { bubbles: true }));
-            campo.dispatchEvent(new Event('change', { bubbles: true }));
+            // 5. Dispara todos os eventos de entrada para o React
             try {
-                campo.dispatchEvent(new InputEvent('input', { bubbles: true, data: texto, inputType: 'insertText' }));
-            } catch (e) { }
+                campo.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                campo.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                campo.dispatchEvent(new InputEvent('input', {
+                    bubbles: true,
+                    cancelable: true,
+                    data: texto,
+                    inputType: texto ? 'insertText' : 'deleteContentBackward'
+                }));
+            } catch (_) { }
+
+            // 6. Se não for para manter o foco no campo nativo (ex: digitação do usuário ou template), devolve à textarea
+            if (!manterFocoNoCampo && estavaFocadoNaNossaTextarea && textareaAtiva) {
+                try { textareaAtiva.focus(); } catch (_) { }
+            }
         }
 
         // Envia a mensagem que está atualmente no campo (botão de envio OU Enter nativo)
@@ -3400,43 +3466,44 @@
             if (!campo) return;
 
             enviandoMensagemNativaAgora = true;
-            setTimeout(() => { enviandoMensagemNativaAgora = false; }, 800);
+            setTimeout(() => { enviandoMensagemNativaAgora = false; }, 600);
 
-            // Procura um botão de envio de texto específico (nunca nossos botões, nem Áudio/Anexar/Descartar)
-            const escopo = campo.closest('form') || document;
-            const btnEnviar = Array.from(escopo.querySelectorAll(
-                'button[aria-label*="enviar" i], ' +
-                'button[title*="enviar" i], ' +
-                '[data-ui="send-button"], ' +
-                'button[type="submit"], ' +
-                'button[class*="send" i]'
-            )).find(b => {
-                if (b.closest('#gemini-docked-panel')) return false;
-                if (b.disabled) return false;
-                const t = ((b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.getAttribute('title') || '')).toLowerCase();
-                if (t.includes('áudio') || t.includes('audio') || t.includes('anexar') || t.includes('descartar')) return false;
-                return t.includes('enviar') || t.includes('send') || (b.className && b.className.toLowerCase().includes('send')) || b.type === 'submit';
-            });
-
-            if (btnEnviar) {
-                btnEnviar.click();
-                return;
-            }
-
-            // Foco preventivo no campo nativo para garantir que KeyboardEvent seja capturado por handlers locais
+            // 1. Garante foco ativo no campo nativo
             try { campo.focus(); } catch (_) { }
 
-            campo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
-            try {
-                campo.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
-            } catch (_) { }
-            campo.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+            // 2. Procura um botão de envio legítimo prioritariamente dentro do container do footer/composer
+            const footerInfo = (typeof localizarElementosFooter === 'function') ? localizarElementosFooter() : null;
+            const containerComposer = (footerInfo && (footerInfo.footerRow || footerInfo.nativeBox)) || campo.closest('form') || campo.parentElement;
 
-            // Se pertencer a um <form>, aciona requestSubmit como fallback
-            const form = campo.closest('form');
-            if (form && typeof form.requestSubmit === 'function') {
-                try { form.requestSubmit(); } catch (_) { }
+            let btnEnviar = null;
+            if (containerComposer) {
+                btnEnviar = Array.from(containerComposer.querySelectorAll(
+                    'button[aria-label*="enviar" i], ' +
+                    'button[title*="enviar" i], ' +
+                    '[data-ui="send-button"], ' +
+                    'button[class*="send" i]'
+                )).find(b => {
+                    if (b.closest('#gemini-docked-panel')) return false;
+                    if (b.disabled) return false;
+                    const t = ((b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.getAttribute('title') || '')).toLowerCase();
+                    if (t.includes('áudio') || t.includes('audio') || t.includes('anexar') || t.includes('descartar')) return false;
+                    return true;
+                });
             }
+
+            if (btnEnviar) {
+                try {
+                    btnEnviar.click();
+                } catch (_) { }
+            }
+
+            // 3. Dispara teclado Enter nativo no campo focado (método principal em chats "Enter envia")
+            const enterOpts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true };
+            campo.dispatchEvent(new KeyboardEvent('keydown', enterOpts));
+            try {
+                campo.dispatchEvent(new KeyboardEvent('keypress', enterOpts));
+            } catch (_) { }
+            campo.dispatchEvent(new KeyboardEvent('keyup', enterOpts));
         }
 
         function calcularMinutosDesdeHorario(horaStr) {
@@ -4896,7 +4963,7 @@
         const origensTextoPorChat = new Map();
 
         // Limpa todos os possíveis aliases de chave do chat ativo em mapaRascunhos, origens e sugestões
-        function limparTodosRascunhosDoChatAtual() {
+        function limparTodosRascunhosDoChatAtual(textoEnviado = '') {
             const chaves = new Set();
             const chaveAtual = (typeof obterChaveIdentificadoraChatAtivo === 'function') ? obterChaveIdentificadoraChatAtivo() : null;
             if (chaveAtual) chaves.add(String(chaveAtual));
@@ -4937,31 +5004,74 @@
                 }
             }
 
+            // Se recebemos o texto que acabou de ser enviado, varre o mapa para eliminar QUALQUER rascunho
+            // que tenha esse mesmo conteúdo exato (evita rascunhos zumbis sob aliases antigos)
+            if (textoEnviado && typeof textoEnviado === 'string') {
+                const tLimpo = textoEnviado.trim();
+                if (tLimpo.length > 0) {
+                    for (const [k, v] of Array.from(mapaRascunhosPorChat.entries())) {
+                        if (v && v.trim() === tLimpo) {
+                            mapaRascunhosPorChat.delete(k);
+                            origensTextoPorChat.delete(k);
+                            if (typeof sugestoesIAPorChat !== 'undefined' && sugestoesIAPorChat.delete) {
+                                sugestoesIAPorChat.delete(k);
+                            }
+                        }
+                    }
+                }
+            }
+
             persistirRascunhosSessao();
         }
 
-        // Força a limpeza segura e total do campo de digitação nativo do Workdesk
+        // Força a limpeza segura e total do campo de digitação nativo do Workdesk (execCommand + setter nativo + React tracker)
         function limparCampoNativo() {
             const campo = obterCampoMensagem();
             if (!campo) return;
             try {
+                const textareaAtiva = document.getElementById('gemini-suggestion-text');
+                const estavaFocadoNaNossaTextarea = (document.activeElement === textareaAtiva);
+
+                try { campo.focus(); } catch (_) { }
+                try {
+                    document.execCommand('selectAll', false, null);
+                    document.execCommand('delete', false, null);
+                } catch (_) { }
+
                 if (campo.value !== undefined) {
-                    const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set ||
-                        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                    const prototype = Object.getPrototypeOf(campo);
+                    const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value') ||
+                        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value') ||
+                        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+                    const setter = descriptor ? descriptor.set : null;
                     if (setter) setter.call(campo, '');
                     else campo.value = '';
+
+                    const tracker = campo._valueTracker;
+                    if (tracker) {
+                        tracker.setValue('__softcom_clear__');
+                    }
                 } else {
                     campo.innerText = '';
                 }
-                campo.dispatchEvent(new Event('input', { bubbles: true }));
-                campo.dispatchEvent(new Event('change', { bubbles: true }));
+
+                campo.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                campo.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+
+                if (estavaFocadoNaNossaTextarea && textareaAtiva) {
+                    try { textareaAtiva.focus(); } catch (_) { }
+                }
             } catch (_) { }
         }
 
         // Limpa integralmente o campo de digitação do SoftCopilot e reseta seus estados visuais
-        function limparTextareaSoftCopilot() {
+        function limparTextareaSoftCopilot(forcar = true, textoEnviado = '') {
             const textarea = document.getElementById('gemini-suggestion-text');
             if (textarea) {
+                // Se não for forçado, não limpa se o usuário já tiver começado a digitar algo novo
+                if (!forcar && textoEnviado && textarea.value && textarea.value.trim() !== textoEnviado.trim()) {
+                    return;
+                }
                 textarea.value = '';
                 textarea.style.height = '38px';
                 textarea.dispatchEvent(new Event('input', { bubbles: true }));
@@ -6526,8 +6636,8 @@
                 }
 
                 // Limpa todos os rascunhos e a textarea imediatamente para feedback visual instantâneo
-                limparTodosRascunhosDoChatAtual();
-                limparTextareaSoftCopilot();
+                limparTodosRascunhosDoChatAtual(textoParaEnviar);
+                limparTextareaSoftCopilot(true, textoParaEnviar);
 
                 // Registra para aprendizado de estilo da IA e rastreio de inatividade (SOP 6 min / 12 min)
                 if (temTexto) {
@@ -6562,8 +6672,8 @@
 
                 if (temTexto && temImg) {
                     // 1. Envia a mensagem de texto PRIMEIRO enquanto o chat nativo está 100% livre e desbloqueado
-                    colocarTextoNoCampo(textoParaEnviar);
-                    await new Promise(r => setTimeout(r, 120));
+                    colocarTextoNoCampo(textoParaEnviar, true);
+                    await new Promise(r => setTimeout(r, 150));
                     enviarMensagemDoCampo();
 
                     // 2. Aguarda a mensagem de texto ser processada e o campo ser liberado pelo Workdesk
@@ -6581,8 +6691,8 @@
 
                     mostrarNotificacao('⚡ Mensagem e imagem enviadas com sucesso ao cliente!', '#2ecc71');
                 } else if (temTexto) {
-                    colocarTextoNoCampo(textoParaEnviar);
-                    await new Promise(r => setTimeout(r, 120));
+                    colocarTextoNoCampo(textoParaEnviar, true);
+                    await new Promise(r => setTimeout(r, 150));
                     enviarMensagemDoCampo();
                     mostrarNotificacao('⚡ Mensagem enviada com sucesso ao cliente!', '#2ecc71');
                 } else if (temImg) {
@@ -6591,24 +6701,23 @@
                 }
 
                 // Ciclos de verificação e limpeza garantida (limpa resíduos de input nativo e rascunhos)
-                for (let i = 0; i < 5; i++) {
-                    await new Promise(r => setTimeout(r, 100));
+                for (let i = 0; i < 3; i++) {
+                    await new Promise(r => setTimeout(r, 120));
                     limparCampoNativo();
-                    limparTextareaSoftCopilot();
-                    limparTodosRascunhosDoChatAtual();
+                    limparTextareaSoftCopilot(false, textoParaEnviar);
+                    limparTodosRascunhosDoChatAtual(textoParaEnviar);
                 }
             } catch (err) {
                 console.error('[Extensão Softcom] Erro ao enviar mensagem/imagem:', err);
                 mostrarNotificacao('⚠️ Erro ao enviar mensagem/imagem.', '#ef4444');
             } finally {
                 enviandoMensagemAoCliente = false;
-                // Mantém o bloqueio de rascunhos ativo por mais 1.2s para evitar qualquer repovoamento assíncrono
                 setTimeout(() => {
                     envioMensagemEmAndamento = false;
                     limparCampoNativo();
-                    limparTextareaSoftCopilot();
-                    limparTodosRascunhosDoChatAtual();
-                }, 1200);
+                    limparTextareaSoftCopilot(false, textoParaEnviar);
+                    limparTodosRascunhosDoChatAtual(textoParaEnviar);
+                }, 400);
             }
         }
 
@@ -7951,6 +8060,13 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     atualizarEstadoBotaoIA();
                     atualizarEstadoCard(rascunhoSalvo.trim().length > 0);
                     ultimoTextoDigitadoPeloUsuario = rascunhoSalvo;
+                }
+
+                // Se o chat alternado não possui rascunho, garante limpeza total do campo nativo do Workdesk
+                if (!rascunhoSalvo) {
+                    try { limparCampoNativo(); } catch (_) { }
+                } else {
+                    try { colocarTextoNoCampo(rascunhoSalvo); } catch (_) { }
                 }
 
                 removerImagemPendente();
