@@ -2824,6 +2824,8 @@
         // =========================================================================
         const STORAGE_KEY_RASCUNHOS = 'softcom_drafts_tickets';
         const mapaRascunhosPorChat = new Map();
+        let ultimoTicketPainel = null;
+        let envioMensagemEmAndamento = false;
 
         // Carrega rascunhos salvos da sessão ativa
         function carregarRascunhosSessao() {
@@ -2889,6 +2891,7 @@
         }
 
         function salvarRascunhoChat(chave, texto) {
+            if (envioMensagemEmAndamento) return;
             if (!chave) return;
             const strTexto = typeof texto === 'string' ? texto : '';
             if (strTexto.trim().length > 0) {
@@ -3355,59 +3358,49 @@
         // ASSISTENTE DE RESPOSTAS INTELIGENTES COM GOOGLE GEMINI & GROQ AI
         // =========================================================
         let gerandoSugestaoGemini = false;
-        let ultimoTicketPainel = null;
+        let enviandoMensagemNativaAgora = false;
 
-        // Coloca o texto no campo de resposta sem enviar
+        // Coloca o texto no campo de resposta nativo do Workdesk com máxima compatibilidade com React
         function colocarTextoNoCampo(texto) {
             const campo = obterCampoMensagem();
             if (!campo) return;
 
-            const textareaAtiva = document.getElementById('gemini-suggestion-text');
-            const estavaFocadoNaNossaTextarea = (document.activeElement === textareaAtiva);
-            const cursorInicio = textareaAtiva?.selectionStart;
-            const cursorFim = textareaAtiva?.selectionEnd;
-
-            campo.focus();
-            if (campo.select) campo.select();
-            document.execCommand('selectAll', false, null);
-            const ok = document.execCommand('insertText', false, texto);
-            if (!ok) {
+            try {
                 if (campo.value !== undefined) {
-                    const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set ||
+                    const prototype = (typeof HTMLTextAreaElement !== 'undefined' && campo instanceof HTMLTextAreaElement)
+                        ? window.HTMLTextAreaElement.prototype
+                        : window.HTMLInputElement.prototype;
+                    const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set ||
+                        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set ||
                         Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-                    if (setter) setter.call(campo, texto);
-                    else campo.value = texto;
+                    if (setter) {
+                        setter.call(campo, texto);
+                    } else {
+                        campo.value = texto;
+                    }
                 } else {
                     campo.innerText = texto;
                 }
+            } catch (_) {
+                try { campo.value = texto; } catch (__) { }
             }
+
             campo.dispatchEvent(new Event('input', { bubbles: true }));
             campo.dispatchEvent(new Event('change', { bubbles: true }));
             try {
                 campo.dispatchEvent(new InputEvent('input', { bubbles: true, data: texto, inputType: 'insertText' }));
             } catch (e) { }
-
-            // Se o usuário estava digitando na nossa textarea, devolve o foco imediatamente a ela
-            if (estavaFocadoNaNossaTextarea && textareaAtiva) {
-                textareaAtiva.focus();
-                if (cursorInicio !== undefined && cursorFim !== undefined) {
-                    try { textareaAtiva.setSelectionRange(cursorInicio, cursorFim); } catch (e) { }
-                }
-            }
         }
 
-        // Trava anti-duplicidade: impede que a mesma mensagem seja enviada duas vezes em sequência
-        let envioMensagemEmAndamento = false;
-
-        // Envia a mensagem que está atualmente no campo (UM único método: botão de envio OU Enter)
+        // Envia a mensagem que está atualmente no campo (botão de envio OU Enter nativo)
         function enviarMensagemDoCampo() {
-            if (envioMensagemEmAndamento) return;
+            if (enviandoMensagemNativaAgora) return;
 
             const campo = obterCampoMensagem();
             if (!campo) return;
 
-            envioMensagemEmAndamento = true;
-            setTimeout(() => { envioMensagemEmAndamento = false; }, 1500);
+            enviandoMensagemNativaAgora = true;
+            setTimeout(() => { enviandoMensagemNativaAgora = false; }, 800);
 
             // Procura um botão de envio de texto específico (nunca nossos botões, nem Áudio/Anexar/Descartar)
             const escopo = campo.closest('form') || document;
@@ -3415,13 +3408,14 @@
                 'button[aria-label*="enviar" i], ' +
                 'button[title*="enviar" i], ' +
                 '[data-ui="send-button"], ' +
+                'button[type="submit"], ' +
                 'button[class*="send" i]'
             )).find(b => {
                 if (b.closest('#gemini-docked-panel')) return false;
                 if (b.disabled) return false;
                 const t = ((b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.getAttribute('title') || '')).toLowerCase();
                 if (t.includes('áudio') || t.includes('audio') || t.includes('anexar') || t.includes('descartar')) return false;
-                return t.includes('enviar') || t.includes('send') || (b.className && b.className.toLowerCase().includes('send'));
+                return t.includes('enviar') || t.includes('send') || (b.className && b.className.toLowerCase().includes('send')) || b.type === 'submit';
             });
 
             if (btnEnviar) {
@@ -3429,11 +3423,20 @@
                 return;
             }
 
+            // Foco preventivo no campo nativo para garantir que KeyboardEvent seja capturado por handlers locais
+            try { campo.focus(); } catch (_) { }
+
             campo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
             try {
                 campo.dispatchEvent(new KeyboardEvent('keypress', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
             } catch (_) { }
             campo.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+
+            // Se pertencer a um <form>, aciona requestSubmit como fallback
+            const form = campo.closest('form');
+            if (form && typeof form.requestSubmit === 'function') {
+                try { form.requestSubmit(); } catch (_) { }
+            }
         }
 
         function calcularMinutosDesdeHorario(horaStr) {
@@ -4892,6 +4895,86 @@
         let ultimoTextoGeradoPorIA = '';
         const origensTextoPorChat = new Map();
 
+        // Limpa todos os possíveis aliases de chave do chat ativo em mapaRascunhos, origens e sugestões
+        function limparTodosRascunhosDoChatAtual() {
+            const chaves = new Set();
+            const chaveAtual = (typeof obterChaveIdentificadoraChatAtivo === 'function') ? obterChaveIdentificadoraChatAtivo() : null;
+            if (chaveAtual) chaves.add(String(chaveAtual));
+            if (ultimoTicketPainel) chaves.add(String(ultimoTicketPainel));
+
+            const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
+            if (ticket) {
+                chaves.add('ticket_' + String(ticket));
+                chaves.add(String(ticket));
+            }
+
+            const nome = (typeof obterNomeClienteParaSaudacao === 'function') ? obterNomeClienteParaSaudacao() : null;
+            if (nome && nome.length >= 2) {
+                const slug = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+                chaves.add('cliente_' + slug);
+                chaves.add('card_' + slug);
+            }
+
+            chaves.forEach(k => {
+                mapaRascunhosPorChat.delete(String(k));
+                origensTextoPorChat.delete(String(k));
+                if (typeof sugestoesIAPorChat !== 'undefined' && sugestoesIAPorChat.delete) {
+                    sugestoesIAPorChat.delete(String(k));
+                }
+            });
+
+            // Varre mapaRascunhosPorChat para remover qualquer chave remanescente que mencione o número do ticket ativo
+            if (ticket) {
+                const ticketStr = String(ticket);
+                for (const k of Array.from(mapaRascunhosPorChat.keys())) {
+                    if (k.includes(ticketStr)) {
+                        mapaRascunhosPorChat.delete(k);
+                        origensTextoPorChat.delete(k);
+                        if (typeof sugestoesIAPorChat !== 'undefined' && sugestoesIAPorChat.delete) {
+                            sugestoesIAPorChat.delete(k);
+                        }
+                    }
+                }
+            }
+
+            persistirRascunhosSessao();
+        }
+
+        // Força a limpeza segura e total do campo de digitação nativo do Workdesk
+        function limparCampoNativo() {
+            const campo = obterCampoMensagem();
+            if (!campo) return;
+            try {
+                if (campo.value !== undefined) {
+                    const setter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set ||
+                        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+                    if (setter) setter.call(campo, '');
+                    else campo.value = '';
+                } else {
+                    campo.innerText = '';
+                }
+                campo.dispatchEvent(new Event('input', { bubbles: true }));
+                campo.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch (_) { }
+        }
+
+        // Limpa integralmente o campo de digitação do SoftCopilot e reseta seus estados visuais
+        function limparTextareaSoftCopilot() {
+            const textarea = document.getElementById('gemini-suggestion-text');
+            if (textarea) {
+                textarea.value = '';
+                textarea.style.height = '38px';
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                textarea.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            removerImagemPendente();
+            atualizarEstadoCard(false);
+            origemTextoAtual = 'nenhum';
+            ultimoTextoDigitadoPeloUsuario = '';
+            ultimoTextoGeradoPorIA = '';
+            atualizarEstadoBotaoIA();
+        }
+
         function atualizarEstadoBotaoIA() {
             const btnIA = document.getElementById('btn-sugerir-ia');
             if (!btnIA) return;
@@ -6207,6 +6290,8 @@
 
             if (textarea) {
                 textarea.addEventListener('input', () => {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = Math.min(120, Math.max(38, textarea.scrollHeight)) + 'px';
                     const val = textarea.value.trim();
                     if (!val) {
                         origemTextoAtual = 'nenhum';
@@ -6218,6 +6303,7 @@
                     }
                     atualizarEstadoBotaoIA();
                     atualizarEstadoCard(val.length > 0);
+                    if (envioMensagemEmAndamento) return;
                     const chaveAtual = obterChaveIdentificadoraChatAtivo();
                     if (chaveAtual) {
                         salvarRascunhoChat(chaveAtual, textarea.value);
@@ -6225,6 +6311,7 @@
                 });
 
                 textarea.addEventListener('keyup', () => {
+                    if (envioMensagemEmAndamento) return;
                     const chaveAtual = obterChaveIdentificadoraChatAtivo();
                     if (chaveAtual) {
                         salvarRascunhoChat(chaveAtual, textarea.value);
@@ -6236,6 +6323,7 @@
                 });
                 textarea.addEventListener('blur', () => {
                     textarea.style.borderColor = '#27272a';
+                    if (envioMensagemEmAndamento) return;
                     const chaveAtual = obterChaveIdentificadoraChatAtivo();
                     if (chaveAtual) {
                         salvarRascunhoChat(chaveAtual, textarea.value);
@@ -6347,24 +6435,9 @@
 
             if (btnClear) {
                 btnClear.onclick = () => {
-                    const chaveAtual = obterChaveIdentificadoraChatAtivo();
-                    if (chaveAtual) {
-                        limparRascunhoChat(chaveAtual);
-                        origensTextoPorChat.delete(chaveAtual);
-                    }
-                    if (ultimoTicketPainel) {
-                        limparRascunhoChat(ultimoTicketPainel);
-                        origensTextoPorChat.delete(ultimoTicketPainel);
-                    }
-                    if (textarea) {
-                        textarea.value = '';
-                    }
-                    removerImagemPendente();
-                    origemTextoAtual = 'nenhum';
-                    ultimoTextoDigitadoPeloUsuario = '';
-                    ultimoTextoGeradoPorIA = '';
-                    atualizarEstadoCard(false);
-                    atualizarEstadoBotaoIA();
+                    limparTodosRascunhosDoChatAtual();
+                    limparTextareaSoftCopilot();
+                    limparCampoNativo();
                 };
                 btnClear.onmouseover = () => {
                     btnClear.style.color = '#ef4444';
@@ -6397,6 +6470,10 @@
             }
 
             if (btnEnviar) {
+                btnEnviar.onmousedown = (e) => {
+                    // Evita perder foco prematuramente ou disparar blur antes do click
+                    if (e && e.preventDefault) e.preventDefault();
+                };
                 btnEnviar.onmouseover = () => {
                     if (!btnEnviar.disabled) {
                         btnEnviar.style.background = '#ffd000';
@@ -6424,70 +6501,69 @@
             atualizarEstadoCard(textarea ? textarea.value.trim().length > 0 : false);
         }
 
+        let enviandoMensagemAoCliente = false;
+
         async function enviarTextoAoCliente(texto) {
-            if (envioMensagemEmAndamento) return;
-            // Se houver qualquer gravação de áudio ativa ou preview nativo pendente, finaliza e descarta para liberar o chat
-            if (gravandoAudioAtivo) {
-                finalizarGravacaoAudioUI();
-            }
-            descartarQualquerAudioPendente();
-
-            const imgParaEnviar = imagemPendente;
-            const textoParaEnviar = (texto || '').trim();
-            const temTexto = (textoParaEnviar.length > 0);
-            const temImg = !!imgParaEnviar;
-
-            if (!temTexto && !temImg) {
-                mostrarNotificacao('⚠️ Digite uma mensagem ou anexe uma imagem para enviar.', '#f59e0b');
-                return;
-            }
-
-            // Limpa o painel da extensão imediatamente para feedback visual instantâneo
-            const chaveAtual = obterChaveIdentificadoraChatAtivo();
-            if (chaveAtual) {
-                limparRascunhoChat(chaveAtual);
-            }
-            const textarea = document.getElementById('gemini-suggestion-text');
-            if (textarea) textarea.value = '';
-            removerImagemPendente();
-            atualizarEstadoCard(false);
-            ultimoTextoDigitadoPeloUsuario = '';
-
-            // Registra para aprendizado de estilo da IA e rastreio de inatividade (SOP 6 min / 12 min)
-            if (temTexto) {
-                try {
-                    const { ultimaMensagemCliente } = extrairHistoricoConversaParaIA();
-                    // 1. Aprendizado geral do estilo do atendente
-                    salvarMensagemParaAprendizado(textoParaEnviar, ultimaMensagemCliente);
-
-                    // 2. Aprendizado adaptativo quando o atendente corrigiu a sugestão gerada pela IA
-                    const sugestaoIAAtiva = (sugestoesIAPorChat.get(chaveAtual) || ultimoTextoGeradoPorIA || '').trim();
-                    if (sugestaoIAAtiva && (textoParaEnviar !== sugestaoIAAtiva) && obterAprendizadoCorrecoesHabilitado()) {
-                        salvarCorrecaoDeSugestaoIA(sugestaoIAAtiva, textoParaEnviar, ultimaMensagemCliente);
-                    }
-                } catch (_) { }
-
-                if (chaveAtual) sugestoesIAPorChat.delete(chaveAtual);
-                ultimoTextoGeradoPorIA = '';
-
-                try {
-                    const ticketId = obterTicketChatAtivo();
-                    if (ticketId) {
-                        chrome.storage.local.set({
-                            ['softcom_ultimo_envio_' + ticketId]: {
-                                timestamp: Date.now(),
-                                texto: textoParaEnviar
-                            }
-                        });
-                    }
-                } catch (_) { }
-            }
+            if (enviandoMensagemAoCliente) return;
+            enviandoMensagemAoCliente = true;
+            envioMensagemEmAndamento = true;
 
             try {
+                // Se houver qualquer gravação de áudio ativa ou preview nativo pendente, finaliza e descarta para liberar o chat
+                if (gravandoAudioAtivo) {
+                    finalizarGravacaoAudioUI();
+                }
+                descartarQualquerAudioPendente();
+
+                const imgParaEnviar = imagemPendente;
+                const textoParaEnviar = (texto || '').trim();
+                const temTexto = (textoParaEnviar.length > 0);
+                const temImg = !!imgParaEnviar;
+
+                if (!temTexto && !temImg) {
+                    mostrarNotificacao('⚠️ Digite uma mensagem ou anexe uma imagem para enviar.', '#f59e0b');
+                    return;
+                }
+
+                // Limpa todos os rascunhos e a textarea imediatamente para feedback visual instantâneo
+                limparTodosRascunhosDoChatAtual();
+                limparTextareaSoftCopilot();
+
+                // Registra para aprendizado de estilo da IA e rastreio de inatividade (SOP 6 min / 12 min)
+                if (temTexto) {
+                    const chaveAtual = (typeof obterChaveIdentificadoraChatAtivo === 'function') ? obterChaveIdentificadoraChatAtivo() : null;
+                    try {
+                        const { ultimaMensagemCliente } = extrairHistoricoConversaParaIA();
+                        // 1. Aprendizado geral do estilo do atendente
+                        salvarMensagemParaAprendizado(textoParaEnviar, ultimaMensagemCliente);
+
+                        // 2. Aprendizado adaptativo quando o atendente corrigiu a sugestão gerada pela IA
+                        const sugestaoIAAtiva = (sugestoesIAPorChat.get(chaveAtual) || ultimoTextoGeradoPorIA || '').trim();
+                        if (sugestaoIAAtiva && (textoParaEnviar !== sugestaoIAAtiva) && obterAprendizadoCorrecoesHabilitado()) {
+                            salvarCorrecaoDeSugestaoIA(sugestaoIAAtiva, textoParaEnviar, ultimaMensagemCliente);
+                        }
+                    } catch (_) { }
+
+                    if (chaveAtual) sugestoesIAPorChat.delete(chaveAtual);
+                    ultimoTextoGeradoPorIA = '';
+
+                    try {
+                        const ticketId = obterTicketChatAtivo();
+                        if (ticketId) {
+                            chrome.storage.local.set({
+                                ['softcom_ultimo_envio_' + ticketId]: {
+                                    timestamp: Date.now(),
+                                    texto: textoParaEnviar
+                                }
+                            });
+                        }
+                    } catch (_) { }
+                }
+
                 if (temTexto && temImg) {
                     // 1. Envia a mensagem de texto PRIMEIRO enquanto o chat nativo está 100% livre e desbloqueado
                     colocarTextoNoCampo(textoParaEnviar);
-                    await new Promise(r => setTimeout(r, 150));
+                    await new Promise(r => setTimeout(r, 120));
                     enviarMensagemDoCampo();
 
                     // 2. Aguarda a mensagem de texto ser processada e o campo ser liberado pelo Workdesk
@@ -6498,7 +6574,7 @@
                             break;
                         }
                     }
-                    await new Promise(r => setTimeout(r, 200));
+                    await new Promise(r => setTimeout(r, 150));
 
                     // 3. Em seguida, anexa e encaminha a imagem para o Workdesk
                     encaminharImagemAoWorkdesk([imgParaEnviar]);
@@ -6513,9 +6589,26 @@
                     encaminharImagemAoWorkdesk([imgParaEnviar]);
                     mostrarNotificacao('⚡ Imagem enviada com sucesso ao cliente!', '#2ecc71');
                 }
+
+                // Ciclos de verificação e limpeza garantida (limpa resíduos de input nativo e rascunhos)
+                for (let i = 0; i < 5; i++) {
+                    await new Promise(r => setTimeout(r, 100));
+                    limparCampoNativo();
+                    limparTextareaSoftCopilot();
+                    limparTodosRascunhosDoChatAtual();
+                }
             } catch (err) {
                 console.error('[Extensão Softcom] Erro ao enviar mensagem/imagem:', err);
                 mostrarNotificacao('⚠️ Erro ao enviar mensagem/imagem.', '#ef4444');
+            } finally {
+                enviandoMensagemAoCliente = false;
+                // Mantém o bloqueio de rascunhos ativo por mais 1.2s para evitar qualquer repovoamento assíncrono
+                setTimeout(() => {
+                    envioMensagemEmAndamento = false;
+                    limparCampoNativo();
+                    limparTextareaSoftCopilot();
+                    limparTodosRascunhosDoChatAtual();
+                }, 1200);
             }
         }
 
@@ -7266,7 +7359,7 @@
                 const chaveAtual = obterChaveIdentificadoraChatAtivo();
                 if (chaveAtual) {
                     ultimoTicketPainel = chaveAtual;
-                    const rascunho = obterRascunhoChat(chaveAtual);
+                    const rascunho = envioMensagemEmAndamento ? '' : (obterRascunhoChat(chaveAtual) || '');
                     const txtEl = card.querySelector('#gemini-suggestion-text');
                     if (txtEl && rascunho) {
                         txtEl.value = rascunho;
@@ -7828,6 +7921,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             if (!chaveAtual) return;
 
             if (chaveAtual !== ultimoTicketPainel) {
+                if (envioMensagemEmAndamento) return;
                 const textarea = document.getElementById('gemini-suggestion-text');
 
                 // 1. Salva o rascunho da conversa anterior antes de alternar
@@ -7875,6 +7969,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 document.documentElement.dataset.softcomDraftCaptureHooked = 'true';
 
                 document.addEventListener('click', (event) => {
+                    if (envioMensagemEmAndamento) return;
                     // Ignora cliques dentro do próprio painel do SoftCopilot
                     if (event.target && event.target.closest && event.target.closest('#gemini-docked-panel')) {
                         return;
@@ -7937,6 +8032,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 if (!card.dataset.greetingHooked) {
                     card.dataset.greetingHooked = 'true';
                     card.addEventListener('click', () => {
+                        if (envioMensagemEmAndamento) return;
                         const textarea = document.getElementById('gemini-suggestion-text');
                         if (ultimoTicketPainel && textarea) {
                             salvarRascunhoChat(ultimoTicketPainel, textarea.value);
