@@ -3451,10 +3451,11 @@
             if (btnEnviar) {
                 try {
                     btnEnviar.click();
+                    return;
                 } catch (_) { }
             }
 
-            // 3. Dispara teclado Enter nativo no campo focado (método principal em chats "Enter envia")
+            // 3. Fallback: dispara teclado Enter nativo no campo focado apenas se nao houver botao de envio
             const enterOpts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true };
             campo.dispatchEvent(new KeyboardEvent('keydown', enterOpts));
             try {
