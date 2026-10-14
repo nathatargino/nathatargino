@@ -2783,6 +2783,7 @@
         const mapaRascunhosPorChat = new Map();
         let ultimoTicketPainel = null;
         let envioMensagemEmAndamento = false;
+        let ultimoTextoEnviadoRecente = { texto: '', timestamp: 0 };
 
         // Carrega rascunhos salvos da sessão ativa
         function carregarRascunhosSessao() {
@@ -2851,7 +2852,12 @@
             if (envioMensagemEmAndamento) return;
             if (!chave) return;
             const strTexto = typeof texto === 'string' ? texto : '';
-            if (strTexto.trim().length > 0) {
+            const tLimpo = strTexto.trim();
+            if (tLimpo.length > 0) {
+                // Se esse texto for idêntico à mensagem enviada recentemente (nos últimos 10s), NUNCA salva como rascunho
+                if (ultimoTextoEnviadoRecente.texto && tLimpo === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
+                    return;
+                }
                 mapaRascunhosPorChat.set(String(chave), strTexto);
                 const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
                 if (ticket) {
@@ -2869,22 +2875,30 @@
 
         function obterRascunhoChat(chave) {
             if (!chave) return '';
-            const direto = mapaRascunhosPorChat.get(String(chave));
-            if (direto) return direto;
-
-            const nome = (typeof obterNomeClienteParaSaudacao === 'function') ? obterNomeClienteParaSaudacao() : null;
-            if (nome && nome.length >= 2) {
-                const slug = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
-                const porNome = mapaRascunhosPorChat.get('cliente_' + slug) || mapaRascunhosPorChat.get('card_' + slug);
-                if (porNome) return porNome;
+            let direto = mapaRascunhosPorChat.get(String(chave));
+            if (!direto) {
+                const nome = (typeof obterNomeClienteParaSaudacao === 'function') ? obterNomeClienteParaSaudacao() : null;
+                if (nome && nome.length >= 2) {
+                    const slug = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+                    direto = mapaRascunhosPorChat.get('cliente_' + slug) || mapaRascunhosPorChat.get('card_' + slug);
+                }
             }
-
-            const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
-            if (ticket) {
-                const porTicket = mapaRascunhosPorChat.get('ticket_' + String(ticket)) || mapaRascunhosPorChat.get(String(ticket));
-                if (porTicket) return porTicket;
+            if (!direto) {
+                const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
+                if (ticket) {
+                    direto = mapaRascunhosPorChat.get('ticket_' + String(ticket)) || mapaRascunhosPorChat.get(String(ticket));
+                }
             }
-
+            if (direto) {
+                // Se o rascunho for idêntico à mensagem recém-enviada, purga imediatamente e não restaura
+                if (ultimoTextoEnviadoRecente.texto && direto.trim() === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
+                    if (typeof limparTodosRascunhosDoChatAtual === 'function') {
+                        limparTodosRascunhosDoChatAtual(direto);
+                    }
+                    return '';
+                }
+                return direto;
+            }
             return '';
         }
 
@@ -3354,24 +3368,29 @@
             const textareaAtiva = document.getElementById('gemini-suggestion-text');
             const estavaFocadoNaNossaTextarea = (document.activeElement === textareaAtiva);
 
-            // 1. Desfoca nossa textarea temporariamente para que o foco vá obrigatoriamente para o campo nativo
-            if (estavaFocadoNaNossaTextarea && textareaAtiva) {
+            // 1. Se for para manter foco no campo nativo e a nossa textarea estava focada, desfoca ela
+            if (manterFocoNoCampo && estavaFocadoNaNossaTextarea && textareaAtiva) {
                 try { textareaAtiva.blur(); } catch (_) { }
             }
 
-            // 2. Garante foco e seleção no campo nativo
-            try {
-                campo.focus();
-                if (campo.select) campo.select();
-            } catch (_) { }
+            // 2. Garante foco e seleção no campo nativo apenas se solicitado
+            if (manterFocoNoCampo) {
+                try {
+                    campo.focus();
+                    if (campo.select) campo.select();
+                } catch (_) { }
+            }
 
-            // 3. Execução de execCommand para inserção nativa (essencial para o React/Workdesk registrar o evento sintético)
-            try {
-                document.execCommand('selectAll', false, null);
-                document.execCommand('insertText', false, texto);
-            } catch (_) { }
+            // 3. Execução de execCommand SOMENTE se o campo nativo estiver REALMENTE com foco ativo!
+            // CRÍTICO: NUNCA executa execCommand se document.activeElement for a nossa textarea ou body!
+            if (document.activeElement === campo) {
+                try {
+                    document.execCommand('selectAll', false, null);
+                    document.execCommand('insertText', false, texto);
+                } catch (_) { }
+            }
 
-            // 4. Setter nativo do protótipo com bypass do _valueTracker do React
+            // 4. Setter nativo do protótipo com bypass do _valueTracker do React (garante inserção 100% confiável)
             try {
                 if (campo.value !== undefined) {
                     const prototype = Object.getPrototypeOf(campo);
@@ -4948,7 +4967,7 @@
                 }
             });
 
-            // Varre mapaRascunhosPorChat para remover qualquer chave remanescente que mencione o número do ticket ativo
+            // Varre para remover qualquer chave remanescente que mencione o número do ticket ativo
             if (ticket) {
                 const ticketStr = String(ticket);
                 for (const k of Array.from(mapaRascunhosPorChat.keys())) {
@@ -4960,9 +4979,21 @@
                         }
                     }
                 }
+                for (const k of Array.from(origensTextoPorChat.keys())) {
+                    if (k.includes(ticketStr)) {
+                        origensTextoPorChat.delete(k);
+                    }
+                }
+                if (typeof sugestoesIAPorChat !== 'undefined') {
+                    for (const k of Array.from(sugestoesIAPorChat.keys())) {
+                        if (k.includes(ticketStr)) {
+                            sugestoesIAPorChat.delete(k);
+                        }
+                    }
+                }
             }
 
-            // Se recebemos o texto que acabou de ser enviado, varre o mapa para eliminar QUALQUER rascunho
+            // Se recebemos o texto que acabou de ser enviado, varre todos os mapas para eliminar QUALQUER rascunho
             // que tenha esse mesmo conteúdo exato (evita rascunhos zumbis sob aliases antigos)
             if (textoEnviado && typeof textoEnviado === 'string') {
                 const tLimpo = textoEnviado.trim();
@@ -4973,6 +5004,14 @@
                             origensTextoPorChat.delete(k);
                             if (typeof sugestoesIAPorChat !== 'undefined' && sugestoesIAPorChat.delete) {
                                 sugestoesIAPorChat.delete(k);
+                            }
+                        }
+                    }
+                    if (typeof sugestoesIAPorChat !== 'undefined') {
+                        for (const [k, v] of Array.from(sugestoesIAPorChat.entries())) {
+                            if (v && v.trim() === tLimpo) {
+                                sugestoesIAPorChat.delete(k);
+                                origensTextoPorChat.delete(k);
                             }
                         }
                     }
@@ -4987,14 +5026,13 @@
             const campo = obterCampoMensagem();
             if (!campo) return;
             try {
-                const textareaAtiva = document.getElementById('gemini-suggestion-text');
-                const estavaFocadoNaNossaTextarea = (document.activeElement === textareaAtiva);
-
-                try { campo.focus(); } catch (_) { }
-                try {
-                    document.execCommand('selectAll', false, null);
-                    document.execCommand('delete', false, null);
-                } catch (_) { }
+                // ExecCommand SOMENTE se o campo nativo estiver com o foco ativo!
+                if (document.activeElement === campo) {
+                    try {
+                        document.execCommand('selectAll', false, null);
+                        document.execCommand('delete', false, null);
+                    } catch (_) { }
+                }
 
                 if (campo.value !== undefined) {
                     const prototype = Object.getPrototypeOf(campo);
@@ -5015,10 +5053,6 @@
 
                 campo.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
                 campo.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-
-                if (estavaFocadoNaNossaTextarea && textareaAtiva) {
-                    try { textareaAtiva.focus(); } catch (_) { }
-                }
             } catch (_) { }
         }
 
@@ -5036,10 +5070,10 @@
                 textarea.dispatchEvent(new Event('change', { bubbles: true }));
             }
             removerImagemPendente();
-            atualizarEstadoCard(false);
             origemTextoAtual = 'nenhum';
             ultimoTextoDigitadoPeloUsuario = '';
             ultimoTextoGeradoPorIA = '';
+            atualizarEstadoCard(false);
             atualizarEstadoBotaoIA();
         }
 
@@ -6576,17 +6610,25 @@
             enviandoMensagemAoCliente = true;
             envioMensagemEmAndamento = true;
 
+            const imgParaEnviar = imagemPendente;
+            const textoParaEnviar = (texto || '').trim();
+            const temTexto = (textoParaEnviar.length > 0);
+            const temImg = !!imgParaEnviar;
+
+            // Registra para proteção anti-ressurreição de rascunhos nos próximos 10 segundos
+            if (temTexto) {
+                ultimoTextoEnviadoRecente = {
+                    texto: textoParaEnviar,
+                    timestamp: Date.now()
+                };
+            }
+
             try {
                 // Se houver qualquer gravação de áudio ativa ou preview nativo pendente, finaliza e descarta para liberar o chat
                 if (gravandoAudioAtivo) {
                     finalizarGravacaoAudioUI();
                 }
                 descartarQualquerAudioPendente();
-
-                const imgParaEnviar = imagemPendente;
-                const textoParaEnviar = (texto || '').trim();
-                const temTexto = (textoParaEnviar.length > 0);
-                const temImg = !!imgParaEnviar;
 
                 if (!temTexto && !temImg) {
                     mostrarNotificacao('⚠️ Digite uma mensagem ou anexe uma imagem para enviar.', '#f59e0b');
@@ -6612,8 +6654,12 @@
                         }
                     } catch (_) { }
 
-                    if (chaveAtual) sugestoesIAPorChat.delete(chaveAtual);
+                    if (chaveAtual) {
+                        sugestoesIAPorChat.delete(chaveAtual);
+                        origensTextoPorChat.delete(chaveAtual);
+                    }
                     ultimoTextoGeradoPorIA = '';
+                    origemTextoAtual = 'nenhum';
 
                     try {
                         const ticketId = obterTicketChatAtivo();
@@ -6662,7 +6708,7 @@
                 for (let i = 0; i < 3; i++) {
                     await new Promise(r => setTimeout(r, 120));
                     limparCampoNativo();
-                    limparTextareaSoftCopilot(false, textoParaEnviar);
+                    limparTextareaSoftCopilot(true, textoParaEnviar);
                     limparTodosRascunhosDoChatAtual(textoParaEnviar);
                 }
             } catch (err) {
@@ -6673,7 +6719,7 @@
                 setTimeout(() => {
                     envioMensagemEmAndamento = false;
                     limparCampoNativo();
-                    limparTextareaSoftCopilot(false, textoParaEnviar);
+                    limparTextareaSoftCopilot(true, textoParaEnviar);
                     limparTodosRascunhosDoChatAtual(textoParaEnviar);
                 }, 400);
             }
@@ -7426,11 +7472,18 @@
                 const chaveAtual = obterChaveIdentificadoraChatAtivo();
                 if (chaveAtual) {
                     ultimoTicketPainel = chaveAtual;
-                    const rascunho = envioMensagemEmAndamento ? '' : (obterRascunhoChat(chaveAtual) || '');
+                    let rascunho = envioMensagemEmAndamento ? '' : (obterRascunhoChat(chaveAtual) || '');
+                    if (rascunho && ultimoTextoEnviadoRecente.texto && rascunho.trim() === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
+                        limparTodosRascunhosDoChatAtual(rascunho);
+                        rascunho = '';
+                    }
                     const txtEl = card.querySelector('#gemini-suggestion-text');
                     if (txtEl && rascunho) {
                         txtEl.value = rascunho;
+                        const origemSalva = origensTextoPorChat.get(chaveAtual);
+                        origemTextoAtual = origemSalva || 'usuario';
                         atualizarEstadoCard(true);
+                        atualizarEstadoBotaoIA();
                         ultimoTextoDigitadoPeloUsuario = rascunho;
                     }
                 }
@@ -7892,19 +7945,22 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             }
 
             function finalizarComSucesso(textoSugestao, modelo = '') {
-                const targetTextarea = document.getElementById('gemini-suggestion-text');
-                if (targetTextarea) {
-                    targetTextarea.value = textoSugestao;
-                    targetTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    colocarTextoNoCampo(textoSugestao);
-                    targetTextarea.focus();
-                }
                 ultimoTextoGeradoPorIA = (textoSugestao || '').trim();
                 origemTextoAtual = 'ia';
                 const chaveAtiva = obterChaveIdentificadoraChatAtivo() || ultimoTicketPainel;
                 if (chaveAtiva) {
                     origensTextoPorChat.set(chaveAtiva, 'ia');
                     sugestoesIAPorChat.set(chaveAtiva, (textoSugestao || '').trim());
+                    salvarRascunhoChat(chaveAtiva, textoSugestao);
+                }
+
+                const targetTextarea = document.getElementById('gemini-suggestion-text');
+                if (targetTextarea) {
+                    targetTextarea.value = textoSugestao;
+                    targetTextarea.style.height = 'auto';
+                    targetTextarea.style.height = Math.min(120, Math.max(38, targetTextarea.scrollHeight)) + 'px';
+                    colocarTextoNoCampo(textoSugestao);
+                    targetTextarea.focus();
                 }
                 atualizarEstadoCard(true);
                 atualizarEstadoBotaoIA();
@@ -8001,7 +8057,11 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 ultimoTicketPainel = chaveAtual;
 
                 // 3. Recupera o rascunho existente para o novo chamado (vazio se não houver)
-                const rascunhoSalvo = obterRascunhoChat(chaveAtual) || '';
+                let rascunhoSalvo = obterRascunhoChat(chaveAtual) || '';
+                if (rascunhoSalvo && ultimoTextoEnviadoRecente.texto && rascunhoSalvo.trim() === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
+                    limparTodosRascunhosDoChatAtual(rascunhoSalvo);
+                    rascunhoSalvo = '';
+                }
 
                 if (textarea) {
                     textarea.value = rascunhoSalvo;
@@ -8076,11 +8136,22 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                                 }
                                 // Pré-atualiza para o novo ticket (zero latência visual)
                                 ultimoTicketPainel = novoKey;
-                                const rascunhoNovo = obterRascunhoChat(novoKey) || '';
+                                let rascunhoNovo = obterRascunhoChat(novoKey) || '';
+                                if (rascunhoNovo && ultimoTextoEnviadoRecente.texto && rascunhoNovo.trim() === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
+                                    limparTodosRascunhosDoChatAtual(rascunhoNovo);
+                                    rascunhoNovo = '';
+                                }
                                 if (textarea) {
                                     textarea.value = rascunhoNovo;
                                     textarea.style.height = 'auto';
                                     textarea.style.height = Math.min(120, Math.max(38, textarea.scrollHeight)) + 'px';
+                                    const origemSalva = origensTextoPorChat.get(novoKey);
+                                    if (rascunhoNovo.trim()) {
+                                        origemTextoAtual = origemSalva || 'usuario';
+                                    } else {
+                                        origemTextoAtual = 'nenhum';
+                                    }
+                                    atualizarEstadoBotaoIA();
                                     atualizarEstadoCard(rascunhoNovo.trim().length > 0);
                                     ultimoTextoDigitadoPeloUsuario = rascunhoNovo;
                                 }
