@@ -178,49 +178,9 @@
         console.log('%c[Extensão Softcom] Ativada no Portal do Conhecimento HelpTools!', 'color: #E3B400; font-weight: bold; font-size: 14px;');
 
         function criarBotaoFlutuante() {
-            if (document.getElementById('softcom-extrator-flutuante')) return;
-
-            const container = document.createElement('div');
-            container.id = 'softcom-extrator-flutuante';
-            container.style.cssText = `
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                z-index: 99999999;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 10px;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            `;
-
-            container.innerHTML = `
-                <button id="btn-softcom-extrair-manuais" style="
-                    background: linear-gradient(135deg, #18222a, #283745);
-                    color: #E3B400;
-                    border: 2px solid #E3B400;
-                    border-radius: 50px;
-                    padding: 12px 22px;
-                    font-size: 14px;
-                    font-weight: 700;
-                    cursor: pointer;
-                    box-shadow: 0 10px 28px rgba(0,0,0,0.5);
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    transition: transform 0.15s ease, box-shadow 0.15s ease;
-                ">
-                    <span style="font-size: 18px;">⚡</span>
-                    <span>Extrair Manuais para IA</span>
-                </button>
-            `;
-
-            document.body.appendChild(container);
-
-            const btn = container.querySelector('#btn-softcom-extrair-manuais');
-            btn.onmouseover = () => { btn.style.transform = 'translateY(-2px)'; };
-            btn.onmouseout = () => { btn.style.transform = 'translateY(0)'; };
-            btn.onclick = () => iniciarExtracaoManuaisHelpTools();
+            // Botão "Extrair Manuais para IA" removido a pedido
+            const el = document.getElementById('softcom-extrator-flutuante');
+            if (el) el.remove();
         }
 
         async function iniciarExtracaoManuaisHelpTools() {
@@ -497,11 +457,8 @@
             atualizarLog(`Download de "todos_faqs_softcom.json" iniciado! A IA Gemini no seu chat já está equipada com toda a base de procedimentos Softcom.`, 100);
         }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', criarBotaoFlutuante);
-        } else {
-            criarBotaoFlutuante();
-        }
+        window.iniciarExtracaoManuaisHelpTools = iniciarExtracaoManuaisHelpTools;
+        criarBotaoFlutuante();
     }
 
     // ---------------------------------------------------------
