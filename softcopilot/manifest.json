@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "SoftCopilot - IA para Suporte Técnico ",
+  "version": "2.60",
+  "description": "Inteligência Artificial com foco em Produtividade.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.groq.com/*",
+    "https://formsubmit.co/*",
+    "https://*.formsubmit.co/*",
+    "https://raw.githubusercontent.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.hostsoftcom.cloud/*",
+        "https://*.softcomtecnologia.com/*",
+        "https://*.softcomsistemas.com.br/*"
+      ],
+      "js": [
+        "react-guard.js"
+      ],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://*.hostsoftcom.cloud/*",
+        "https://*.softcomtecnologia.com/*",
+        "https://*.softcomsistemas.com.br/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "Atualizar_SoftCopilot.bat",
+        "autoupdate.bat",
+        "react-guard.js",
+        "manuais_softcom.json",
+        "base_conhecimento_completa_softcom.json"
+      ],
+      "matches": [
+        "https://*.hostsoftcom.cloud/*",
+        "https://*.softcomtecnologia.com/*",
+        "https://*.softcomsistemas.com.br/*"
+      ]
+    }
+  ]
+}

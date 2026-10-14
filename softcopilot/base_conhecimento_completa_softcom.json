@@ -1,0 +1,3538 @@
+[
+  {
+    "id": "FAQ-855-USER",
+    "categoria": "Infraestrutura & Servidor (Windows Server)",
+    "titulo": "FAQ 855 - Como Criar Usuário no Windows Server (Acesso Remoto)",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Passo a passo oficial:\n1. Acessar o Servidor como administrador;\n2. Pressionar Win + R e digitar: lusrmgr.msc;\n3. Clicar na pasta 'Usuários' e selecionar 'Novo Usuário';\n4. Preencher Nome de Usuário, Senha e Confirmar Senha;\n5. Desmarcar a opção: 'O usuário deve alterar a senha no próximo logon';\n6. Marcar obrigatoriamente: 'O usuário não pode alterar a senha' e 'A senha nunca expira';\n7. Clicar em Criar. Em seguida, botão direito no usuário criado > Propriedades > aba 'Membro de';\n8. Adicionar ao grupo correto: se for operador/terminal, adicionar ao grupo 'Usuários de Área de Trabalho Remota' (Remote Desktop Users). Se for suporte pleno, 'Administradores'."
+  },
+  {
+    "id": "FAQ-855-PASS",
+    "categoria": "Infraestrutura & Servidor (Windows Server)",
+    "titulo": "FAQ 855 - Como Alterar ou Redefinir Senha de Usuário no Windows Server",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Passo a passo:\n1. Pressionar Win + R e executar: lusrmgr.msc;\n2. Entrar na pasta 'Usuários';\n3. Clicar com o botão direito do mouse no usuário desejado;\n4. Escolher a opção 'Redefinir Senha' (Set Password);\n5. Digitar a nova senha, confirmar e clicar em OK."
+  },
+  {
+    "id": "FAQ-855-FIREWALL",
+    "categoria": "Infraestrutura & Servidor (Windows Server)",
+    "titulo": "FAQ 855 - Criar Exceção no Firewall do Windows para Acesso Remoto (Porta 4009)",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Passo a passo para liberação de porta:\n1. Acessar Painel de Controle > Sistema e Segurança > Windows Defender Firewall;\n2. Clicar em 'Configurações Avançadas' no menu lateral esquerdo;\n3. Clicar em 'Regras de Entrada' > 'Nova Regra...';\n4. Selecionar o tipo 'Porta' e avançar;\n5. Selecionar TCP e em 'Portas locais específicas' digitar: 4009;\n6. Selecionar 'Permitir a conexão' e avançar;\n7. Marcar os três perfis: Domínio, Particular e Público;\n8. Definir o Nome como: 'Acesso Remoto Softcom (4009)' e clicar em Concluir."
+  },
+  {
+    "id": "FAQ-2682-INT",
+    "categoria": "Impressoras & Dispositivos",
+    "titulo": "FAQ 2682 - Como Instalar e Compartilhar Impressora no Acesso Remoto Interno",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Resolução de impressora no Remoto Interno:\n1. Acessar a estação onde a impressora está fisicamente conectada (via USB/Rede);\n2. Testar se a impressora imprime normalmente na máquina local;\n3. Compartilhar a impressora nas propriedades dela (aba Compartilhamento > 'Compartilhar esta impressora');\n4. Verificar se a estação e o servidor estão na mesma faixa de IP e rede local;\n5. No Servidor, pressionar Win + R e digitar '\\\\IP_DA_ESTACAO' ou '\\\\NOME_DA_ESTACAO';\n6. Clicar com o botão direito na impressora compartilhada e selecionar 'Conectar'."
+  },
+  {
+    "id": "FAQ-2682-EXT",
+    "categoria": "Impressoras & Dispositivos",
+    "titulo": "FAQ 2682 - Como Configurar Impressora no Acesso Remoto Externo (Redirecionamento)",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Resolução de impressora no Remoto Externo:\n1. Acessar as opções do atalho de Conexão de Área de Trabalho Remota (.rdp);\n2. Ir na aba 'Recursos Locais';\n3. No grupo 'Dispositivos e recursos locais', marcar a caixa 'Impressoras';\n4. Conectar ao servidor externo;\n5. O Windows Server irá redirecionar a impressora padrão local (ex: 'NomeDaImpressora (redirecionado X)').\n6. No Softshop/PDV, definir essa impressora redirecionada como a padrão de impressão."
+  },
+  {
+    "id": "FAQ-482-RDP",
+    "categoria": "Infraestrutura & Servidor (Windows Server)",
+    "titulo": "FAQ 482 - Criar Atalho de Conexão Remota RDP (Interno e Externo na Porta 4009)",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Padrão oficial Softcom de atalho remoto:\nAcesso Interno:\n- Computador: servsoft:4009 ou IP_DO_SERVIDOR:4009\n- Nome de Usuário: operador ou administrador\n- Recursos Locais: Desmarcar 'Impressoras', manter Área de Transferência marcada;\n- Marcar 'Permitir salvar credenciais';\n- Salvar em D:\\softcom\\ e enviar atalho para Área de Trabalho.\n\nAcesso Externo:\n- Computador: host.no-ip.biz:4009 ou IP_PUBLICO:4009\n- Nome de Usuário: operador ou administrador\n- Recursos Locais: Marcar 'Impressoras' e 'Área de Transferência';\n- Salvar em D:\\softcom\\ e criar atalho na Área de Trabalho."
+  },
+  {
+    "id": "FAQ-1361-AUTOSTART",
+    "categoria": "Infraestrutura & Servidor (Windows Server)",
+    "titulo": "FAQ 1361 - Configurar Usuário Remoto para Abrir o Softshop Direto no Logon",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Para fazer o terminal abrir direto no sistema sem carregar a área de trabalho do servidor:\n1. Executar: lusrmgr.msc;\n2. Selecionar o usuário do operador > Propriedades > aba 'Ambiente';\n3. Marcar a caixa: 'Iniciar o seguinte programa durante o logon';\n4. Nome do arquivo de programa:\n   \"C:\\Arquivos de programas\\Microsoft Office\\Office11\\msaccess.exe\" \"%unidade%:\\softcom\\softshop.mdb\"\n5. Iniciar em: %unidade%:\\softcom\n   (Substituir %unidade% pela letra correta do disco onde está a pasta softcom, ex: C ou D)."
+  },
+  {
+    "id": "FAQ-2278-REMOTOLOCAL",
+    "categoria": "Infraestrutura & Servidor (Windows Server)",
+    "titulo": "FAQ 2278 - Acesso Remoto Interno Não Funciona (Diagnóstico e Solução)",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Causas e Testes:\n1. Teste no próprio Servidor: abrir mstsc e conectar em 'localhost' ou 'localhost:4009'. Se não conectar nele mesmo, o serviço de Terminal Server ou porta está desativado;\n2. Redes diferentes: verificar se terminal e servidor estão na mesma faixa de IP (ex: 192.168.1.x) e máscara de rede;\n3. Firewall: conferir se a porta 4009 TCP está liberada nas regras de entrada do Firewall do Windows Server;\n4. Atalho: verificar se o IP digitado no atalho da estação coincide com o IP atual do servidor."
+  },
+  {
+    "id": "FAQ-210-REMOTOEXT",
+    "categoria": "Infraestrutura & Servidor (Windows Server)",
+    "titulo": "FAQ 210 - Acesso Remoto Externo Não Funciona (Diagnóstico e Solução)",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Diagnóstico de Acesso Externo:\n1. Verificar se o servidor do cliente está ligado e com acesso à internet;\n2. Se estiver sem internet, orientar o cliente a reiniciar modem/roteador;\n3. No servidor, verificar se o aplicativo No-IP DUC está aberto e com as flags verdes atualizadas;\n4. No roteador do cliente, confirmar se o encaminhamento de porta (Port Forwarding / NAT) da porta 4009 para o IP interno fixo do servidor continua ativo;\n5. Testar conexão local: se local funciona e externo não, o problema está no roteador, No-IP ou bloqueio da operadora."
+  },
+  {
+    "id": "FAQ-6361-SQLCMD",
+    "categoria": "Banco de Dados & SQL Server",
+    "titulo": "FAQ 6361 - Como Instalar o SQL Server 2014 Express via Linha de Comando (CMD Silencioso)",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Instalação padronizada da Softcom:\n1. Baixar o instalador Microsoft SQL Server 2014 Express SP3 e extrair os arquivos em uma pasta temporária;\n2. Abrir o CMD como Administrador e navegar até a pasta dos arquivos extraídos;\n3. Executar o comando:\nSETUP.EXE /qs /ACTION=install /FEATURES=\"SQLENGINE,SSMS,TOOLS\" /TCPENABLED=1 /SECURITYMODE=SQL /SAPWD=qaz@123 /INSTANCENAME=SQLEXPRESS /IACCEPTSQLSERVERLICENSETERMS /SQLSVCACCOUNT=\"NT Authority\\SYSTEM\" /AGTSVCACCOUNT=\"NT Authority\\SYSTEM\" /UpdateEnabled=0 /SkipRules=RebootRequiredCheck\n\nParâmetros padrão Softcom:\n- Instância: SQLEXPRESS\n- Usuário: sa\n- Senha: qaz@123\n- Autenticação: Mista (SQL Server e Windows)."
+  },
+  {
+    "id": "FAQ-3876-SQLRESTORE",
+    "categoria": "Banco de Dados & SQL Server",
+    "titulo": "FAQ 3876 - Restaurar Backup de Banco de Dados (.BAK) no SQL Server",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Restauração oficial no SSMS:\n1. Abrir o SQL Server Management Studio (SSMS) e conectar na instância (ex: .\\SQLEXPRESS com usuário sa / qaz@123);\n2. Clicar com botão direito em 'Bancos de Dados' > 'Restaurar Banco de Dados...';\n3. Selecionar a opção 'Dispositivo' e clicar no botão [...];\n4. Clicar em 'Adicionar' e selecionar o arquivo de backup .bak;\n5. Na aba 'Arquivos', direcionar para o banco ser restaurado na pasta Softcom\\SQL;\n6. Conferir as informações e clicar em OK para concluir."
+  },
+  {
+    "id": "FAQ-823-ODBC",
+    "categoria": "Banco de Dados & SQL Server",
+    "titulo": "FAQ 823 - Criar Conexão ODBC para Banco de Dados SQL Server",
+    "url": "local://treinamentos/Mitigacao_Infra.pdf",
+    "ehVideo": false,
+    "procedimento": "Configuração do ODBC 32 bits:\n1. Abrir o 'Fontes de Dados ODBC (32 bits)' em C:\\Windows\\SysWOW64\\odbcad32.exe;\n2. Na aba 'DSN de Sistema' ou 'DSN de Usuário', clicar em 'Adicionar';\n3. Selecionar o driver: 'SQL Server' ou 'SQL Server Native Client';\n4. Nome da conexão: informar o nome padrão do sistema;\n5. Servidor: informar SERVIDOR\\SQLEXPRESS ou IP,PORTA;\n6. Autenticação: 'Com autenticação do SQL Server' usando logon sa e senha qaz@123;\n7. Selecionar o banco de dados padrão do cliente e clicar em Concluir;\n8. Clicar em 'Testar Fonte de Dados'. Deve exibir 'TESTES CONCLUÍDOS COM ÊXITO'."
+  },
+  {
+    "id": "FAQ-60MIN-TSCLIENT",
+    "categoria": "Emissão Fiscal & TSCLIENT",
+    "titulo": "NFe Parada no Servidor: Nota Não Exporta para o Emissor Local (TSCLIENT)",
+    "url": "local://treinamentos/60 minutos TSCLIENT.pptx",
+    "ehVideo": false,
+    "procedimento": "Causa: O Softshop roda no servidor e gera os arquivos TXT da NFe, que precisam chegar ao terminal local onde o Emissor está instalado via recurso TSCLIENT.\n\nPasso a passo de verificação e solução:\n1. NO ATALHO RDP LOCAL: Abrir as propriedades do atalho remoto da estação > Recursos Locais > Mais... > UNIDADES (Discos rígidos) DEVE ESTAR MARCADA (especialmente C:). Se estiver desmarcada, o servidor não enxerga a máquina local;\n2. NO SOFTSHOP (SERVIDOR): Verificar em Cadastro de Empresa / Configuração se o caminho TXT está cadastrado apontando para TSCLIENT, exemplo: '\\\\TSCLIENT\\C\\softcom\\emissor\\txt\\';\n3. NO EMISSOR (MÁQUINA LOCAL): Verificar se o caminho do diretório de importação de notas aponta para 'C:\\softcom\\emissor\\txt\\';\n4. EM CENÁRIO MULTILOJAS: Confirmar se a subpasta criada dentro de txt contém o CNPJ exato da empresa emitente;\n5. TESTE RÁPIDO: No servidor remoto, abrir o Executar (Win+R) e digitar '\\\\tsclient\\c'. Se abrir a unidade C do terminal local, a ponte TSCLIENT está ativa e a nota exportará normalmente."
+  },
+  {
+    "id": "FAQ-SCANNTECH-CFG",
+    "categoria": "Integrações & Supermercados (Scanntech)",
+    "titulo": "Como Configurar a Integração Scanntech no Softshop (Versões 9.5 a 9.9+)",
+    "url": "local://treinamentos/Configuracao Scanntech.pdf",
+    "ehVideo": false,
+    "procedimento": "Passo a passo de implantação da Scanntech:\nPasso 1: Entrar na Estrutura >> Segurança >> Configuração Empresa >> Opção Scanntech = 'Sim';\nPasso 2: Ir no formulário 'entradaatendente', logar no sistema e acessar: Utilitários >> Integração >> Scanntech;\nPasso 3: Com a tela do integrador aberta, se os serviços estiverem iniciados, parar os serviços para liberar a opção 'Configurar';\nPasso 4 - Aba Identificação:\n  - Usuário: integrador_prod@softcomtecnologia.com.br\n  - Senha: M9X0ACEJ\n  - ID Empresa: código de registro fornecido pela Scanntech;\n  - Locais: vincular a Loja Softcom com o código IDLocal fornecido pela Scanntech;\nPasso 5 - Aba Avançado (Shift + F11):\n  - Promoções: intervalo de 10, 15 ou 20 minutos;\n  - Vendas: intervalo de 30 min, 1h, 1h30 ou 2h;\n  - Fechamentos: 10 min, 15 min ou 20 min;\n  - Ambiente: Produção;\nPasso 6: Salvar e reiniciar os serviços do integrador."
+  },
+  {
+    "id": "FAQ-SOFTCOMSHOP-DNS",
+    "categoria": "Softcomshop (Nuvem / Web)",
+    "titulo": "Softcomshop Não Abre ou Apresenta Falha de Carregamento (Limpeza de DNS)",
+    "url": "local://treinamentos/Softcomshop.pdf",
+    "ehVideo": false,
+    "procedimento": "Procedimento de resolução de conectividade Softcomshop:\n1. Configurar servidores DNS na placa de rede do computador:\n   - DNS Primário: 8.8.8.8\n   - DNS Secundário: 1.1.1.1 (ou 8.8.4.4);\n2. Abrir o Prompt de Comando (CMD) como Administrador e executar:\n   ipconfig /flushdns\n   ipconfig /registerdns\n3. Limpar cache do navegador (Ctrl + Shift + Del) e tentar acessar novamente o Softcomshop."
+  },
+  {
+    "id": "FAQ-IMPORTADOR-DADOS",
+    "categoria": "Migração de Versão & Banco de Dados",
+    "titulo": "Como Usar o Importador de Dados Softcom para Migração de Versão",
+    "url": "local://treinamentos/Treinamento Importador de Dados.pdf",
+    "ehVideo": false,
+    "procedimento": "Passo a passo com os cuidados técnicos obrigatórios:\n1. Sistema 100% PARADO: ninguém pode estar com o sistema aberto durante a migração;\n2. Verificar se o Windows é 32 bits ou 64 bits;\n3. Desinstalar o Microsoft Access 2003;\n4. Instalar o AccessDataBaseEngine correspondente à arquitetura (32 bits ou 64 bits);\n5. Reinstalar o Access 2003;\n6. Abrir o Importador de Dados e selecionar:\n   - Passo 1: FRONT Origem (versão antiga que o cliente estava usando);\n   - Passo 3: FRONT Destino (versão nova para onde os dados irão);\n7. Passo 4 (Tratar Dados): Na pergunta de criar perfis de usuário:\n   - Se for a PRIMEIRA VEZ passando o importador no cliente: Clicar em 'SIM';\n   - Se for a SEGUNDA VEZ ou mais: Clicar sempre em 'NÃO' (para não duplicar/corromper perfis);\n8. Passo 5 (Vincular Tabelas): Clicar em Executar nas consultas para atualizar todos os vínculos no banco novo."
+  },
+  {
+    "id": "FAQ-N2-LENTO-ACCESS-SQL",
+    "categoria": "Suporte N2 - Resolução de Problemas Complexos",
+    "titulo": "FAQ 2196 / 3494 - Diagnóstico Completo de Sistema Lento (Access e SQL Server)",
+    "url": "local://treinamentos/Treinamento_N2.pptx",
+    "ehVideo": false,
+    "procedimento": "Checklist de análise N2 para lentidão:\n1. ANÁLISE DE RECURSOS DO WINDOWS:\n   - Gerenciador de Tarefas: CPU e Disco em 100% (Windows Search, SysMain, antivírus travando pasta softcom);\n   - Memória RAM acima de 80%: configurar memória virtual do Windows;\n   - Rede: Terminais conectados via Wi-Fi sofrem quedas e lentidão no banco; exigir cabo de rede ethernet (Cat5e/Cat6);\n\n2. SE O BANCO FOR ACCESS (.MDB):\n   - Executar 'Compactar e Reparar Banco de Dados';\n   - Executar SQL Convert (opção: 'Tratamento Banco Access') para recuperar relacionamentos corrompidos;\n   - Banco acima de 1GB ou com alto fluxo: orientar e migrar para SQL Server (validar com Gerente);\n\n3. SE O BANCO FOR SQL SERVER:\n   - FAQ 2673: Verificar se o banco está em modo 'Suspect' (executar rotina de emergência);\n   - FAQ 3541: Recompilar Índices das tabelas;\n   - FAQ 4681: Ajustar nível de isolamento de transações (Snapshot/Read Committed);\n   - Fazer Shrink do log de transações (.LDF) para reduzir espaço em disco;\n   - Implantar AutoComplete (validar com Gerente)."
+  },
+  {
+    "id": "FAQ-N2-ERRO-DATA-OCX",
+    "categoria": "Suporte N2 - Resolução de Problemas Complexos",
+    "titulo": "Erro de Data ao Abrir o Sistema / Erro de Compilação VBA (MSCOMCTL.OCX)",
+    "url": "local://treinamentos/Treinamento_N2.pptx",
+    "ehVideo": false,
+    "procedimento": "Solução para erro referente a funções de Data, Format ou bibliotecas ausentes ao abrir o Softshop:\n1. Abrir a estrutura do Softshop segurando a tecla Shift;\n2. Pressionar Alt + F11 para abrir o editor de VBA;\n3. Ir no menu: Ferramentas >> Referências...;\n4. Localizar a referência 'MSCOMCTL.OCX' e 'cruflBCS.dll';\n5. Desmarcar a caixinha das referências com 'AUSENTE / MISSING', clicar em OK;\n6. Abrir novamente Ferramentas >> Referências e marcar as bibliotecas corretas;\n7. Ir no menu Depurar >> Compilar Softshop;\n8. Salvar e fechar. O sistema abrirá sem erro de data."
+  },
+  {
+    "id": "FAQ-N2-ERRO-XML-NFE",
+    "categoria": "Suporte N2 - Resolução de Problemas Complexos",
+    "titulo": "Erro ao Tentar Importar XML de NFe de Compra (Entrada de Nota)",
+    "url": "local://treinamentos/Treinamento_N2.pptx",
+    "ehVideo": false,
+    "procedimento": "Soluções N2 para falha na importação de XML:\n1. Executar Compactar e Reparar no banco;\n2. Limpar as tabelas locais temporárias de XML no Access;\n3. Abrir a estrutura do sistema (Shift ao iniciar): se ao depurar o código VBA parar em linhas referentes a 'confecção', comentar as 2 linhas e compilar;\n4. Rodar o SQL Convert no banco para checar se há chave primária duplicada na tabela de produtos ou cabeçalho de nota fiscal."
+  },
+  {
+    "id": "FAQ-N2-OBJETO-NAO-ENCONTRADO",
+    "categoria": "Suporte N2 - Resolução de Problemas Complexos",
+    "titulo": "Erro: Objeto, Formulário ou Módulo Não Encontrado ao Clicar em uma Função",
+    "url": "local://treinamentos/Treinamento_N2.pptx",
+    "ehVideo": false,
+    "procedimento": "Solução:\n1. Identificar qual formulário, relatório ou módulo VBA o erro menciona;\n2. Abrir uma base limpa da mesma versão (base ORIGEM);\n3. No Softshop do cliente (segurando Shift), ir em Arquivo >> Obter Dados Externos >> Importar;\n4. Selecionar o arquivo MDB de Origem e importar exatamente o objeto que estava faltando;\n5. Compilar o VBA e fechar o sistema."
+  },
+  {
+    "id": "FAQ-N2-ELGIN-L42",
+    "categoria": "Impressoras & Dispositivos (Etiquetadora)",
+    "titulo": "FAQ 3399 - Instalação e Blocagem da Etiquetadora Elgin L42 / L42 Pro",
+    "url": "local://treinamentos/Treinamento_N2.pptx",
+    "ehVideo": false,
+    "procedimento": "Passo a passo oficial de configuração da Elgin L42:\n1. Desativar imposição de assinatura de driver do Windows se necessário;\n2. Instalar o driver oficial Seagull da Elgin L42;\n3. Nas propriedades da impressora, aba Configuração de Página:\n   - Criar o formato exato da etiqueta utilizada pelo cliente (Ex: Gôndola 1 coluna, ou Jóia/3 Colunas 3x2);\n   - Ajustar tipo de sensor: Sensor de Gap (para etiquetas com espaço) ou Sensor de Tarja;\n4. Realizar calibragem segurando o botão Feed ao ligar até piscar o LED;\n5. No Softshop, acessar menu Relatórios/Etiquetas e selecionar o modelo de blocagem correspondente."
+  },
+  {
+    "id": "FAQ-TEF-PAYGO",
+    "categoria": "TEF & Meios de Pagamento (PayGo)",
+    "titulo": "Configuração, Homologação e Tratamento de Pendências TEF PayGo",
+    "url": "local://treinamentos/Treinamento_PayGo_Parceiro_set23.pdf",
+    "ehVideo": false,
+    "procedimento": "Diretrizes de Suporte TEF PayGo:\n1. Instalação do Cliente PayGo e comunicação com PINPad USB/Serial;\n2. No Gerenciador de Dispositivos, identificar a porta COM correta do PINPad Gertec/Ingenico;\n3. Configurar parâmetros no PDV Softshop: selecionar gerenciador TEF PayGo / NTK;\n4. Em caso de queda de energia ou transação interrompida (Transação Pendente):\n   - O sistema realiza tentativa de desfazimento automático;\n   - Se persistir, acessar o gerenciador PayGo na bandeja do sistema para confirmar ou cancelar a transação pendente;\n5. Estorno/Cancelamento de venda no cartão: deve ser feito na mesma data com autorização do supervisor e inserção do cartão no PINPad."
+  },
+  {
+    "id": "FAQ-FISCAL-VINCULOS",
+    "categoria": "Fiscal & Tributário (NFe / NFCe)",
+    "titulo": "Guia Prático: Regimes Tributários, CFOP, NCM e Vínculos Fiscais no Softcom",
+    "url": "local://treinamentos/1 - Treinamento Fiscal.pptx",
+    "ehVideo": false,
+    "procedimento": "Conceitos fundamentais para suporte fiscal Softcom:\n1. Regimes Tributários: Simples Nacional (ME/EPP), Lucro Presumido e Lucro Real;\n2. CFOPs mais comuns no suporte:\n   - 5.102: Venda de mercadoria adquirida de terceiros (Dentro do Estado);\n   - 6.102 / 6.152: Venda/Transferência para Fora do Estado;\n   - 5.405: Venda de mercadoria com Substituição Tributária (ST);\n   - 1.102: Compra para revenda (Dentro do Estado);\n   - 2.556: Compra para uso e consumo;\n3. NCM e CEST: Erros de NCM nulo ou CEST obrigatório bloqueiam faturamento de pedidos (NCM deve conter 8 dígitos válidos);\n4. Vínculos Fiscais no Softcom:\n   - Em Utilitários/Configurações Fiscais, o vínculo define Origem (UF), Destino (UF), Regime da Empresa e alíquotas de ICMS, PIS e COFINS aplicadas automaticamente aos produtos."
+  },
+  {
+    "id": "FAQ-SLA-SUPORTE",
+    "categoria": "Processos & SLA de Atendimento",
+    "titulo": "SLA Oficial da Softcom, Comunicação e Mandamentos do Suporte Técnico",
+    "url": "local://treinamentos/Processos + Pensamento Tecnico.pdf",
+    "ehVideo": false,
+    "procedimento": "Diretrizes Oficiais do Atendimento Softcom:\n\nSLA de Bugs e Ocorrências:\n- CRÍTICO (cliente com operação totalmente parada): Análise em até 30 minutos, resolução imediata. Comunicação no Discord com time de dev;\n- ALTO: Análise de 2h a 1 dia útil (Hotfix 7 dias ou Release 45 dias);\n- MÉDIO: Análise de 2 a 4 dias úteis;\n- BAIXO: Análise de 4 a 7 dias úteis;\n\nREGRA DE OURO:\nSempre aplicar SOLUÇÃO DE CONTORNO para destravar a operação do cliente de imediato, enquanto a correção definitiva é tratada.\n\nMANDAMENTOS DO SUPORTE SOFTCOM:\n1. Escute o cliente com atenção primordial, mas não acredite cegamente;\n2. Nunca subestime o usuário;\n3. Não abra a estrutura do sistema logo de cara, pode não ser necessário;\n4. Pense simples, não seja pessimista;\n5. Avalie se pode se tratar de orientação de uso ou treinamento;\n6. Questione: já funcionava antes? Quando parou? Ou nunca funcionou?\n\nProcesso de Contato com o Cliente:\n- 3 tentativas de ligação por telefone;\n- Em caso de insucesso, envio de mensagem formal via WhatsApp;\n- Se não houver retorno, registrar a tentativa na Ocorrência com prints comprovando o contato."
+  },
+  {
+    "id": "6387",
+    "categoria": "Vendas 360",
+    "titulo": "Vendas 360 Portal - B2B",
+    "url": "https://www.youtube.com/embed/2rxyMBzIFBY?si=5PF86YgIWRZcQRsn",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas 360 Portal - B2B. Link: https://www.youtube.com/embed/2rxyMBzIFBY?si=5PF86YgIWRZcQRsn"
+  },
+  {
+    "id": "6388",
+    "categoria": "Vendas 360",
+    "titulo": "Vendas 360 Portal - Cadastro de Clientes",
+    "url": "https://www.youtube.com/embed/Qvc0PyWHnC4?si=HrgriCJlmj28GUp4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas 360 Portal - Cadastro de Clientes. Link: https://www.youtube.com/embed/Qvc0PyWHnC4?si=HrgriCJlmj28GUp4"
+  },
+  {
+    "id": "6389",
+    "categoria": "Vendas 360",
+    "titulo": "Vendas 360 Portal - Cadastro Vendedores",
+    "url": "https://www.youtube.com/embed/mDY_vzGR5O4?si=lxMaZfkrWe9FHG0Y",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas 360 Portal - Cadastro Vendedores. Link: https://www.youtube.com/embed/mDY_vzGR5O4?si=lxMaZfkrWe9FHG0Y"
+  },
+  {
+    "id": "6390",
+    "categoria": "Vendas 360",
+    "titulo": "Vendas 360 Portal - Criando um Pedido",
+    "url": "https://www.youtube.com/embed/5f-CspVKrmg?si=m_dGwq5WxjDKFL2s",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas 360 Portal - Criando um Pedido. Link: https://www.youtube.com/embed/5f-CspVKrmg?si=m_dGwq5WxjDKFL2s"
+  },
+  {
+    "id": "6391",
+    "categoria": "Vendas 360",
+    "titulo": "Vendas 360 Portal - Dashboard",
+    "url": "https://www.youtube.com/embed/x3hl0t3Bozk?si=ca4tG044i8PBM3-4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas 360 Portal - Dashboard. Link: https://www.youtube.com/embed/x3hl0t3Bozk?si=ca4tG044i8PBM3-4"
+  },
+  {
+    "id": "6409",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop - Como Cancelar uma NFC-e",
+    "url": "https://www.youtube.com/embed/sDbyXYKW4g0?si=B_4_-14RaItBJiLx",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop - Como Cancelar uma NFC-e. Link: https://www.youtube.com/embed/sDbyXYKW4g0?si=B_4_-14RaItBJiLx"
+  },
+  {
+    "id": "6410",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop - Atualizar Dados Fiscais",
+    "url": "https://www.youtube.com/embed/QkoSYWTmdrQ?si=lK0vQmFzgUo4repB",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop - Atualizar Dados Fiscais. Link: https://www.youtube.com/embed/QkoSYWTmdrQ?si=lK0vQmFzgUo4repB"
+  },
+  {
+    "id": "6417",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop - SINTEGRA",
+    "url": "https://www.youtube.com/embed/s7qvzYyPMO4?si=8zMl1p5-_4md_PlB",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop - SINTEGRA. Link: https://www.youtube.com/embed/s7qvzYyPMO4?si=8zMl1p5-_4md_PlB"
+  },
+  {
+    "id": "6400",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop Financeiro - Transferência Entre Contas",
+    "url": "https://www.youtube.com/embed/7MHrnpNz2tM?si=XB9e6DYXPlzvcYnd",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro - Transferência Entre Contas. Link: https://www.youtube.com/embed/7MHrnpNz2tM?si=XB9e6DYXPlzvcYnd"
+  },
+  {
+    "id": "6401",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop Financeiro - Conciliador de Cartões",
+    "url": "https://www.youtube.com/embed/PjjWHHxHv4s?si=zorjwKm67oIBJ3wW",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro - Conciliador de Cartões. Link: https://www.youtube.com/embed/PjjWHHxHv4s?si=zorjwKm67oIBJ3wW"
+  },
+  {
+    "id": "6402",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop Financeiro - Como Gerar um Recibo",
+    "url": "https://www.youtube.com/embed/kigGSaMltyA?si=Bsp4xFW5jn5hd08_",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro - Como Gerar um Recibo. Link: https://www.youtube.com/embed/kigGSaMltyA?si=Bsp4xFW5jn5hd08_"
+  },
+  {
+    "id": "6403",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop Financeiro - Como Estornar um Pix",
+    "url": "https://www.youtube.com/embed/mL2yEK6kbWA?si=wnNnxu_MHm2ferIX",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro - Como Estornar um Pix. Link: https://www.youtube.com/embed/mL2yEK6kbWA?si=wnNnxu_MHm2ferIX"
+  },
+  {
+    "id": "6404",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop Financeiro - Como Cadastrar uma Conta",
+    "url": "https://www.youtube.com/embed/vLIfgJqzqKk?si=2-0ewbZ19DQVTeIL",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro - Como Cadastrar uma Conta. Link: https://www.youtube.com/embed/vLIfgJqzqKk?si=2-0ewbZ19DQVTeIL"
+  },
+  {
+    "id": "6405",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop Financeio - DRE",
+    "url": "https://www.youtube.com/embed/jJWNw9unHEo?si=mvQkQB_LJyslI6xs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeio - DRE. Link: https://www.youtube.com/embed/jJWNw9unHEo?si=mvQkQB_LJyslI6xs"
+  },
+  {
+    "id": "6406",
+    "categoria": "Softcomshop - Financeiro",
+    "titulo": "Softcomshop Jornada NFe: Emissão NFe Avulsa",
+    "url": "https://www.youtube.com/embed/A9clYhtlvU4?si=D1mzHRcbjfVv8pfY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Jornada NFe: Emissão NFe Avulsa. Link: https://www.youtube.com/embed/A9clYhtlvU4?si=D1mzHRcbjfVv8pfY"
+  },
+  {
+    "id": "6418",
+    "categoria": "Softcomshop Usabilidade",
+    "titulo": "Softcomshop - Como Realizar o Cadastro de um Grupo",
+    "url": "https://www.youtube.com/embed/h6YUi_oNJdc?si=FYKITclWhGmy1p_e",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop - Como Realizar o Cadastro de um Grupo. Link: https://www.youtube.com/embed/h6YUi_oNJdc?si=FYKITclWhGmy1p_e"
+  },
+  {
+    "id": "6427",
+    "categoria": "Softcomshop Usabilidade",
+    "titulo": "Softcomshop - Como Definir o Setor de Impressão de um Produto",
+    "url": "https://www.youtube.com/embed/sPzVA4j5Ge8?si=WItDxkp9oEZjxm8o",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop - Como Definir o Setor de Impressão de um Produto. Link: https://www.youtube.com/embed/sPzVA4j5Ge8?si=WItDxkp9oEZjxm8o"
+  },
+  {
+    "id": "6317",
+    "categoria": "Softcomshop Usabilidade",
+    "titulo": "Softcomshop Usabilidade - Batismo",
+    "url": "https://www.youtube.com/embed/7v02FN17e68",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Usabilidade - Batismo. Link: https://www.youtube.com/embed/7v02FN17e68"
+  },
+  {
+    "id": "6370",
+    "categoria": "Vertical Serviços",
+    "titulo": "Softcomshop Vertical Serviços: Cadastrando Serviços",
+    "url": "https://www.youtube.com/embed/Fd1I2MrR6CY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Vertical Serviços: Cadastrando Serviços. Link: https://www.youtube.com/embed/Fd1I2MrR6CY"
+  },
+  {
+    "id": "6371",
+    "categoria": "Vertical Serviços",
+    "titulo": "Softcomshop Vertical Serviços: Lançamento de Contratos",
+    "url": "https://www.youtube.com/embed/QqptzAXAaIs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Vertical Serviços: Lançamento de Contratos. Link: https://www.youtube.com/embed/QqptzAXAaIs"
+  },
+  {
+    "id": "6372",
+    "categoria": "Vertical Serviços",
+    "titulo": "Softcomshop Vertical Serviços: Gestão de Contratos",
+    "url": "https://www.youtube.com/embed/BLYTVmjR5Qs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Vertical Serviços: Gestão de Contratos. Link: https://www.youtube.com/embed/BLYTVmjR5Qs"
+  },
+  {
+    "id": "6373",
+    "categoria": "Vertical Serviços",
+    "titulo": "Softcomshop Vertical Serviços: Lançamento de Propostas",
+    "url": "https://www.youtube.com/embed/1bx_H8EMqx4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Vertical Serviços: Lançamento de Propostas. Link: https://www.youtube.com/embed/1bx_H8EMqx4"
+  },
+  {
+    "id": "6374",
+    "categoria": "Vertical Serviços",
+    "titulo": "Softcomshop Vertical Serviços: Ordem de Serviço",
+    "url": "https://www.youtube.com/embed/6LNGEx0nbzI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Vertical Serviços: Ordem de Serviço. Link: https://www.youtube.com/embed/6LNGEx0nbzI"
+  },
+  {
+    "id": "6359",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Softshop Autopeças: Painel Oficina",
+    "url": "https://www.youtube.com/embed/zHRX7LCj2rQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Autopeças: Painel Oficina. Link: https://www.youtube.com/embed/zHRX7LCj2rQ"
+  },
+  {
+    "id": "6291",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Softshop Autopeças: Como Realizar Orçamentos",
+    "url": "https://www.youtube.com/embed/Rd-3YN598fI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Autopeças: Como Realizar Orçamentos. Link: https://www.youtube.com/embed/Rd-3YN598fI"
+  },
+  {
+    "id": "6292",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Softshop Autopeças: Como Realizar Vendas",
+    "url": "https://www.youtube.com/embed/v8P3VNeHRBY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Autopeças: Como Realizar Vendas. Link: https://www.youtube.com/embed/v8P3VNeHRBY"
+  },
+  {
+    "id": "96",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Softshop: Realize Seus Orçamentos",
+    "url": "https://www.youtube.com/embed/k9kOIU3GBrg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Realize Seus Orçamentos. Link: https://www.youtube.com/embed/k9kOIU3GBrg"
+  },
+  {
+    "id": "85",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Softshop: Vendas no Balcão e Finalização no Caixa",
+    "url": "https://www.youtube.com/embed/It-SekJQ-0M",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Vendas no Balcão e Finalização no Caixa. Link: https://www.youtube.com/embed/It-SekJQ-0M"
+  },
+  {
+    "id": "199",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Vendedores: Realize suas Vendas através do SMobile",
+    "url": "https://www.youtube.com/embed/keo2mR0ZJEk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendedores: Realize suas Vendas através do SMobile. Link: https://www.youtube.com/embed/keo2mR0ZJEk"
+  },
+  {
+    "id": "68",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Softshop: Como Emitir Nota Fiscal",
+    "url": "https://www.youtube.com/embed/h9Dn_vCbzog",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Como Emitir Nota Fiscal. Link: https://www.youtube.com/embed/h9Dn_vCbzog"
+  },
+  {
+    "id": "106",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Softshop: Gerando Boleto Bancário de Vendas",
+    "url": "https://www.youtube.com/embed/SU4ry-ij56U",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Gerando Boleto Bancário de Vendas. Link: https://www.youtube.com/embed/SU4ry-ij56U"
+  },
+  {
+    "id": "6334",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Caixa: Funções Caixa, Abertura e Fechamento de Caixa",
+    "url": "https://www.youtube.com/embed/-Hugf2W-ZjA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Funções Caixa, Abertura e Fechamento de Caixa. Link: https://www.youtube.com/embed/-Hugf2W-ZjA"
+  },
+  {
+    "id": "6348",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Caixa: Alteração de conta PIX",
+    "url": "https://www.youtube.com/embed/3sGq6C7Zz4c",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Alteração de conta PIX. Link: https://www.youtube.com/embed/3sGq6C7Zz4c"
+  },
+  {
+    "id": "6333",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Caixa: Vendas com Pagamento PIX",
+    "url": "https://www.youtube.com/embed/fwqS55U88ok",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Vendas com Pagamento PIX. Link: https://www.youtube.com/embed/fwqS55U88ok"
+  },
+  {
+    "id": "6208",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Caixa: Realizando Cadastro de Clientes",
+    "url": "https://www.youtube.com/embed/giGbXdJnukw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Realizando Cadastro de Clientes. Link: https://www.youtube.com/embed/giGbXdJnukw"
+  },
+  {
+    "id": "69",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Caixa: Realizando Vendas",
+    "url": "https://www.youtube.com/embed/CiUqj7op8ZY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Realizando Vendas. Link: https://www.youtube.com/embed/CiUqj7op8ZY"
+  },
+  {
+    "id": "70",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Caixa: Funcionalidades da Tela de Vendas",
+    "url": "https://www.youtube.com/embed/ed6o1CbQyZE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Funcionalidades da Tela de Vendas. Link: https://www.youtube.com/embed/ed6o1CbQyZE"
+  },
+  {
+    "id": "79",
+    "categoria": "Vendas: Orçamentos, Notas Fiscais e Cupons Eletrônicos",
+    "titulo": "Caixa: Finalizando uma Venda feita no Balcão (Pré-Venda)",
+    "url": "https://www.youtube.com/embed/IimGARExU-o",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Finalizando uma Venda feita no Balcão (Pré-Venda). Link: https://www.youtube.com/embed/IimGARExU-o"
+  },
+  {
+    "id": "6316",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Segmento Farmácia",
+    "url": "https://www.youtube.com/embed/lpQhspw3FY4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Segmento Farmácia. Link: https://www.youtube.com/embed/lpQhspw3FY4"
+  },
+  {
+    "id": "6309",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Conhecimento Fiscal",
+    "url": "https://www.youtube.com/embed/02AZNQ-UTw8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Conhecimento Fiscal. Link: https://www.youtube.com/embed/02AZNQ-UTw8"
+  },
+  {
+    "id": "6310",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Segmento Alimentos",
+    "url": "https://www.youtube.com/embed/3XicYEAp1rk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Segmento Alimentos. Link: https://www.youtube.com/embed/3XicYEAp1rk"
+  },
+  {
+    "id": "6311",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Segmento Veículos",
+    "url": "https://www.youtube.com/embed/Ork1uODCgLg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Segmento Veículos. Link: https://www.youtube.com/embed/Ork1uODCgLg"
+  },
+  {
+    "id": "6312",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Segmento Construção",
+    "url": "https://www.youtube.com/embed/KUjL8UPiBL4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Segmento Construção. Link: https://www.youtube.com/embed/KUjL8UPiBL4"
+  },
+  {
+    "id": "6313",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Segmento Moda",
+    "url": "https://www.youtube.com/embed/yE4hve1KPJM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Segmento Moda. Link: https://www.youtube.com/embed/yE4hve1KPJM"
+  },
+  {
+    "id": "6314",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Segmento Petshop",
+    "url": "https://www.youtube.com/embed/_MIztG5CHPI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Segmento Petshop. Link: https://www.youtube.com/embed/_MIztG5CHPI"
+  },
+  {
+    "id": "6315",
+    "categoria": "Batismo Comercial",
+    "titulo": "Batismo Comercial - Segmento Ótica",
+    "url": "https://www.youtube.com/embed/23hrwulZFZ8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Batismo Comercial - Segmento Ótica. Link: https://www.youtube.com/embed/23hrwulZFZ8"
+  },
+  {
+    "id": "6295",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Softshop: Ordem de Fornecimento",
+    "url": "https://www.youtube.com/embed/w7JCcYDYl60",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Ordem de Fornecimento. Link: https://www.youtube.com/embed/w7JCcYDYl60"
+  },
+  {
+    "id": "63",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Cadastro de Funcionários",
+    "url": "https://www.youtube.com/embed/jpjn8T_I44s",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Cadastro de Funcionários. Link: https://www.youtube.com/embed/jpjn8T_I44s"
+  },
+  {
+    "id": "64",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Cadastro de Mercadorias",
+    "url": "https://www.youtube.com/embed/RLxqyLbSZjg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Cadastro de Mercadorias. Link: https://www.youtube.com/embed/RLxqyLbSZjg"
+  },
+  {
+    "id": "67",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Cadastro de Clientes",
+    "url": "https://www.youtube.com/embed/G3QO9G_86S8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Cadastro de Clientes. Link: https://www.youtube.com/embed/G3QO9G_86S8"
+  },
+  {
+    "id": "66",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Lançamento de Nota Fiscal de Entrada",
+    "url": "https://www.youtube.com/embed/a8Y_WGQbX3I\n",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Lançamento de Nota Fiscal de Entrada. Link: https://www.youtube.com/embed/a8Y_WGQbX3I\n"
+  },
+  {
+    "id": "105",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Nuvem Fiscal",
+    "url": "https://www.youtube.com/embed/cWRlSxrpz20",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nuvem Fiscal. Link: https://www.youtube.com/embed/cWRlSxrpz20"
+  },
+  {
+    "id": "94",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Ajustes de Estoque: Correções, Avarias, Vencidas ou Retiradas",
+    "url": "https://www.youtube.com/embed/KvlJQwk7QSE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Ajustes de Estoque: Correções, Avarias, Vencidas ou Retiradas. Link: https://www.youtube.com/embed/KvlJQwk7QSE"
+  },
+  {
+    "id": "84",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Balanço: Contagem de Estoque",
+    "url": "https://www.youtube.com/embed/m9Un6WWa1QU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Balanço: Contagem de Estoque. Link: https://www.youtube.com/embed/m9Un6WWa1QU"
+  },
+  {
+    "id": "6378",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Novo Collector: Balanço e Ajuste de Estoque",
+    "url": "https://www.youtube.com/shorts/ZOzw5zQjfvw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Novo Collector: Balanço e Ajuste de Estoque. Link: https://www.youtube.com/shorts/ZOzw5zQjfvw"
+  },
+  {
+    "id": "166",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Collector: Exportando os Dados do Softshop",
+    "url": "https://www.youtube.com/embed/HNcIGSVze3U",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Collector: Exportando os Dados do Softshop. Link: https://www.youtube.com/embed/HNcIGSVze3U"
+  },
+  {
+    "id": "6198",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Collector: Inserindo Arquivo e Realizando Balanço",
+    "url": "https://www.youtube.com/embed/Zlz7AHmlsmo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Collector: Inserindo Arquivo e Realizando Balanço. Link: https://www.youtube.com/embed/Zlz7AHmlsmo"
+  },
+  {
+    "id": "6199",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Collector: Importando Dados para o Softshop",
+    "url": "https://www.youtube.com/embed/A3marFoj1zc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Collector: Importando Dados para o Softshop. Link: https://www.youtube.com/embed/A3marFoj1zc"
+  },
+  {
+    "id": "200",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Markup: Formação de Preço",
+    "url": "https://www.youtube.com/embed/joGUfJCS7XY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Markup: Formação de Preço. Link: https://www.youtube.com/embed/joGUfJCS7XY"
+  },
+  {
+    "id": "6197",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "F8 Consulta Preços: Mercadorias Similares e Relacionadas",
+    "url": "https://www.youtube.com/embed/7DchNbCVA7k",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: F8 Consulta Preços: Mercadorias Similares e Relacionadas. Link: https://www.youtube.com/embed/7DchNbCVA7k"
+  },
+  {
+    "id": "6200",
+    "categoria": "Primeiros Cadastros e Controle de Estoque",
+    "titulo": "Ordem de Produção: Apontamentos, Perdas e Sobras",
+    "url": "https://www.youtube.com/embed/DMT1TQrQsIU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Ordem de Produção: Apontamentos, Perdas e Sobras. Link: https://www.youtube.com/embed/DMT1TQrQsIU"
+  },
+  {
+    "id": "99",
+    "categoria": "Você realiza Vendas no Cartão de Crédito, conheça essas Funções",
+    "titulo": "SITEF: Cancelamento do Pagamento",
+    "url": "https://www.youtube.com/embed/YJmZzWl-nfI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SITEF: Cancelamento do Pagamento. Link: https://www.youtube.com/embed/YJmZzWl-nfI"
+  },
+  {
+    "id": "102",
+    "categoria": "Você realiza Vendas no Cartão de Crédito, conheça essas Funções",
+    "titulo": "SITEF: Consultar Transações",
+    "url": "https://www.youtube.com/embed/5Lhuq6GFCV8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SITEF: Consultar Transações. Link: https://www.youtube.com/embed/5Lhuq6GFCV8"
+  },
+  {
+    "id": "86",
+    "categoria": "Aprenda a gerenciar o Financeiro",
+    "titulo": "Contas a Receber: Débitos dos Clientes e Realizando a Baixa",
+    "url": "https://www.youtube.com/embed/IDffyx9cBuw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Contas a Receber: Débitos dos Clientes e Realizando a Baixa. Link: https://www.youtube.com/embed/IDffyx9cBuw"
+  },
+  {
+    "id": "87",
+    "categoria": "Aprenda a gerenciar o Financeiro",
+    "titulo": "Contas a Pagar: Realizando Baixas e Parcelando Títulos",
+    "url": "https://www.youtube.com/embed/C-RODmg7fn8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Contas a Pagar: Realizando Baixas e Parcelando Títulos. Link: https://www.youtube.com/embed/C-RODmg7fn8"
+  },
+  {
+    "id": "6268",
+    "categoria": "Aprenda a gerenciar o Financeiro",
+    "titulo": "Banco: Conciliador de Cartões",
+    "url": "https://www.youtube.com/embed/mqXSwRiTlGM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Banco: Conciliador de Cartões. Link: https://www.youtube.com/embed/mqXSwRiTlGM"
+  },
+  {
+    "id": "213",
+    "categoria": "Aprenda a gerenciar o Financeiro",
+    "titulo": "Banco: Conciliação Bancária",
+    "url": "https://www.youtube.com/embed/Usj1r7pqaRs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Banco: Conciliação Bancária. Link: https://www.youtube.com/embed/Usj1r7pqaRs"
+  },
+  {
+    "id": "142",
+    "categoria": "Sua Empresa Emite Boletos Bancários",
+    "titulo": "Remessa: Aprenda a Enviar os Boletos para Registro no Banco",
+    "url": "https://www.youtube.com/embed/lKZeKZ1_0Uo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Remessa: Aprenda a Enviar os Boletos para Registro no Banco. Link: https://www.youtube.com/embed/lKZeKZ1_0Uo"
+  },
+  {
+    "id": "143",
+    "categoria": "Sua Empresa Emite Boletos Bancários",
+    "titulo": "Retorno: Realize de Forma Automática a Baixa dos Boletos Pagos no Software",
+    "url": "https://www.youtube.com/embed/GCnVbXQtpCY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Retorno: Realize de Forma Automática a Baixa dos Boletos Pagos no Software. Link: https://www.youtube.com/embed/GCnVbXQtpCY"
+  },
+  {
+    "id": "6296",
+    "categoria": "A sua Empresa realiza Entregas",
+    "titulo": "Softshop: Emissor CTE",
+    "url": "https://www.youtube.com/embed/-OsiETdbrxY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Emissor CTE. Link: https://www.youtube.com/embed/-OsiETdbrxY"
+  },
+  {
+    "id": "107",
+    "categoria": "A sua Empresa realiza Entregas",
+    "titulo": "Carga: Organize e Controle suas Entregas",
+    "url": "https://www.youtube.com/embed/UeAwhMiwlT8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Carga: Organize e Controle suas Entregas. Link: https://www.youtube.com/embed/UeAwhMiwlT8"
+  },
+  {
+    "id": "104",
+    "categoria": "A sua Empresa realiza Entregas",
+    "titulo": "MDF-e: Emissão/Encerramento",
+    "url": "https://www.youtube.com/embed/unxuoXdKhSI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: MDF-e: Emissão/Encerramento. Link: https://www.youtube.com/embed/unxuoXdKhSI"
+  },
+  {
+    "id": "100",
+    "categoria": "A sua Empresa realiza Entregas",
+    "titulo": "MDF-e: Cancelamento",
+    "url": "https://www.youtube.com/embed/69-HPOOm8BI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: MDF-e: Cancelamento. Link: https://www.youtube.com/embed/69-HPOOm8BI"
+  },
+  {
+    "id": "6481",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Horários",
+    "url": "https://www.youtube.com/embed/UlO975JrqT4?si=zBVXhsFBybEL8Xpg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Horários. Link: https://www.youtube.com/embed/UlO975JrqT4?si=zBVXhsFBybEL8Xpg"
+  },
+  {
+    "id": "6482",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Gestor de Jornadas",
+    "url": "https://www.youtube.com/embed/AJFjjgPfZTU?si=8ruurDsV_WubNgsa",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Gestor de Jornadas. Link: https://www.youtube.com/embed/AJFjjgPfZTU?si=8ruurDsV_WubNgsa"
+  },
+  {
+    "id": "6483",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Relatórios",
+    "url": "https://www.youtube.com/embed/sqZ0trxl9U4?si=8X7TWibkvkKaJMqp",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Relatórios. Link: https://www.youtube.com/embed/sqZ0trxl9U4?si=8X7TWibkvkKaJMqp"
+  },
+  {
+    "id": "6484",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Agente de Atendimento",
+    "url": "https://www.youtube.com/embed/X-FMDL36Dqk?si=QgeiKyd--5pG6TMl",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Agente de Atendimento. Link: https://www.youtube.com/embed/X-FMDL36Dqk?si=QgeiKyd--5pG6TMl"
+  },
+  {
+    "id": "6485",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Reordenar Imagens",
+    "url": "https://www.youtube.com/embed/bRa_cJMoMcg?si=MIt3Ty3QZDCuAGcf",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Reordenar Imagens. Link: https://www.youtube.com/embed/bRa_cJMoMcg?si=MIt3Ty3QZDCuAGcf"
+  },
+  {
+    "id": "6486",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Mais Vendidos",
+    "url": "https://www.youtube.com/embed/lqPiEbPuuyQ?si=SZgmggngJ7j3FWLC",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Mais Vendidos. Link: https://www.youtube.com/embed/lqPiEbPuuyQ?si=SZgmggngJ7j3FWLC"
+  },
+  {
+    "id": "6487",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Áreas de Entrega",
+    "url": "https://www.youtube.com/embed/-dIfEPIYTTw?si=k2BGfzxUbedMq6h5",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Áreas de Entrega. Link: https://www.youtube.com/embed/-dIfEPIYTTw?si=k2BGfzxUbedMq6h5"
+  },
+  {
+    "id": "6477",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Cadastro de Produto",
+    "url": "https://www.youtube.com/embed/z43VnKAOTf0?si=9TUKMJkdRBIXvnvd",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Cadastro de Produto. Link: https://www.youtube.com/embed/z43VnKAOTf0?si=9TUKMJkdRBIXvnvd"
+  },
+  {
+    "id": "6478",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Meios de Pagamento",
+    "url": "https://www.youtube.com/embed/BiO5ml9FI50?si=FtLcVPArSHDit3Uj",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Meios de Pagamento. Link: https://www.youtube.com/embed/BiO5ml9FI50?si=FtLcVPArSHDit3Uj"
+  },
+  {
+    "id": "6479",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Perfil Empresarial",
+    "url": "https://www.youtube.com/embed/OG7eNOzsQM0?si=Io7E8I0SigV1fIz3",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Perfil Empresarial. Link: https://www.youtube.com/embed/OG7eNOzsQM0?si=Io7E8I0SigV1fIz3"
+  },
+  {
+    "id": "6480",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Cross Selling",
+    "url": "https://www.youtube.com/embed/ZsQdtLsNbpc?si=FYymVHxoXYtOiEzJ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Cross Selling. Link: https://www.youtube.com/embed/ZsQdtLsNbpc?si=FYymVHxoXYtOiEzJ"
+  },
+  {
+    "id": "6468",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Sugestão do Vendedor",
+    "url": "https://www.youtube.com/embed/QWEPN86XC74?si=ckIE6dNRQGSZernN",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Sugestão do Vendedor. Link: https://www.youtube.com/embed/QWEPN86XC74?si=ckIE6dNRQGSZernN"
+  },
+  {
+    "id": "6469",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho: Cadastro de Produto - Grade",
+    "url": "https://www.youtube.com/embed/jxu23Crowvs?si=N3FtbfMG16rALCzM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho: Cadastro de Produto - Grade. Link: https://www.youtube.com/embed/jxu23Crowvs?si=N3FtbfMG16rALCzM"
+  },
+  {
+    "id": "6471",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Gerenciamento de Pedidos",
+    "url": "https://www.youtube.com/embed/XDeO7zHpgFY?si=CscHc6ouB62S6F0f",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Gerenciamento de Pedidos. Link: https://www.youtube.com/embed/XDeO7zHpgFY?si=CscHc6ouB62S6F0f"
+  },
+  {
+    "id": "6472",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Estoque",
+    "url": "https://www.youtube.com/embed/PNE8qVZyPkE?si=xwJsTvHDLa2qwSl0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Estoque. Link: https://www.youtube.com/embed/PNE8qVZyPkE?si=xwJsTvHDLa2qwSl0"
+  },
+  {
+    "id": "6473",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Categorias",
+    "url": "https://www.youtube.com/embed/cgaaDcoR1OU?si=Zup4u5UPsqMm3GdG",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Categorias. Link: https://www.youtube.com/embed/cgaaDcoR1OU?si=Zup4u5UPsqMm3GdG"
+  },
+  {
+    "id": "6474",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Promoção de Produtos",
+    "url": "https://www.youtube.com/embed/IZqmKL9Dwic?si=jy0MwBJ13ub-FapS",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Promoção de Produtos. Link: https://www.youtube.com/embed/IZqmKL9Dwic?si=jy0MwBJ13ub-FapS"
+  },
+  {
+    "id": "6475",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho - Turbine Suas Vendas",
+    "url": "https://www.youtube.com/embed/UWU0ESuphfQ?si=QDDu59nSzjYuSzhg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho - Turbine Suas Vendas. Link: https://www.youtube.com/embed/UWU0ESuphfQ?si=QDDu59nSzjYuSzhg"
+  },
+  {
+    "id": "6407",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho Delivery - Cartão Fidelidade",
+    "url": "https://www.youtube.com/embed/MTKw8XLP9eI?si=6gwdDu82sxXRa2oL",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho Delivery - Cartão Fidelidade. Link: https://www.youtube.com/embed/MTKw8XLP9eI?si=6gwdDu82sxXRa2oL"
+  },
+  {
+    "id": "6408",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho Delivery - Como Resgatar os Pontos do Cartão Fidelidade",
+    "url": "https://www.youtube.com/embed/HUNVETo-A7I?si=0JiFdi5LlpnJbtmx",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho Delivery - Como Resgatar os Pontos do Cartão Fidelidade. Link: https://www.youtube.com/embed/HUNVETo-A7I?si=0JiFdi5LlpnJbtmx"
+  },
+  {
+    "id": "6298",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Marketplace: Meu Carrinho",
+    "url": "https://www.youtube.com/embed/V7P57gCsYJ4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Marketplace: Meu Carrinho. Link: https://www.youtube.com/embed/V7P57gCsYJ4"
+  },
+  {
+    "id": "6289",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho: Cadastro de Produto - Restaurante",
+    "url": "https://www.youtube.com/embed/XuWSu4CHxRk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho: Cadastro de Produto - Restaurante. Link: https://www.youtube.com/embed/XuWSu4CHxRk"
+  },
+  {
+    "id": "6273",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho: Gerenciamento de Produtos",
+    "url": "https://www.youtube.com/embed/67tslHZnbaU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho: Gerenciamento de Produtos. Link: https://www.youtube.com/embed/67tslHZnbaU"
+  },
+  {
+    "id": "6287",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho: Gerenciamento de Pedidos pelo PDV",
+    "url": "https://www.youtube.com/embed/DpEIVrs3PCE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho: Gerenciamento de Pedidos pelo PDV. Link: https://www.youtube.com/embed/DpEIVrs3PCE"
+  },
+  {
+    "id": "6285",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho: Integração com o WhatsApp",
+    "url": "https://www.youtube.com/embed/bmYRhr6vbI0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho: Integração com o WhatsApp. Link: https://www.youtube.com/embed/bmYRhr6vbI0"
+  },
+  {
+    "id": "6264",
+    "categoria": "Meu Carrinho: Turbine as Suas Vendas",
+    "titulo": "Meu Carrinho: Integração com o Facebook",
+    "url": "https://www.youtube.com/embed/0a2jcVXVQDs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Meu Carrinho: Integração com o Facebook. Link: https://www.youtube.com/embed/0a2jcVXVQDs"
+  },
+  {
+    "id": "6377",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Nota Fiscal: Emitindo uma Nota Fiscal de Devolução de Compra (Tela Compras)",
+    "url": "https://www.youtube.com/embed/A5muZ2vEnz0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Emitindo uma Nota Fiscal de Devolução de Compra (Tela Compras). Link: https://www.youtube.com/embed/A5muZ2vEnz0"
+  },
+  {
+    "id": "71",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Nota Fiscal: Emitindo uma Nota Fiscal de Devolução de Compra ou Venda (Tela Ajustes Estoque)",
+    "url": "https://www.youtube.com/embed/4PGUMqyTCGQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Emitindo uma Nota Fiscal de Devolução de Compra ou Venda (Tela Ajustes Estoque). Link: https://www.youtube.com/embed/4PGUMqyTCGQ"
+  },
+  {
+    "id": "72",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Nota Fiscal: Cancelando uma Nota Fiscal",
+    "url": "https://www.youtube.com/embed/RaoDhKjZDKQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Cancelando uma Nota Fiscal. Link: https://www.youtube.com/embed/RaoDhKjZDKQ"
+  },
+  {
+    "id": "74",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Nota Fiscal: Inutilizando a Numeração da Nota Fiscal",
+    "url": "https://www.youtube.com/embed/b4Ic8c7b3lw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Inutilizando a Numeração da Nota Fiscal. Link: https://www.youtube.com/embed/b4Ic8c7b3lw"
+  },
+  {
+    "id": "73",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Nota Fiscal: Realizando uma Carta de Correção de uma Nota Fiscal",
+    "url": "https://www.youtube.com/embed/Y94OBCFBuzY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Realizando uma Carta de Correção de uma Nota Fiscal. Link: https://www.youtube.com/embed/Y94OBCFBuzY"
+  },
+  {
+    "id": "95",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Nota Fiscal: Enviando o XML das Notas Fiscais para o seu Contador",
+    "url": "https://www.youtube.com/embed/ZYVOK41czSU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Enviando o XML das Notas Fiscais para o seu Contador. Link: https://www.youtube.com/embed/ZYVOK41czSU"
+  },
+  {
+    "id": "93",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Cupom Fiscal Eletrônico: Aprenda a Gerenciar as Notas Fiscais de Consumidor",
+    "url": "https://www.youtube.com/embed/Yic6Mv9oFvA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Cupom Fiscal Eletrônico: Aprenda a Gerenciar as Notas Fiscais de Consumidor. Link: https://www.youtube.com/embed/Yic6Mv9oFvA"
+  },
+  {
+    "id": "6203",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Caixa: Gerenciador de Pedidos MEI",
+    "url": "https://www.youtube.com/embed/RzJMWBHyFtI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Gerenciador de Pedidos MEI. Link: https://www.youtube.com/embed/RzJMWBHyFtI"
+  },
+  {
+    "id": "6228",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Caixa: Gerenciador SAT",
+    "url": "https://www.youtube.com/embed/janoxNuxvwU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Gerenciador SAT. Link: https://www.youtube.com/embed/janoxNuxvwU"
+  },
+  {
+    "id": "75",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Caixa: Cancelando uma Venda",
+    "url": "https://www.youtube.com/embed/KIm8tNUmaLE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Cancelando uma Venda. Link: https://www.youtube.com/embed/KIm8tNUmaLE"
+  },
+  {
+    "id": "6206",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Caixa: Cupom Sorteio",
+    "url": "https://www.youtube.com/embed/HHe-sDP_GHI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Cupom Sorteio. Link: https://www.youtube.com/embed/HHe-sDP_GHI"
+  },
+  {
+    "id": "6207",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Caixa: Como Fazer um Recebimento",
+    "url": "https://www.youtube.com/embed/SO0ctxPTr1Y",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Como Fazer um Recebimento. Link: https://www.youtube.com/embed/SO0ctxPTr1Y"
+  },
+  {
+    "id": "78",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Caixa: Realizando uma Troca de Mercadoria",
+    "url": "https://www.youtube.com/embed/7lRi2-HbH24",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Realizando uma Troca de Mercadoria. Link: https://www.youtube.com/embed/7lRi2-HbH24"
+  },
+  {
+    "id": "76",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Troca: Devolvendo o valor para o seu cliente",
+    "url": "https://www.youtube.com/embed/AJB2n2hxtuI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Troca: Devolvendo o valor para o seu cliente. Link: https://www.youtube.com/embed/AJB2n2hxtuI"
+  },
+  {
+    "id": "77",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Troca: Realizando uma Devolução de Mercadoria no Caixa, Gerando crédito para o seu cliente",
+    "url": "https://www.youtube.com/embed/zkDgH0T46_k",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Troca: Realizando uma Devolução de Mercadoria no Caixa, Gerando crédito para o seu cliente. Link: https://www.youtube.com/embed/zkDgH0T46_k"
+  },
+  {
+    "id": "80",
+    "categoria": "Você trabalha no Faturamento da Empresa, aprenda a fazer devoluções, trocas e cancelamentos",
+    "titulo": "Troca: Nota Fiscal de Devolução Referente as Trocas do mês",
+    "url": "https://www.youtube.com/embed/tgMbZ9saEOk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Troca: Nota Fiscal de Devolução Referente as Trocas do mês. Link: https://www.youtube.com/embed/tgMbZ9saEOk"
+  },
+  {
+    "id": "6194",
+    "categoria": "Aprenda como fazer Consignação de Produtos",
+    "titulo": "Aprenda a Gerar uma Consignação, realizando uma Requisição",
+    "url": "https://www.youtube.com/embed/SZMH0nkpdL8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Aprenda a Gerar uma Consignação, realizando uma Requisição. Link: https://www.youtube.com/embed/SZMH0nkpdL8"
+  },
+  {
+    "id": "6195",
+    "categoria": "Aprenda como fazer Consignação de Produtos",
+    "titulo": "Aprenda a Gerar uma Consignação, realizando uma Devolução",
+    "url": "https://www.youtube.com/embed/d71Zw2o1Ntk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Aprenda a Gerar uma Consignação, realizando uma Devolução. Link: https://www.youtube.com/embed/d71Zw2o1Ntk"
+  },
+  {
+    "id": "6196",
+    "categoria": "Aprenda como fazer Consignação de Produtos",
+    "titulo": "Aprenda a Gerar uma Venda de uma Consignação",
+    "url": "https://www.youtube.com/embed/_CPSwFOtOSA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Aprenda a Gerar uma Venda de uma Consignação. Link: https://www.youtube.com/embed/_CPSwFOtOSA"
+  },
+  {
+    "id": "81",
+    "categoria": "Para o Seu Contador",
+    "titulo": "Nota Fiscal: Enviando o XML das Notas Fiscais para o seu Contador",
+    "url": "https://www.youtube.com/embed/FIeHHLpfSko",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Enviando o XML das Notas Fiscais para o seu Contador. Link: https://www.youtube.com/embed/FIeHHLpfSko"
+  },
+  {
+    "id": "82",
+    "categoria": "Para o Seu Contador",
+    "titulo": "Nota Fiscal: Inutilizando a Numeração da Nota Fiscal",
+    "url": "https://www.youtube.com/embed/-Eb38fSWWYY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Inutilizando a Numeração da Nota Fiscal. Link: https://www.youtube.com/embed/-Eb38fSWWYY"
+  },
+  {
+    "id": "83",
+    "categoria": "Para o Seu Contador",
+    "titulo": "Troca: Nota Fiscal de Devolução Referente as Trocas do mês",
+    "url": "https://www.youtube.com/embed/tgMbZ9saEOk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Troca: Nota Fiscal de Devolução Referente as Trocas do mês. Link: https://www.youtube.com/embed/tgMbZ9saEOk"
+  },
+  {
+    "id": "98",
+    "categoria": "Para o Seu Contador",
+    "titulo": "Nota Fiscal: Relação das Notas Fiscais de Entrada e Saída",
+    "url": "https://www.youtube.com/embed/7u1K5M7GJIM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nota Fiscal: Relação das Notas Fiscais de Entrada e Saída. Link: https://www.youtube.com/embed/7u1K5M7GJIM"
+  },
+  {
+    "id": "103",
+    "categoria": "Para o Seu Contador",
+    "titulo": "Softshop: Relatório de Inventário",
+    "url": "https://www.youtube.com/embed/gIBjbTlUHMw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Relatório de Inventário. Link: https://www.youtube.com/embed/gIBjbTlUHMw"
+  },
+  {
+    "id": "6357",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Softshop: Dashboard Gestão de Estoque",
+    "url": "https://www.youtube.com/embed/vE-s9XmtSz8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Dashboard Gestão de Estoque. Link: https://www.youtube.com/embed/vE-s9XmtSz8"
+  },
+  {
+    "id": "6274",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Painel Operacional (Tá em Ordem)",
+    "url": "https://www.youtube.com/embed/b77jdlYIlBQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Painel Operacional (Tá em Ordem). Link: https://www.youtube.com/embed/b77jdlYIlBQ"
+  },
+  {
+    "id": "6255",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Vendas: Vendas por Período",
+    "url": "https://www.youtube.com/embed/Kksw2liM_8I",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas: Vendas por Período. Link: https://www.youtube.com/embed/Kksw2liM_8I"
+  },
+  {
+    "id": "6282",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Vendas: Mercadorias",
+    "url": "https://www.youtube.com/embed/aDgPD1zemA4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas: Mercadorias. Link: https://www.youtube.com/embed/aDgPD1zemA4"
+  },
+  {
+    "id": "89",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Vendas: Gerente de Vendas",
+    "url": "https://www.youtube.com/embed/VwZJFFv2YGE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas: Gerente de Vendas. Link: https://www.youtube.com/embed/VwZJFFv2YGE"
+  },
+  {
+    "id": "6278",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Caixa: Lançamentos",
+    "url": "https://www.youtube.com/embed/obWbMd2lDOU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Lançamentos. Link: https://www.youtube.com/embed/obWbMd2lDOU"
+  },
+  {
+    "id": "6252",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Caixa: Caixa Diário - Relatório Diário Para Conferir Informações Financeiras",
+    "url": "https://www.youtube.com/embed/2y9xxqLdvto",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Caixa Diário - Relatório Diário Para Conferir Informações Financeiras. Link: https://www.youtube.com/embed/2y9xxqLdvto"
+  },
+  {
+    "id": "6277",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Caixa: Demonstrativo DRE - Visão Geral da Saúde Financeira da sua Empresa",
+    "url": "https://www.youtube.com/embed/ZZq7RH1Qpno",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Demonstrativo DRE - Visão Geral da Saúde Financeira da sua Empresa. Link: https://www.youtube.com/embed/ZZq7RH1Qpno"
+  },
+  {
+    "id": "6267",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Banco: Conciliador de Cartões",
+    "url": "https://www.youtube.com/embed/mqXSwRiTlGM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Banco: Conciliador de Cartões. Link: https://www.youtube.com/embed/mqXSwRiTlGM"
+  },
+  {
+    "id": "6281",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Banco: Conciliação Bancária",
+    "url": "https://www.youtube.com/embed/Usj1r7pqaRs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Banco: Conciliação Bancária. Link: https://www.youtube.com/embed/Usj1r7pqaRs"
+  },
+  {
+    "id": "6284",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Clientes: Listagem",
+    "url": "https://www.youtube.com/embed/ORuQ0YK_KhM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Clientes: Listagem. Link: https://www.youtube.com/embed/ORuQ0YK_KhM"
+  },
+  {
+    "id": "88",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Comissão: Vendedor - Comissões e Desempenho",
+    "url": "https://www.youtube.com/embed/PwDkOCjzlEU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Comissão: Vendedor - Comissões e Desempenho. Link: https://www.youtube.com/embed/PwDkOCjzlEU"
+  },
+  {
+    "id": "6279",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Mercadorias: Listagens",
+    "url": "https://www.youtube.com/embed/P9O8lymB1ks",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Mercadorias: Listagens. Link: https://www.youtube.com/embed/P9O8lymB1ks"
+  },
+  {
+    "id": "92",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Mercadorias: Exibir Estoque",
+    "url": "https://www.youtube.com/embed/R59wRGZayho",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Mercadorias: Exibir Estoque. Link: https://www.youtube.com/embed/R59wRGZayho"
+  },
+  {
+    "id": "6280",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Mercadorias: Ficha Estoque",
+    "url": "https://www.youtube.com/embed/6MNXHsTyHPA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Mercadorias: Ficha Estoque. Link: https://www.youtube.com/embed/6MNXHsTyHPA"
+  },
+  {
+    "id": "6283",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Fiscal: Listagem NF-e",
+    "url": "https://www.youtube.com/embed/zPD3ULAGnPw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Fiscal: Listagem NF-e. Link: https://www.youtube.com/embed/zPD3ULAGnPw"
+  },
+  {
+    "id": "97",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Fiscal: Relatórios Fiscais",
+    "url": "https://www.youtube.com/embed/iY73s2TMCBs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Fiscal: Relatórios Fiscais. Link: https://www.youtube.com/embed/iY73s2TMCBs"
+  },
+  {
+    "id": "6276",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Relatório de Ajustes de Estoque",
+    "url": "https://www.youtube.com/embed/1ACq8nMMaFM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Relatório de Ajustes de Estoque. Link: https://www.youtube.com/embed/1ACq8nMMaFM"
+  },
+  {
+    "id": "6253",
+    "categoria": "Explore as Informações da sua Empresa, Pergunte aos Relatórios do Softcom",
+    "titulo": "Relatório de Evolução: Evolução Anual das Despesas e Receitas",
+    "url": "https://www.youtube.com/embed/2HIOSBBeYYw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Relatório de Evolução: Evolução Anual das Despesas e Receitas. Link: https://www.youtube.com/embed/2HIOSBBeYYw"
+  },
+  {
+    "id": "6294",
+    "categoria": "Conheça Soluções para Tomada de Decisão",
+    "titulo": "Softshop: Gestão de compras - Cotação",
+    "url": "https://www.youtube.com/embed/fMJi2Jjjw44",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Gestão de compras - Cotação. Link: https://www.youtube.com/embed/fMJi2Jjjw44"
+  },
+  {
+    "id": "6251",
+    "categoria": "Conheça Soluções para Tomada de Decisão",
+    "titulo": "Vendas: Vendas por Período",
+    "url": "https://www.youtube.com/embed/GB3-WCgYdvM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vendas: Vendas por Período. Link: https://www.youtube.com/embed/GB3-WCgYdvM"
+  },
+  {
+    "id": "6257",
+    "categoria": "Conheça Soluções para Tomada de Decisão",
+    "titulo": "Caixa: Demonstrativo DRE - Visão Geral da Saúde Financeira da sua Empresa",
+    "url": "https://www.youtube.com/embed/ZZq7RH1Qpno",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Caixa: Demonstrativo DRE - Visão Geral da Saúde Financeira da sua Empresa. Link: https://www.youtube.com/embed/ZZq7RH1Qpno"
+  },
+  {
+    "id": "109",
+    "categoria": "Conheça Soluções para Tomada de Decisão",
+    "titulo": "Relatório de Evolução: Evolução Anual das Despesas e Receitas",
+    "url": "https://www.youtube.com/embed/2HIOSBBeYYw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Relatório de Evolução: Evolução Anual das Despesas e Receitas. Link: https://www.youtube.com/embed/2HIOSBBeYYw"
+  },
+  {
+    "id": "110",
+    "categoria": "Conheça Soluções para Tomada de Decisão",
+    "titulo": "Painel de Bordo: Tá em Ordem",
+    "url": "https://www.youtube.com/embed/IMxSY_s0wQ4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Painel de Bordo: Tá em Ordem. Link: https://www.youtube.com/embed/IMxSY_s0wQ4"
+  },
+  {
+    "id": "6288",
+    "categoria": "Conheça Soluções para Tomada de Decisão",
+    "titulo": "Painel de Bordo: Tá em Ordem (Configurações)",
+    "url": "https://www.youtube.com/embed/97lVLlJqHjA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Painel de Bordo: Tá em Ordem (Configurações). Link: https://www.youtube.com/embed/97lVLlJqHjA"
+  },
+  {
+    "id": "6297",
+    "categoria": "Conheça Ferramentas Auxiliares, Crie Campanhas Promocionais, Gerencie seus Preços e Dados Fiscais",
+    "titulo": "Softshop: E-commerce - Cadastrar/Exportar Mercadorias e Importar pedidos",
+    "url": "https://www.youtube.com/embed/Umb1d690m5s",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: E-commerce - Cadastrar/Exportar Mercadorias e Importar pedidos. Link: https://www.youtube.com/embed/Umb1d690m5s"
+  },
+  {
+    "id": "6299",
+    "categoria": "Conheça Ferramentas Auxiliares, Crie Campanhas Promocionais, Gerencie seus Preços e Dados Fiscais",
+    "titulo": "Softshop: Vinculo Fiscal",
+    "url": "https://www.youtube.com/embed/PcsW00FeNF0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop: Vinculo Fiscal. Link: https://www.youtube.com/embed/PcsW00FeNF0"
+  },
+  {
+    "id": "113",
+    "categoria": "Conheça Ferramentas Auxiliares, Crie Campanhas Promocionais, Gerencie seus Preços e Dados Fiscais",
+    "titulo": "Gestor de Preços: Aprenda a Reajustar o Preço de Venda das Suas Mercadorias",
+    "url": "https://www.youtube.com/embed/ROapE79Q1V8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Gestor de Preços: Aprenda a Reajustar o Preço de Venda das Suas Mercadorias. Link: https://www.youtube.com/embed/ROapE79Q1V8"
+  },
+  {
+    "id": "198",
+    "categoria": "Conheça Ferramentas Auxiliares, Crie Campanhas Promocionais, Gerencie seus Preços e Dados Fiscais",
+    "titulo": "Gestor de Promoções: Gerencie com Eficiência Suas Campanhas Promocionais",
+    "url": "https://www.youtube.com/embed/6uJtxx9sFi8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Gestor de Promoções: Gerencie com Eficiência Suas Campanhas Promocionais. Link: https://www.youtube.com/embed/6uJtxx9sFi8"
+  },
+  {
+    "id": "6213",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart: Cadastro de Clientes",
+    "url": "https://www.youtube.com/embed/pc3F5_pQEcs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Cadastro de Clientes. Link: https://www.youtube.com/embed/pc3F5_pQEcs"
+  },
+  {
+    "id": "6211",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart: Realizando uma Venda",
+    "url": "https://www.youtube.com/embed/NqMTH2n_PrE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Realizando uma Venda. Link: https://www.youtube.com/embed/NqMTH2n_PrE"
+  },
+  {
+    "id": "6212",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart: Reimprimindo Venda",
+    "url": "https://www.youtube.com/embed/RVGGqh0Fjmw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Reimprimindo Venda. Link: https://www.youtube.com/embed/RVGGqh0Fjmw"
+  },
+  {
+    "id": "148",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart: Instalação e Configuração",
+    "url": "https://www.youtube.com/embed/urm1TetIvcQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Instalação e Configuração. Link: https://www.youtube.com/embed/urm1TetIvcQ"
+  },
+  {
+    "id": "152",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart: Emitindo um Cupom Eletrônico com Pausa e CPF Avulso",
+    "url": "https://www.youtube.com/embed/UbHxPo1vBSg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Emitindo um Cupom Eletrônico com Pausa e CPF Avulso. Link: https://www.youtube.com/embed/UbHxPo1vBSg"
+  },
+  {
+    "id": "6214",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart: Adiantamento/Fechamento de Mesas (Restaurante)",
+    "url": "https://www.youtube.com/embed/EyW_cIWNpzw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Adiantamento/Fechamento de Mesas (Restaurante). Link: https://www.youtube.com/embed/EyW_cIWNpzw"
+  },
+  {
+    "id": "6215",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart: Fechamento de Delivery pelo Entregador (Restaurante)",
+    "url": "https://www.youtube.com/embed/xlhGR9zyPQ0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Fechamento de Delivery pelo Entregador (Restaurante). Link: https://www.youtube.com/embed/xlhGR9zyPQ0"
+  },
+  {
+    "id": "6223",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart (Ótica): Gerando Orçamento ou Venda",
+    "url": "https://www.youtube.com/embed/Ym6bCYhNTVw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart (Ótica): Gerando Orçamento ou Venda. Link: https://www.youtube.com/embed/Ym6bCYhNTVw"
+  },
+  {
+    "id": "6224",
+    "categoria": "Softcom Smart: Aprenda a Realizar Pedidos e Emitir Notas Fiscais",
+    "titulo": "Softcom Smart (Ótica): Localizando Ordem de Serviço no Softshop",
+    "url": "https://www.youtube.com/embed/CNJa_qbJtQE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart (Ótica): Localizando Ordem de Serviço no Softshop. Link: https://www.youtube.com/embed/CNJa_qbJtQE"
+  },
+  {
+    "id": "6426",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop - Cadastro de Fornecedor",
+    "url": "https://www.youtube.com/embed/lpGmS6vg6Rg?si=LS8w1VcWh0DdRTn8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop - Cadastro de Fornecedor. Link: https://www.youtube.com/embed/lpGmS6vg6Rg?si=LS8w1VcWh0DdRTn8"
+  },
+  {
+    "id": "6335",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Vínculos Fiscais",
+    "url": "https://www.youtube.com/embed/VMQkPmmqO7E",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Vínculos Fiscais. Link: https://www.youtube.com/embed/VMQkPmmqO7E"
+  },
+  {
+    "id": "6336",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Gestor de Preços",
+    "url": "https://www.youtube.com/embed/fY64wQKPn-M",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Gestor de Preços. Link: https://www.youtube.com/embed/fY64wQKPn-M"
+  },
+  {
+    "id": "6337",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Ordem de Fornecimento",
+    "url": "https://www.youtube.com/embed/v3iZ6bjcMbY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Ordem de Fornecimento. Link: https://www.youtube.com/embed/v3iZ6bjcMbY"
+  },
+  {
+    "id": "6216",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Cadastro de Funcionários",
+    "url": "https://www.youtube.com/embed/3TGe5g_1Zfk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Cadastro de Funcionários. Link: https://www.youtube.com/embed/3TGe5g_1Zfk"
+  },
+  {
+    "id": "145",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Cadastro de Clientes",
+    "url": "https://www.youtube.com/embed/6mKS-IEH3rE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Cadastro de Clientes. Link: https://www.youtube.com/embed/6mKS-IEH3rE"
+  },
+  {
+    "id": "146",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Cadastro de Produtos",
+    "url": "https://www.youtube.com/embed/UbdTemkkL3s",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Cadastro de Produtos. Link: https://www.youtube.com/embed/UbdTemkkL3s"
+  },
+  {
+    "id": "6262",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Cadastro de Produtos (Grade)",
+    "url": "https://www.youtube.com/embed/9ziPRefOHqM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Cadastro de Produtos (Grade). Link: https://www.youtube.com/embed/9ziPRefOHqM"
+  },
+  {
+    "id": "6218",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Importando Notas de Compra",
+    "url": "https://www.youtube.com/embed/pJ_8g9aUKeI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Importando Notas de Compra. Link: https://www.youtube.com/embed/pJ_8g9aUKeI"
+  },
+  {
+    "id": "6263",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Importando Notas de Compra (Grade)",
+    "url": "https://www.youtube.com/embed/fjYwV7vkX4o",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Importando Notas de Compra (Grade). Link: https://www.youtube.com/embed/fjYwV7vkX4o"
+  },
+  {
+    "id": "6222",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Nuvem Fiscal",
+    "url": "https://www.youtube.com/embed/xRU7bPtFhG8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Nuvem Fiscal. Link: https://www.youtube.com/embed/xRU7bPtFhG8"
+  },
+  {
+    "id": "6217",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Movimentação (Ajustes de Estoque)",
+    "url": "https://www.youtube.com/embed/e2WqSoiEEPw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Movimentação (Ajustes de Estoque). Link: https://www.youtube.com/embed/e2WqSoiEEPw"
+  },
+  {
+    "id": "6259",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Movimentação (Grade)",
+    "url": "https://www.youtube.com/embed/d8gkar1cYEw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Movimentação (Grade). Link: https://www.youtube.com/embed/d8gkar1cYEw"
+  },
+  {
+    "id": "6221",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Balanço",
+    "url": "https://www.youtube.com/embed/CeacU5podyU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Balanço. Link: https://www.youtube.com/embed/CeacU5podyU"
+  },
+  {
+    "id": "6260",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Balanço (Grade)",
+    "url": "https://www.youtube.com/embed/DP0e5fCHsOA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Balanço (Grade). Link: https://www.youtube.com/embed/DP0e5fCHsOA"
+  },
+  {
+    "id": "6227",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Gestor de Promoção",
+    "url": "https://www.youtube.com/embed/0GLAEN3Wf68",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Gestor de Promoção. Link: https://www.youtube.com/embed/0GLAEN3Wf68"
+  },
+  {
+    "id": "6232",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Orçamento",
+    "url": "https://www.youtube.com/embed/iA1gaO4UE24",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Orçamento. Link: https://www.youtube.com/embed/iA1gaO4UE24"
+  },
+  {
+    "id": "6258",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Orçamento (Grade)",
+    "url": "https://www.youtube.com/embed/78Zqjv2bT2g",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Orçamento (Grade). Link: https://www.youtube.com/embed/78Zqjv2bT2g"
+  },
+  {
+    "id": "6219",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Vendas",
+    "url": "https://www.youtube.com/embed/IDfK0qC4v_w?si=aax9yQXlpGMRzAsX",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Vendas. Link: https://www.youtube.com/embed/IDfK0qC4v_w?si=aax9yQXlpGMRzAsX"
+  },
+  {
+    "id": "6261",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Vendas (Grade)",
+    "url": "https://www.youtube.com/embed/uA2Z5aZnDFw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Vendas (Grade). Link: https://www.youtube.com/embed/uA2Z5aZnDFw"
+  },
+  {
+    "id": "6220",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Emitir uma NFCe de uma Venda",
+    "url": "https://www.youtube.com/embed/X7mduHi6PC8?si=pqnUrHFOLmiUfsYg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Emitir uma NFCe de uma Venda. Link: https://www.youtube.com/embed/X7mduHi6PC8?si=pqnUrHFOLmiUfsYg"
+  },
+  {
+    "id": "6225",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Cancelando uma Venda",
+    "url": "https://www.youtube.com/embed/9cBPLPf4eXA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Cancelando uma Venda. Link: https://www.youtube.com/embed/9cBPLPf4eXA"
+  },
+  {
+    "id": "6231",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Inutilizando a Numeração da NFCe",
+    "url": "https://www.youtube.com/embed/RHbeNChS9NE?si=mgvxb0L569FIHqKt",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Inutilizando a Numeração da NFCe. Link: https://www.youtube.com/embed/RHbeNChS9NE?si=mgvxb0L569FIHqKt"
+  },
+  {
+    "id": "6229",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Download dos XMLs NFCe",
+    "url": "https://www.youtube.com/embed/1nXMXlnnclE?si=p2u6cHZFT0qKqyDr",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Download dos XMLs NFCe. Link: https://www.youtube.com/embed/1nXMXlnnclE?si=p2u6cHZFT0qKqyDr"
+  },
+  {
+    "id": "6233",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Gerando Nota Fiscal de uma Venda",
+    "url": "https://www.youtube.com/embed/TYoD38FXPRc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Gerando Nota Fiscal de uma Venda. Link: https://www.youtube.com/embed/TYoD38FXPRc"
+  },
+  {
+    "id": "147",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Nota Fiscal - Realizando Emissão Avulsa",
+    "url": "https://www.youtube.com/embed/WuAAbCJwfGQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Nota Fiscal - Realizando Emissão Avulsa. Link: https://www.youtube.com/embed/WuAAbCJwfGQ"
+  },
+  {
+    "id": "6230",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Cancelando uma Nota Fiscal",
+    "url": "https://www.youtube.com/embed/IUS9KXb3FfE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Cancelando uma Nota Fiscal. Link: https://www.youtube.com/embed/IUS9KXb3FfE"
+  },
+  {
+    "id": "183",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Inutilizando a Numeração da Nota Fiscal",
+    "url": "https://www.youtube.com/embed/yFHRC3wlufw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Inutilizando a Numeração da Nota Fiscal. Link: https://www.youtube.com/embed/yFHRC3wlufw"
+  },
+  {
+    "id": "184",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Nota Fiscal de Devolução",
+    "url": "https://www.youtube.com/embed/hj5g-jH2N7E",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Nota Fiscal de Devolução. Link: https://www.youtube.com/embed/hj5g-jH2N7E"
+  },
+  {
+    "id": "6234",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Como fazer o Download dos XMLs NFe",
+    "url": "https://www.youtube.com/embed/02faas_S67E?si=K0ZzOYBQAvvQiC6q",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Como fazer o Download dos XMLs NFe. Link: https://www.youtube.com/embed/02faas_S67E?si=K0ZzOYBQAvvQiC6q"
+  },
+  {
+    "id": "6239",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop Financeiro: Lançamento em Contas",
+    "url": "https://www.youtube.com/embed/bmtc3Lmu7ic",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro: Lançamento em Contas. Link: https://www.youtube.com/embed/bmtc3Lmu7ic"
+  },
+  {
+    "id": "6238",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop Financeiro: Contas a Receber",
+    "url": "https://www.youtube.com/embed/UTrTvG-nJM4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro: Contas a Receber. Link: https://www.youtube.com/embed/UTrTvG-nJM4"
+  },
+  {
+    "id": "6237",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop Financeiro: Contas a Pagar",
+    "url": "https://www.youtube.com/embed/4LqQAJCQFYs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro: Contas a Pagar. Link: https://www.youtube.com/embed/4LqQAJCQFYs"
+  },
+  {
+    "id": "6240",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop Financeiro: Fluxo",
+    "url": "https://www.youtube.com/embed/WFm5B3gIcpA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro: Fluxo. Link: https://www.youtube.com/embed/WFm5B3gIcpA"
+  },
+  {
+    "id": "6241",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop Financeiro: Extrato",
+    "url": "https://www.youtube.com/embed/oqKZ_s4fjtM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Financeiro: Extrato. Link: https://www.youtube.com/embed/oqKZ_s4fjtM"
+  },
+  {
+    "id": "6235",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Gerar SPED",
+    "url": "https://www.youtube.com/embed/Znf5spoPYtc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Gerar SPED. Link: https://www.youtube.com/embed/Znf5spoPYtc"
+  },
+  {
+    "id": "6236",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Sintegra",
+    "url": "https://www.youtube.com/embed/6KlhI0Or3TI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Sintegra. Link: https://www.youtube.com/embed/6KlhI0Or3TI"
+  },
+  {
+    "id": "6226",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: Ta em ordem",
+    "url": "https://www.youtube.com/embed/f7yJ4dgpUNE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Ta em ordem. Link: https://www.youtube.com/embed/f7yJ4dgpUNE"
+  },
+  {
+    "id": "6242",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: MDFe - Emissão e Encerramento",
+    "url": "https://www.youtube.com/embed/8lf294W8igQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: MDFe - Emissão e Encerramento. Link: https://www.youtube.com/embed/8lf294W8igQ"
+  },
+  {
+    "id": "6243",
+    "categoria": "Softcomshop: Aprenda a Realizar os Primeiros Cadastros e Emitir Notas Fiscais",
+    "titulo": "Softcomshop: MDFe - Cancelamento",
+    "url": "https://www.youtube.com/embed/pG7Ax751E5g",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: MDFe - Cancelamento. Link: https://www.youtube.com/embed/pG7Ax751E5g"
+  },
+  {
+    "id": "6419",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Produtos Ficha Estoque",
+    "url": "https://www.youtube.com/embed/1ntOoz9PqlU?si=56n6r3sdRz3nVRIi",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Produtos Ficha Estoque. Link: https://www.youtube.com/embed/1ntOoz9PqlU?si=56n6r3sdRz3nVRIi"
+  },
+  {
+    "id": "6425",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop - Radar Empresas",
+    "url": "https://www.youtube.com/embed/HtJUeIN4gDk?si=tdiDjlgl1Q8gKEQv",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop - Radar Empresas. Link: https://www.youtube.com/embed/HtJUeIN4gDk?si=tdiDjlgl1Q8gKEQv"
+  },
+  {
+    "id": "6433",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como gerar o relatório de Comissão",
+    "url": "https://www.youtube.com/embed/u80tZeIBJ4s?si=nhaIvhyve2sBTOZK",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como gerar o relatório de Comissão. Link: https://www.youtube.com/embed/u80tZeIBJ4s?si=nhaIvhyve2sBTOZK"
+  },
+  {
+    "id": "6434",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como conferir o relatório de Contratos a Vencer",
+    "url": "https://www.youtube.com/embed/zPeF5gZR5qM?si=fBUo1K4JAvbhxqZ2",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como conferir o relatório de Contratos a Vencer. Link: https://www.youtube.com/embed/zPeF5gZR5qM?si=fBUo1K4JAvbhxqZ2"
+  },
+  {
+    "id": "6435",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como gerar o relatório de Gerente de Vendas",
+    "url": "https://www.youtube.com/embed/OhcYSkVHVaI?si=46BVvzkATTm6zzLr",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como gerar o relatório de Gerente de Vendas. Link: https://www.youtube.com/embed/OhcYSkVHVaI?si=46BVvzkATTm6zzLr"
+  },
+  {
+    "id": "6436",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como gerar o relatório do inventário",
+    "url": "https://www.youtube.com/embed/jT6oVCDVwfg?si=CHY3l-wK6c6abKQ-",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como gerar o relatório do inventário. Link: https://www.youtube.com/embed/jT6oVCDVwfg?si=CHY3l-wK6c6abKQ-"
+  },
+  {
+    "id": "6437",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como conferir o relatório de Movimentação de Estoque",
+    "url": "https://www.youtube.com/embed/DUBPRy5-pk8?si=McrvTRCSYg12b34t",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como conferir o relatório de Movimentação de Estoque. Link: https://www.youtube.com/embed/DUBPRy5-pk8?si=McrvTRCSYg12b34t"
+  },
+  {
+    "id": "6438",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como consultar a Tabela de Preço",
+    "url": "https://www.youtube.com/embed/CD4qRleTKPw?si=MyvdNjKqMTA4b_AZ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como consultar a Tabela de Preço. Link: https://www.youtube.com/embed/CD4qRleTKPw?si=MyvdNjKqMTA4b_AZ"
+  },
+  {
+    "id": "6439",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como consultar o relatório do Estoque",
+    "url": "https://www.youtube.com/embed/-cdeeC7lSmI?si=FuaCQ6N58nNFj52v",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como consultar o relatório do Estoque. Link: https://www.youtube.com/embed/-cdeeC7lSmI?si=FuaCQ6N58nNFj52v"
+  },
+  {
+    "id": "6442",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como consultar a Projeção de Cartões",
+    "url": "https://www.youtube.com/embed/TjzMbUD511g?si=1mxXWrRqt2GbHB-U",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como consultar a Projeção de Cartões. Link: https://www.youtube.com/embed/TjzMbUD511g?si=1mxXWrRqt2GbHB-U"
+  },
+  {
+    "id": "6443",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como consultar o relatório Contas a Pagar",
+    "url": "https://www.youtube.com/embed/iv08keF9eG4?si=VVDz-9y6ovQBo0iE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como consultar o relatório Contas a Pagar. Link: https://www.youtube.com/embed/iv08keF9eG4?si=VVDz-9y6ovQBo0iE"
+  },
+  {
+    "id": "6444",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como usar o relatório Mais Vendidos",
+    "url": "https://www.youtube.com/embed/6ZarfGeJRzg?si=WFPFtz9YGQFqRY-X",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como usar o relatório Mais Vendidos. Link: https://www.youtube.com/embed/6ZarfGeJRzg?si=WFPFtz9YGQFqRY-X"
+  },
+  {
+    "id": "6445",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como utilizar o relatório Contas a Receber",
+    "url": "https://www.youtube.com/embed/Nmm03pRDt08?si=n41Yl8LmOtAA3EX9",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como utilizar o relatório Contas a Receber. Link: https://www.youtube.com/embed/Nmm03pRDt08?si=n41Yl8LmOtAA3EX9"
+  },
+  {
+    "id": "6446",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Conferindo Relatório de Caixa",
+    "url": "https://www.youtube.com/embed/Fm68TvEvkdI?si=YUoxEH2b_f9i1vBw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Conferindo Relatório de Caixa. Link: https://www.youtube.com/embed/Fm68TvEvkdI?si=YUoxEH2b_f9i1vBw"
+  },
+  {
+    "id": "6447",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Conferindo Relatórios de Pagamentos",
+    "url": "https://www.youtube.com/embed/wGPy7Fjcjy4?si=M6AeeiUJFjCSndFW",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Conferindo Relatórios de Pagamentos. Link: https://www.youtube.com/embed/wGPy7Fjcjy4?si=M6AeeiUJFjCSndFW"
+  },
+  {
+    "id": "6448",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Acompanhando Relatórios de Evolução",
+    "url": "https://www.youtube.com/embed/wGPy7Fjcjy4?si=bbp71ttaAunr4__F",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Acompanhando Relatórios de Evolução. Link: https://www.youtube.com/embed/wGPy7Fjcjy4?si=bbp71ttaAunr4__F"
+  },
+  {
+    "id": "6449",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Acompanhando Relatórios de Evolução",
+    "url": "https://www.youtube.com/embed/puidjDA8Ii4?si=Dm0-UE_w4scTIpm-",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Acompanhando Relatórios de Evolução. Link: https://www.youtube.com/embed/puidjDA8Ii4?si=Dm0-UE_w4scTIpm-"
+  },
+  {
+    "id": "6450",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Gerando Relatório de Últimas Compras",
+    "url": "https://www.youtube.com/embed/CL3kTpsW0vY?si=wWfWOKeXZ-H7sG7P",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Gerando Relatório de Últimas Compras. Link: https://www.youtube.com/embed/CL3kTpsW0vY?si=wWfWOKeXZ-H7sG7P"
+  },
+  {
+    "id": "6451",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatórios - Como gerar o relatório de Auditoria",
+    "url": "https://www.youtube.com/embed/69zXZDN6zs0?si=nsSd382TWQ_MhqSi",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatórios - Como gerar o relatório de Auditoria. Link: https://www.youtube.com/embed/69zXZDN6zs0?si=nsSd382TWQ_MhqSi"
+  },
+  {
+    "id": "6452",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop relatórios - Gerando Relatórios dos Aniversariantes",
+    "url": "https://www.youtube.com/embed/KVEsiA2cIF0?si=8cXu6AWTqKxenJb2",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop relatórios - Gerando Relatórios dos Aniversariantes. Link: https://www.youtube.com/embed/KVEsiA2cIF0?si=8cXu6AWTqKxenJb2"
+  },
+  {
+    "id": "6245",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop: Relatório Ficha Estoque",
+    "url": "https://www.youtube.com/embed/AGnCElWhRy8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Relatório Ficha Estoque. Link: https://www.youtube.com/embed/AGnCElWhRy8"
+  },
+  {
+    "id": "6247",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop: Relatório NCM",
+    "url": "https://www.youtube.com/embed/Ldj0u5ooWAM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Relatório NCM. Link: https://www.youtube.com/embed/Ldj0u5ooWAM"
+  },
+  {
+    "id": "6248",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop Relatório de Vendas Período",
+    "url": "https://www.youtube.com/embed/MEDioOvTnN8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Relatório de Vendas Período. Link: https://www.youtube.com/embed/MEDioOvTnN8"
+  },
+  {
+    "id": "6249",
+    "categoria": "Softcomshop: Conhecendo os relatórios",
+    "titulo": "Softcomshop: Relatório Fiscal (Analítico e Sintético)",
+    "url": "https://www.youtube.com/embed/E3R1A0Lq9sM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop: Relatório Fiscal (Analítico e Sintético). Link: https://www.youtube.com/embed/E3R1A0Lq9sM"
+  },
+  {
+    "id": "6464",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop: Consulta Histórico",
+    "url": "https://www.youtube.com/embed/p3ehVvGizMo?si=mj_7wEBlkvZWerSc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop: Consulta Histórico. Link: https://www.youtube.com/embed/p3ehVvGizMo?si=mj_7wEBlkvZWerSc"
+  },
+  {
+    "id": "6466",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Consultar Histórico (Mobile)",
+    "url": "https://www.youtube.com/embed/jBHVu1yiWeo?si=ZXT3RItuN6XmI0_a",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Consultar Histórico (Mobile). Link: https://www.youtube.com/embed/jBHVu1yiWeo?si=ZXT3RItuN6XmI0_a"
+  },
+  {
+    "id": "6467",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Realizando Checklist",
+    "url": "https://www.youtube.com/embed/IEJudIApNRY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Realizando Checklist. Link: https://www.youtube.com/embed/IEJudIApNRY"
+  },
+  {
+    "id": "6491",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop: Cadastro de Similares",
+    "url": "https://www.youtube.com/embed/51k-rvpMbj0?si=2ODyoSSnVerz2G1u",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop: Cadastro de Similares. Link: https://www.youtube.com/embed/51k-rvpMbj0?si=2ODyoSSnVerz2G1u"
+  },
+  {
+    "id": "6501",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Cadastro de Similares",
+    "url": "https://www.youtube.com/embed/51k-rvpMbj0?si=b1GP17_MXqVtTFSQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Cadastro de Similares. Link: https://www.youtube.com/embed/51k-rvpMbj0?si=b1GP17_MXqVtTFSQ"
+  },
+  {
+    "id": "6456",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Gerando Orçamento",
+    "url": "https://www.youtube.com/embed/-zMAibsIcIQ?si=awOjTI9db7Qp4Dyy",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Gerando Orçamento. Link: https://www.youtube.com/embed/-zMAibsIcIQ?si=awOjTI9db7Qp4Dyy"
+  },
+  {
+    "id": "6458",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Cadastro de Novo Veículo",
+    "url": "https://www.youtube.com/embed/9k5eg5ytn-Q?si=n1erI7gwtdfiWcMz",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Cadastro de Novo Veículo. Link: https://www.youtube.com/embed/9k5eg5ytn-Q?si=n1erI7gwtdfiWcMz"
+  },
+  {
+    "id": "6459",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Nova Ordem de Serviço",
+    "url": "https://www.youtube.com/embed/sKUx6D09pnA?si=ndACRFJnMkDyVNJU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Nova Ordem de Serviço. Link: https://www.youtube.com/embed/sKUx6D09pnA?si=ndACRFJnMkDyVNJU"
+  },
+  {
+    "id": "6460",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Como Adicionar Profissionais",
+    "url": "https://www.youtube.com/embed/xQwQa3j6Cuk?si=ejLsJV3XF_aS5Ts2",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Como Adicionar Profissionais. Link: https://www.youtube.com/embed/xQwQa3j6Cuk?si=ejLsJV3XF_aS5Ts2"
+  },
+  {
+    "id": "6461",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Como Cadastrar Mecânico",
+    "url": "https://www.youtube.com/embed/6dIzFb9uqf0?si=0zafrnYbWoXAZ7m_",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Como Cadastrar Mecânico. Link: https://www.youtube.com/embed/6dIzFb9uqf0?si=0zafrnYbWoXAZ7m_"
+  },
+  {
+    "id": "6462",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Relatório de Comissão Profissional",
+    "url": "https://www.youtube.com/embed/zoKJ09vY0OI?si=LfQXeHL7VgFICbET",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Relatório de Comissão Profissional. Link: https://www.youtube.com/embed/zoKJ09vY0OI?si=LfQXeHL7VgFICbET"
+  },
+  {
+    "id": "6455",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Como Utilizar o Pesquisa Preço",
+    "url": "https://www.youtube.com/embed/ePwaoamEyBI?si=zUPZ28JmJB1bZct5",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Como Utilizar o Pesquisa Preço. Link: https://www.youtube.com/embed/ePwaoamEyBI?si=zUPZ28JmJB1bZct5"
+  },
+  {
+    "id": "6453",
+    "categoria": "Pitstop",
+    "titulo": "Softcomshop Pitstop - Painel de Atendimentos",
+    "url": "https://www.youtube.com/embed/z86mWKBIfe4?si=gMVEBPX4Rs6vdV2G",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Pitstop - Painel de Atendimentos. Link: https://www.youtube.com/embed/z86mWKBIfe4?si=gMVEBPX4Rs6vdV2G"
+  },
+  {
+    "id": "6428",
+    "categoria": "Restaurante",
+    "titulo": "Softcomchef Delivery - Cancelar Itens do Pedido",
+    "url": "https://www.youtube.com/embed/jBJaG7Ddu60?si=G5KiT3miBVltO7uL",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomchef Delivery - Cancelar Itens do Pedido. Link: https://www.youtube.com/embed/jBJaG7Ddu60?si=G5KiT3miBVltO7uL"
+  },
+  {
+    "id": "6429",
+    "categoria": "Restaurante",
+    "titulo": "Softcomchef Delivery - Como Cadastrar um Novo Cliente",
+    "url": "https://www.youtube.com/embed/40o9ONigmuw?si=tHnbWJu8HmIt_xas",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomchef Delivery - Como Cadastrar um Novo Cliente. Link: https://www.youtube.com/embed/40o9ONigmuw?si=tHnbWJu8HmIt_xas"
+  },
+  {
+    "id": "6430",
+    "categoria": "Restaurante",
+    "titulo": "Softcomchef Delivery - Como Cancelar um Pedido",
+    "url": "https://www.youtube.com/embed/gzXlYnDJEAo?si=cYLoOOJvjyfKHEdi",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomchef Delivery - Como Cancelar um Pedido. Link: https://www.youtube.com/embed/gzXlYnDJEAo?si=cYLoOOJvjyfKHEdi"
+  },
+  {
+    "id": "6431",
+    "categoria": "Restaurante",
+    "titulo": "Softcomchef Delivery - Como Editar um Pedido",
+    "url": "https://www.youtube.com/embed/dQ4ipXxsLEc?si=np864m7Qulc4IiAT",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomchef Delivery - Como Editar um Pedido. Link: https://www.youtube.com/embed/dQ4ipXxsLEc?si=np864m7Qulc4IiAT"
+  },
+  {
+    "id": "6432",
+    "categoria": "Restaurante",
+    "titulo": "Softcomchef Delivery - Novo Delivery Avulso",
+    "url": "https://www.youtube.com/embed/oFnBjIPaP6M?si=oNpOsymwNmm6u-eq",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomchef Delivery - Novo Delivery Avulso. Link: https://www.youtube.com/embed/oFnBjIPaP6M?si=oNpOsymwNmm6u-eq"
+  },
+  {
+    "id": "6399",
+    "categoria": "Restaurante",
+    "titulo": "Tá no Menu - Como Sincronizar os Produtos Automaticamente",
+    "url": "https://www.youtube.com/embed/YNjjlG2to-w?si=UTwXjUeITsGMaP98",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tá no Menu - Como Sincronizar os Produtos Automaticamente. Link: https://www.youtube.com/embed/YNjjlG2to-w?si=UTwXjUeITsGMaP98"
+  },
+  {
+    "id": "6398",
+    "categoria": "Restaurante",
+    "titulo": "Tá no Menu - Como gerar o QR Code das Mesas",
+    "url": "https://www.youtube.com/embed/ly-qm5GQxys?si=67GqHonfbvnKfBd7",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tá no Menu - Como gerar o QR Code das Mesas. Link: https://www.youtube.com/embed/ly-qm5GQxys?si=67GqHonfbvnKfBd7"
+  },
+  {
+    "id": "6396",
+    "categoria": "Restaurante",
+    "titulo": "Tá no Menu - Como Fazer um Pedido",
+    "url": "https://www.youtube.com/embed/caaM1Wurnjw?si=oitaLlqCzJDtg0Y_",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tá no Menu - Como Fazer um Pedido. Link: https://www.youtube.com/embed/caaM1Wurnjw?si=oitaLlqCzJDtg0Y_"
+  },
+  {
+    "id": "6395",
+    "categoria": "Restaurante",
+    "titulo": "Tá no Menu - Como Editar o Cardápio de Forma Manual",
+    "url": "https://www.youtube.com/embed/tYnRBG-7nwM?si=Y7L89C_8OX5mnzDY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tá no Menu - Como Editar o Cardápio de Forma Manual. Link: https://www.youtube.com/embed/tYnRBG-7nwM?si=Y7L89C_8OX5mnzDY"
+  },
+  {
+    "id": "6394",
+    "categoria": "Restaurante",
+    "titulo": "Tá no Menu - Como Configurar os Dados da Empresa",
+    "url": "https://www.youtube.com/embed/azefN3jgQa0?si=gUBTr-rcpsMT4-5j",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tá no Menu - Como Configurar os Dados da Empresa. Link: https://www.youtube.com/embed/azefN3jgQa0?si=gUBTr-rcpsMT4-5j"
+  },
+  {
+    "id": "6393",
+    "categoria": "Restaurante",
+    "titulo": "Tá no Menu - Como Configurar Horários de Funcionamento",
+    "url": "https://www.youtube.com/embed/VcIO6riUBXA?si=xg6CgzkuEthBUq9K",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tá no Menu - Como Configurar Horários de Funcionamento. Link: https://www.youtube.com/embed/VcIO6riUBXA?si=xg6CgzkuEthBUq9K"
+  },
+  {
+    "id": "6385",
+    "categoria": "Restaurante",
+    "titulo": "SoftcomChef - Realizando um Adiantamento",
+    "url": "https://www.youtube.com/embed/jSPqdvJHXGE?si=CsH3G2jYRgYtXFAc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SoftcomChef - Realizando um Adiantamento. Link: https://www.youtube.com/embed/jSPqdvJHXGE?si=CsH3G2jYRgYtXFAc"
+  },
+  {
+    "id": "6386",
+    "categoria": "Restaurante",
+    "titulo": "SoftcomChef - Recebendo um Pagamento",
+    "url": "https://www.youtube.com/embed/Yz4CjGwKWms?si=Hb7TG282UpUAy0TP",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SoftcomChef - Recebendo um Pagamento. Link: https://www.youtube.com/embed/Yz4CjGwKWms?si=Hb7TG282UpUAy0TP"
+  },
+  {
+    "id": "6380",
+    "categoria": "Restaurante",
+    "titulo": "SoftcomChef - Criando e Filtrando Mesas",
+    "url": "https://www.youtube.com/embed/KutnOTQLtSI?si=7mdPoDERkZCknUmq",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SoftcomChef - Criando e Filtrando Mesas. Link: https://www.youtube.com/embed/KutnOTQLtSI?si=7mdPoDERkZCknUmq"
+  },
+  {
+    "id": "6381",
+    "categoria": "Restaurante",
+    "titulo": "SoftcomChef - Como Transferir Itens Entre Mesas",
+    "url": "https://www.youtube.com/embed/zmaK33CcevA?si=rhO93z2FrhaHRw34",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SoftcomChef - Como Transferir Itens Entre Mesas. Link: https://www.youtube.com/embed/zmaK33CcevA?si=rhO93z2FrhaHRw34"
+  },
+  {
+    "id": "6382",
+    "categoria": "Restaurante",
+    "titulo": "SoftcomChef - Juntando Mesas",
+    "url": "https://www.youtube.com/embed/53srrft83H0?si=EWsZF8j1o585vUbu",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SoftcomChef - Juntando Mesas. Link: https://www.youtube.com/embed/53srrft83H0?si=EWsZF8j1o585vUbu"
+  },
+  {
+    "id": "6383",
+    "categoria": "Restaurante",
+    "titulo": "SoftcomChef - Cancelando um Pedido",
+    "url": "https://www.youtube.com/embed/P-obaZE7YwA?si=pF5gTUw1CoTrkT1b",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SoftcomChef - Cancelando um Pedido. Link: https://www.youtube.com/embed/P-obaZE7YwA?si=pF5gTUw1CoTrkT1b"
+  },
+  {
+    "id": "6384",
+    "categoria": "Restaurante",
+    "titulo": "SoftcomChef - Sinalizando uma Mesa que Pediu a Conta",
+    "url": "https://www.youtube.com/embed/d9Puy0X5vC8?si=wx7m4USFfqbP6JsI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SoftcomChef - Sinalizando uma Mesa que Pediu a Conta. Link: https://www.youtube.com/embed/d9Puy0X5vC8?si=wx7m4USFfqbP6JsI"
+  },
+  {
+    "id": "162",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Softshop: Cadastro de Grupos",
+    "url": "https://www.youtube.com/embed/Dho5EnEAoUI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Softshop: Cadastro de Grupos. Link: https://www.youtube.com/embed/Dho5EnEAoUI"
+  },
+  {
+    "id": "163",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Softshop: Cadastro de Mercadorias",
+    "url": "https://www.youtube.com/embed/n_rxs6YNJ7c",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Softshop: Cadastro de Mercadorias. Link: https://www.youtube.com/embed/n_rxs6YNJ7c"
+  },
+  {
+    "id": "167",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Softshop: Produção",
+    "url": "https://www.youtube.com/embed/rOv57GdR5ek",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Softshop: Produção. Link: https://www.youtube.com/embed/rOv57GdR5ek"
+  },
+  {
+    "id": "168",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Softshop: Manipulação",
+    "url": "https://www.youtube.com/embed/FCtQsbEn_go",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Softshop: Manipulação. Link: https://www.youtube.com/embed/FCtQsbEn_go"
+  },
+  {
+    "id": "164",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Softshop: Painel de Bordo",
+    "url": "https://www.youtube.com/embed/habHGsE94ZE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Softshop: Painel de Bordo. Link: https://www.youtube.com/embed/habHGsE94ZE"
+  },
+  {
+    "id": "180",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Softshop: Caixa Fechamento",
+    "url": "https://www.youtube.com/embed/lCDiAwuhKPg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Softshop: Caixa Fechamento. Link: https://www.youtube.com/embed/lCDiAwuhKPg"
+  },
+  {
+    "id": "169",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Realize Vendas Delivery",
+    "url": "https://www.youtube.com/embed/TCUsEQQ2WMg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Realize Vendas Delivery. Link: https://www.youtube.com/embed/TCUsEQQ2WMg"
+  },
+  {
+    "id": "6202",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Aprenda a utilizar o seu Delivery integrado com o Ifood",
+    "url": "https://www.youtube.com/embed/wdSysAUKCZE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Aprenda a utilizar o seu Delivery integrado com o Ifood. Link: https://www.youtube.com/embed/wdSysAUKCZE"
+  },
+  {
+    "id": "6204",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Cadastrando Mercadorias no Ifood (Cardápio Padrão)",
+    "url": "https://www.youtube.com/embed/1zxIess7Ao4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Cadastrando Mercadorias no Ifood (Cardápio Padrão). Link: https://www.youtube.com/embed/1zxIess7Ao4"
+  },
+  {
+    "id": "6205",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Cadastrando Mercadorias no Ifood (Cardápio Pizza)",
+    "url": "https://www.youtube.com/embed/oYBH3q2wtuo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Cadastrando Mercadorias no Ifood (Cardápio Pizza). Link: https://www.youtube.com/embed/oYBH3q2wtuo"
+  },
+  {
+    "id": "170",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Realize a Venda pelo Painel de Mesas",
+    "url": "https://www.youtube.com/embed/i4_ILvQfdTo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Realize a Venda pelo Painel de Mesas. Link: https://www.youtube.com/embed/i4_ILvQfdTo"
+  },
+  {
+    "id": "165",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Transferir ou Juntar Contas através do Painel de Mesas",
+    "url": "https://www.youtube.com/embed/INcQPQ8QhdQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Transferir ou Juntar Contas através do Painel de Mesas. Link: https://www.youtube.com/embed/INcQPQ8QhdQ"
+  },
+  {
+    "id": "181",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Realize o Adiantamento de uma Conta",
+    "url": "https://www.youtube.com/embed/K2_ycxdaFKc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Realize o Adiantamento de uma Conta. Link: https://www.youtube.com/embed/K2_ycxdaFKc"
+  },
+  {
+    "id": "6209",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante/Caixa: Tela de Apoio",
+    "url": "https://www.youtube.com/embed/ROmLNlOLH5M",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante/Caixa: Tela de Apoio. Link: https://www.youtube.com/embed/ROmLNlOLH5M"
+  },
+  {
+    "id": "214",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante: Comanda Eletrônica (Instalação e Configuração)",
+    "url": "https://www.youtube.com/embed/p2RMlziZSB4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante: Comanda Eletrônica (Instalação e Configuração). Link: https://www.youtube.com/embed/p2RMlziZSB4"
+  },
+  {
+    "id": "212",
+    "categoria": "Restaurante",
+    "titulo": "Restaurante: Comanda Eletrônica",
+    "url": "https://www.youtube.com/embed/GmBKY07DKnc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Restaurante: Comanda Eletrônica. Link: https://www.youtube.com/embed/GmBKY07DKnc"
+  },
+  {
+    "id": "6503",
+    "categoria": "Pedido na Mesa",
+    "titulo": "Pedido na Mesa - Variações",
+    "url": "https://www.youtube.com/embed/jZ-zqOmydgc?si=FHaFgKCEIuBPWGZm",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Pedido na Mesa - Variações. Link: https://www.youtube.com/embed/jZ-zqOmydgc?si=FHaFgKCEIuBPWGZm"
+  },
+  {
+    "id": "6495",
+    "categoria": "Pedido na Mesa",
+    "titulo": "Pedido na Mesa - Cadastro de Grupos",
+    "url": "https://www.youtube.com/embed/ykq4EkHN1J0?si=ugBt8HZNasJ_maPm",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Pedido na Mesa - Cadastro de Grupos. Link: https://www.youtube.com/embed/ykq4EkHN1J0?si=ugBt8HZNasJ_maPm"
+  },
+  {
+    "id": "6497",
+    "categoria": "Pedido na Mesa",
+    "titulo": "Pedido na Mesa - Avaliações",
+    "url": "https://www.youtube.com/embed/_GRQ_RjMbTs?si=W1fnprW3ZJzNtWAW",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Pedido na Mesa - Avaliações. Link: https://www.youtube.com/embed/_GRQ_RjMbTs?si=W1fnprW3ZJzNtWAW"
+  },
+  {
+    "id": "6498",
+    "categoria": "Pedido na Mesa",
+    "titulo": "Pedido na Mesa - Cadastro de Comandas",
+    "url": "https://www.youtube.com/embed/PedyUfHxBF0?si=_nLsdkGvEm6mGx8R",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Pedido na Mesa - Cadastro de Comandas. Link: https://www.youtube.com/embed/PedyUfHxBF0?si=_nLsdkGvEm6mGx8R"
+  },
+  {
+    "id": "6502",
+    "categoria": "Catálogo Digital",
+    "titulo": "Catálogo Digital - Temas",
+    "url": "https://www.youtube.com/embed/2zyG9rrJYA8?si=oGn5LAtdp3q8fHip",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Catálogo Digital - Temas. Link: https://www.youtube.com/embed/2zyG9rrJYA8?si=oGn5LAtdp3q8fHip"
+  },
+  {
+    "id": "6490",
+    "categoria": "Catálogo Digital",
+    "titulo": "Catálogo Digital - Cadastro de Grupos",
+    "url": "https://www.youtube.com/embed/756mJ94TheI?si=P9pC_y7sVgF1Ecen",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Catálogo Digital - Cadastro de Grupos. Link: https://www.youtube.com/embed/756mJ94TheI?si=P9pC_y7sVgF1Ecen"
+  },
+  {
+    "id": "6496",
+    "categoria": "Catálogo Digital",
+    "titulo": "Catálogo Digital - Grade",
+    "url": "https://www.youtube.com/embed/ni_d3MFgI4w?si=Wr18u0t5Neij-k7L",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Catálogo Digital - Grade. Link: https://www.youtube.com/embed/ni_d3MFgI4w?si=Wr18u0t5Neij-k7L"
+  },
+  {
+    "id": "6499",
+    "categoria": "Catálogo Digital",
+    "titulo": "Catálogo Digital - Cadastro de Produtos",
+    "url": "https://www.youtube.com/embed/Y3kop7HBhSo?si=9xNsxsyWWZIljNNn",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Catálogo Digital - Cadastro de Produtos. Link: https://www.youtube.com/embed/Y3kop7HBhSo?si=9xNsxsyWWZIljNNn"
+  },
+  {
+    "id": "6414",
+    "categoria": "Moda",
+    "titulo": "Softcomshop Moda - Orçamento (Grade)",
+    "url": "https://www.youtube.com/embed/DDPDFlFhQwk?si=Oa-r2V0zW-sSMjGL",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Moda - Orçamento (Grade). Link: https://www.youtube.com/embed/DDPDFlFhQwk?si=Oa-r2V0zW-sSMjGL"
+  },
+  {
+    "id": "6362",
+    "categoria": "Moda",
+    "titulo": "Softcomshop Moda: Cadastro de Produtos (Grade)",
+    "url": "https://www.youtube.com/embed/aZlldk1v5HE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Moda: Cadastro de Produtos (Grade). Link: https://www.youtube.com/embed/aZlldk1v5HE"
+  },
+  {
+    "id": "6363",
+    "categoria": "Moda",
+    "titulo": "Softcomshop Moda: Importando Notas de Compra (Grade)",
+    "url": "https://www.youtube.com/embed/OiXaRvLMcRo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Moda: Importando Notas de Compra (Grade). Link: https://www.youtube.com/embed/OiXaRvLMcRo"
+  },
+  {
+    "id": "6364",
+    "categoria": "Moda",
+    "titulo": "Softcomshop Moda: Balanço de Estoque (Grade)",
+    "url": "https://www.youtube.com/embed/7UNd9LKeXPs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Moda: Balanço de Estoque (Grade). Link: https://www.youtube.com/embed/7UNd9LKeXPs"
+  },
+  {
+    "id": "6369",
+    "categoria": "Moda",
+    "titulo": "Softcomshop Moda: Vendas (Grade)",
+    "url": "https://www.youtube.com/embed/_LTDfP52pKU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Moda: Vendas (Grade). Link: https://www.youtube.com/embed/_LTDfP52pKU"
+  },
+  {
+    "id": "6365",
+    "categoria": "Moda",
+    "titulo": "Softshop Moda: Cadastro de Mercadorias (Grade)",
+    "url": "https://www.youtube.com/embed/-CFvxDo05O8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Moda: Cadastro de Mercadorias (Grade). Link: https://www.youtube.com/embed/-CFvxDo05O8"
+  },
+  {
+    "id": "6366",
+    "categoria": "Moda",
+    "titulo": "Softshop Moda: Lançamento de Nota Fiscal de Entrada (Grade)",
+    "url": "https://www.youtube.com/embed/r4PLY333zGE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Moda: Lançamento de Nota Fiscal de Entrada (Grade). Link: https://www.youtube.com/embed/r4PLY333zGE"
+  },
+  {
+    "id": "6368",
+    "categoria": "Moda",
+    "titulo": "Softshop Moda: Ajustes de Estoque: Correções, Avarias, Vencidas ou Retiradas",
+    "url": "https://www.youtube.com/embed/KvlJQwk7QSE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Moda: Ajustes de Estoque: Correções, Avarias, Vencidas ou Retiradas. Link: https://www.youtube.com/embed/KvlJQwk7QSE"
+  },
+  {
+    "id": "6192",
+    "categoria": "Moda",
+    "titulo": "Softshop Moda: Vendedores - Realize suas Vendas no Balcão para serem finalizadas no Caixa (Grade)",
+    "url": "https://www.youtube.com/embed/r3Fk23v4muI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Moda: Vendedores - Realize suas Vendas no Balcão para serem finalizadas no Caixa (Grade). Link: https://www.youtube.com/embed/r3Fk23v4muI"
+  },
+  {
+    "id": "6492",
+    "categoria": "Softcomshop Atacado",
+    "titulo": "Softcomshop Atacado: Bloqueio e Desbloqueio de Pedidos",
+    "url": "https://www.youtube.com/embed/WDAXhuOKw48?si=WyNgZ65l5mKFxvH7",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Atacado: Bloqueio e Desbloqueio de Pedidos. Link: https://www.youtube.com/embed/WDAXhuOKw48?si=WyNgZ65l5mKFxvH7"
+  },
+  {
+    "id": "6319",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Cadastro de Vacinas",
+    "url": "https://www.youtube.com/embed/FoyFSgoNfLQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Cadastro de Vacinas. Link: https://www.youtube.com/embed/FoyFSgoNfLQ"
+  },
+  {
+    "id": "6320",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Cadastro de Pet",
+    "url": "https://www.youtube.com/embed/bzfYUnmPWN0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Cadastro de Pet. Link: https://www.youtube.com/embed/bzfYUnmPWN0"
+  },
+  {
+    "id": "6321",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Cadastro de Serviços",
+    "url": "https://www.youtube.com/embed/ePYHaizzLbQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Cadastro de Serviços. Link: https://www.youtube.com/embed/ePYHaizzLbQ"
+  },
+  {
+    "id": "6322",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Cadastro Pacotes",
+    "url": "https://www.youtube.com/embed/Q5X0ILSsqFA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Cadastro Pacotes. Link: https://www.youtube.com/embed/Q5X0ILSsqFA"
+  },
+  {
+    "id": "6323",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Uso de Pacote de Serviço",
+    "url": "https://www.youtube.com/embed/7Bm673rhGJ8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Uso de Pacote de Serviço. Link: https://www.youtube.com/embed/7Bm673rhGJ8"
+  },
+  {
+    "id": "6324",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Modelo Prescrição",
+    "url": "https://www.youtube.com/embed/liOwQjrd64w",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Modelo Prescrição. Link: https://www.youtube.com/embed/liOwQjrd64w"
+  },
+  {
+    "id": "6325",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Tipos de Atendimento",
+    "url": "https://www.youtube.com/embed/argRB3T8hgQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Tipos de Atendimento. Link: https://www.youtube.com/embed/argRB3T8hgQ"
+  },
+  {
+    "id": "6326",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Registro de Receitas",
+    "url": "https://www.youtube.com/embed/2aiIWwaPub4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Registro de Receitas. Link: https://www.youtube.com/embed/2aiIWwaPub4"
+  },
+  {
+    "id": "6327",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Registro de Exames",
+    "url": "https://www.youtube.com/embed/rRMJpEWk3VY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Registro de Exames. Link: https://www.youtube.com/embed/rRMJpEWk3VY"
+  },
+  {
+    "id": "6328",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Realizando Atendimentos",
+    "url": "https://www.youtube.com/embed/dhxNZRb-OFs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Realizando Atendimentos. Link: https://www.youtube.com/embed/dhxNZRb-OFs"
+  },
+  {
+    "id": "6329",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Registro de Anamneses",
+    "url": "https://www.youtube.com/embed/bp2ST3wtKHo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Registro de Anamneses. Link: https://www.youtube.com/embed/bp2ST3wtKHo"
+  },
+  {
+    "id": "6330",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Inserindo Peso do Pet",
+    "url": "https://www.youtube.com/embed/vNqt6Xq9Kbk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Inserindo Peso do Pet. Link: https://www.youtube.com/embed/vNqt6Xq9Kbk"
+  },
+  {
+    "id": "6331",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Inserindo Fotos do Pet",
+    "url": "https://www.youtube.com/embed/sEn_gxHPPEs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Inserindo Fotos do Pet. Link: https://www.youtube.com/embed/sEn_gxHPPEs"
+  },
+  {
+    "id": "6332",
+    "categoria": "Petshop",
+    "titulo": "Softcomshop Petshop: Aplicação e Agendamento de Vacinas",
+    "url": "https://www.youtube.com/embed/jAk7P-svbu0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Petshop: Aplicação e Agendamento de Vacinas. Link: https://www.youtube.com/embed/jAk7P-svbu0"
+  },
+  {
+    "id": "6178",
+    "categoria": "Petshop",
+    "titulo": "Petshop: Cadastro de Pacotes",
+    "url": "https://www.youtube.com/embed/juN8EBEzvcY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Petshop: Cadastro de Pacotes. Link: https://www.youtube.com/embed/juN8EBEzvcY"
+  },
+  {
+    "id": "6179",
+    "categoria": "Petshop",
+    "titulo": "Petshop: Cadastro de Pets",
+    "url": "https://www.youtube.com/embed/zhmoyM8G4_g",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Petshop: Cadastro de Pets. Link: https://www.youtube.com/embed/zhmoyM8G4_g"
+  },
+  {
+    "id": "6180",
+    "categoria": "Petshop",
+    "titulo": "Petshop: Painel de Serviços",
+    "url": "https://www.youtube.com/embed/WtbOASPCobM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Petshop: Painel de Serviços. Link: https://www.youtube.com/embed/WtbOASPCobM"
+  },
+  {
+    "id": "6181",
+    "categoria": "Petshop",
+    "titulo": "Petshop: Painel Taxi Pet",
+    "url": "https://www.youtube.com/embed/OJgfaxg98Cs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Petshop: Painel Taxi Pet. Link: https://www.youtube.com/embed/OJgfaxg98Cs"
+  },
+  {
+    "id": "6375",
+    "categoria": "Ótica",
+    "titulo": "Softcomshop Ótica: Cadastrando Lentes e Armações",
+    "url": "https://www.youtube.com/embed/0Zhi_hAMnt8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Ótica: Cadastrando Lentes e Armações. Link: https://www.youtube.com/embed/0Zhi_hAMnt8"
+  },
+  {
+    "id": "6376",
+    "categoria": "Ótica",
+    "titulo": "Softcomshop Ótica: Como Realizar uma Assistência",
+    "url": "https://www.youtube.com/embed/N9dABIbsi4E",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Ótica: Como Realizar uma Assistência. Link: https://www.youtube.com/embed/N9dABIbsi4E"
+  },
+  {
+    "id": "6182",
+    "categoria": "Ótica",
+    "titulo": "Softshop Ótica: Aprendendo a Gerenciar a Assistência",
+    "url": "https://www.youtube.com/embed/9sGZgN-EWwk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Ótica: Aprendendo a Gerenciar a Assistência. Link: https://www.youtube.com/embed/9sGZgN-EWwk"
+  },
+  {
+    "id": "185",
+    "categoria": "Vidros",
+    "titulo": "Vidros: Cadastro de Grupos",
+    "url": "https://www.youtube.com/embed/620ohPCXcPM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vidros: Cadastro de Grupos. Link: https://www.youtube.com/embed/620ohPCXcPM"
+  },
+  {
+    "id": "186",
+    "categoria": "Vidros",
+    "titulo": "Vidros: Cadastro de Mercadorias",
+    "url": "https://www.youtube.com/embed/jD5Ph6tVHrs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vidros: Cadastro de Mercadorias. Link: https://www.youtube.com/embed/jD5Ph6tVHrs"
+  },
+  {
+    "id": "187",
+    "categoria": "Vidros",
+    "titulo": "Vidros: Ordem de Medição",
+    "url": "https://www.youtube.com/embed/unlJXM6PaFA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vidros: Ordem de Medição. Link: https://www.youtube.com/embed/unlJXM6PaFA"
+  },
+  {
+    "id": "189",
+    "categoria": "Vidros",
+    "titulo": "Vidros: Vendedores, Realize seus Orçamentos",
+    "url": "https://www.youtube.com/embed/bC2ZTN0GNDs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vidros: Vendedores, Realize seus Orçamentos. Link: https://www.youtube.com/embed/bC2ZTN0GNDs"
+  },
+  {
+    "id": "190",
+    "categoria": "Vidros",
+    "titulo": "Vidros: Vendedores, Realize suas Vendas",
+    "url": "https://www.youtube.com/embed/J2VBw-V9Jm4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Vidros: Vendedores, Realize suas Vendas. Link: https://www.youtube.com/embed/J2VBw-V9Jm4"
+  },
+  {
+    "id": "191",
+    "categoria": "Vidros",
+    "titulo": "Produção: Aprenda a Utilizar o Módulo de Produção dos Vidros",
+    "url": "https://www.youtube.com/embed/3SusM1v0GWE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Produção: Aprenda a Utilizar o Módulo de Produção dos Vidros. Link: https://www.youtube.com/embed/3SusM1v0GWE"
+  },
+  {
+    "id": "6415",
+    "categoria": "SPED",
+    "titulo": "Softcomshop SPED - Como Gerar Arquivo",
+    "url": "https://www.youtube.com/embed/LwDwMQ-0EDk?si=VFvvbSslVChC-yPk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop SPED - Como Gerar Arquivo. Link: https://www.youtube.com/embed/LwDwMQ-0EDk?si=VFvvbSslVChC-yPk"
+  },
+  {
+    "id": "6360",
+    "categoria": "SPED",
+    "titulo": "SPED: Como Gerar Inventário Bloco H",
+    "url": "https://www.youtube.com/embed/OE2oEY6-tE4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SPED: Como Gerar Inventário Bloco H. Link: https://www.youtube.com/embed/OE2oEY6-tE4"
+  },
+  {
+    "id": "172",
+    "categoria": "SPED",
+    "titulo": "SPED Técnico: Instalação, Configuração do Vínculo e Download do Validador",
+    "url": "https://www.youtube.com/embed/s20QkoyD8YM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SPED Técnico: Instalação, Configuração do Vínculo e Download do Validador. Link: https://www.youtube.com/embed/s20QkoyD8YM"
+  },
+  {
+    "id": "173",
+    "categoria": "SPED",
+    "titulo": "SPED Técnico: Abas de Configuração",
+    "url": "https://www.youtube.com/embed/1VgSFG8uV4Y",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SPED Técnico: Abas de Configuração. Link: https://www.youtube.com/embed/1VgSFG8uV4Y"
+  },
+  {
+    "id": "174",
+    "categoria": "SPED",
+    "titulo": "SPED: Como Gerar Arquivo",
+    "url": "https://www.youtube.com/embed/dhDgS9AuEdU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SPED: Como Gerar Arquivo. Link: https://www.youtube.com/embed/dhDgS9AuEdU"
+  },
+  {
+    "id": "159",
+    "categoria": "Nota Fiscal de Serviço",
+    "titulo": "Técnico: Emissor NFSe (Instalação e Configuração)",
+    "url": "https://www.youtube.com/embed/7MHSQ_djdIU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Técnico: Emissor NFSe (Instalação e Configuração). Link: https://www.youtube.com/embed/7MHSQ_djdIU"
+  },
+  {
+    "id": "161",
+    "categoria": "Nota Fiscal de Serviço",
+    "titulo": "Realizando o Cadastro dos Serviços",
+    "url": "https://www.youtube.com/embed/4_gg9dbD5ek",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Realizando o Cadastro dos Serviços. Link: https://www.youtube.com/embed/4_gg9dbD5ek"
+  },
+  {
+    "id": "177",
+    "categoria": "Nota Fiscal de Serviço",
+    "titulo": "Emitindo uma NFSe de um Pedido",
+    "url": "https://www.youtube.com/embed/hHE4Txk7EfA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Emitindo uma NFSe de um Pedido. Link: https://www.youtube.com/embed/hHE4Txk7EfA"
+  },
+  {
+    "id": "178",
+    "categoria": "Nota Fiscal de Serviço",
+    "titulo": "Emitindo uma NFSe Avulsa",
+    "url": "https://www.youtube.com/embed/0ZPfJQfPjGk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Emitindo uma NFSe Avulsa. Link: https://www.youtube.com/embed/0ZPfJQfPjGk"
+  },
+  {
+    "id": "179",
+    "categoria": "Nota Fiscal de Serviço",
+    "titulo": "Aprenda como Cancelar ou Substituir uma NFSe",
+    "url": "https://www.youtube.com/embed/nwstAdxVm0k",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Aprenda como Cancelar ou Substituir uma NFSe. Link: https://www.youtube.com/embed/nwstAdxVm0k"
+  },
+  {
+    "id": "6174",
+    "categoria": "Demonstração",
+    "titulo": "Óticas",
+    "url": "https://www.youtube.com/embed/eZ5MFCxd2x8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Óticas. Link: https://www.youtube.com/embed/eZ5MFCxd2x8"
+  },
+  {
+    "id": "6175",
+    "categoria": "Demonstração",
+    "titulo": "Mercadinho",
+    "url": "https://www.youtube.com/embed/I1ZuhR1NaWo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Mercadinho. Link: https://www.youtube.com/embed/I1ZuhR1NaWo"
+  },
+  {
+    "id": "6176",
+    "categoria": "Demonstração",
+    "titulo": "Autopeças",
+    "url": "https://www.youtube.com/embed/rprbt8jchOE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Autopeças. Link: https://www.youtube.com/embed/rprbt8jchOE"
+  },
+  {
+    "id": "6177",
+    "categoria": "Demonstração",
+    "titulo": "PetShop",
+    "url": "https://www.youtube.com/embed/GpOftGWzleE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PetShop. Link: https://www.youtube.com/embed/GpOftGWzleE"
+  },
+  {
+    "id": "6184",
+    "categoria": "Demonstração",
+    "titulo": "PDV: Como utilizar o Cupom Sorteio",
+    "url": "https://www.youtube.com/embed/Kx_BWmuVLuY ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Como utilizar o Cupom Sorteio. Link: https://www.youtube.com/embed/Kx_BWmuVLuY "
+  },
+  {
+    "id": "6185",
+    "categoria": "Demonstração",
+    "titulo": "Entenda sobre o Software Multilojas",
+    "url": "https://www.youtube.com/embed/mevF7lzC8P4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Entenda sobre o Software Multilojas. Link: https://www.youtube.com/embed/mevF7lzC8P4"
+  },
+  {
+    "id": "3372",
+    "categoria": "Demonstração",
+    "titulo": "Salão de Beleza e Barbearias",
+    "url": "https://www.youtube.com/embed/GuyW50EzP2c",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Salão de Beleza e Barbearias. Link: https://www.youtube.com/embed/GuyW50EzP2c"
+  },
+  {
+    "id": "3233",
+    "categoria": "Demonstração",
+    "titulo": "Simuladores de Preço de Compra e Venda",
+    "url": "https://www.youtube.com/embed/qeU6quiktxc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Simuladores de Preço de Compra e Venda. Link: https://www.youtube.com/embed/qeU6quiktxc"
+  },
+  {
+    "id": "3234",
+    "categoria": "Demonstração",
+    "titulo": "Confecção",
+    "url": "https://www.youtube.com/embed/ZrZPInIxnO8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Confecção. Link: https://www.youtube.com/embed/ZrZPInIxnO8"
+  },
+  {
+    "id": "3235",
+    "categoria": "Demonstração",
+    "titulo": "Novo Módulo PetShop",
+    "url": "https://www.youtube.com/embed/BRdY8IfDfBc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Novo Módulo PetShop. Link: https://www.youtube.com/embed/BRdY8IfDfBc"
+  },
+  {
+    "id": "3236",
+    "categoria": "Demonstração",
+    "titulo": "Tela de Pesquisa F8",
+    "url": "https://www.youtube.com/embed/g9_VXtCXAho",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tela de Pesquisa F8. Link: https://www.youtube.com/embed/g9_VXtCXAho"
+  },
+  {
+    "id": "3237",
+    "categoria": "Demonstração",
+    "titulo": "Assistência Técnica",
+    "url": "https://www.youtube.com/embed/t61FaJxN_BA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Assistência Técnica. Link: https://www.youtube.com/embed/t61FaJxN_BA"
+  },
+  {
+    "id": "4269",
+    "categoria": "Demonstração",
+    "titulo": "Tela de Acordos",
+    "url": "https://www.youtube.com/embed/I4b_yoQGk50",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Tela de Acordos. Link: https://www.youtube.com/embed/I4b_yoQGk50"
+  },
+  {
+    "id": "3509",
+    "categoria": "Demonstração",
+    "titulo": "5 Passos para saber se nosso cliente esta pronto para gerar o Sped 2019",
+    "url": "https://www.youtube.com/embed/Yadm3_qH6Pk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: 5 Passos para saber se nosso cliente esta pronto para gerar o Sped 2019. Link: https://www.youtube.com/embed/Yadm3_qH6Pk"
+  },
+  {
+    "id": "188",
+    "categoria": "Demonstração",
+    "titulo": "SOFTCLIN",
+    "url": "https://www.youtube.com/embed/J0aDugNlufg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SOFTCLIN. Link: https://www.youtube.com/embed/J0aDugNlufg"
+  },
+  {
+    "id": "131",
+    "categoria": "Técnico: SOFTSHOP",
+    "titulo": "Instalação e Configuração (Parte 1)",
+    "url": "https://www.youtube.com/embed/F66yYuZKZFk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Instalação e Configuração (Parte 1). Link: https://www.youtube.com/embed/F66yYuZKZFk"
+  },
+  {
+    "id": "133",
+    "categoria": "Técnico: SOFTSHOP",
+    "titulo": "Instalação e Configuração (Parte 2)",
+    "url": "https://www.youtube.com/embed/JaY6rYIY28c",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Instalação e Configuração (Parte 2). Link: https://www.youtube.com/embed/JaY6rYIY28c"
+  },
+  {
+    "id": "6349",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia: Atribuir Função de Responsável Técnico a um Funcionário",
+    "url": "https://www.youtube.com/embed/RlC7XmPXvSQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia: Atribuir Função de Responsável Técnico a um Funcionário. Link: https://www.youtube.com/embed/RlC7XmPXvSQ"
+  },
+  {
+    "id": "6350",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia: Relatórios para a Vigilância Sanitária",
+    "url": "https://www.youtube.com/embed/KYHSJFnZWCk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia: Relatórios para a Vigilância Sanitária. Link: https://www.youtube.com/embed/KYHSJFnZWCk"
+  },
+  {
+    "id": "6351",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia: Controle de Receituário",
+    "url": "https://www.youtube.com/embed/u_tIKe-GKT0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia: Controle de Receituário. Link: https://www.youtube.com/embed/u_tIKe-GKT0"
+  },
+  {
+    "id": "6352",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia: Cadastro de Medicamentos Controlados",
+    "url": "https://www.youtube.com/embed/pkVJkD5YfmA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia: Cadastro de Medicamentos Controlados. Link: https://www.youtube.com/embed/pkVJkD5YfmA"
+  },
+  {
+    "id": "6353",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia: Entrada de Notas Fiscais com Preenchimento de Lote/Serial",
+    "url": "https://www.youtube.com/embed/YO2vl_uU6oY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia: Entrada de Notas Fiscais com Preenchimento de Lote/Serial. Link: https://www.youtube.com/embed/YO2vl_uU6oY"
+  },
+  {
+    "id": "6354",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia: Balanço e Inventário",
+    "url": "https://www.youtube.com/embed/T06-2typm_E",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia: Balanço e Inventário. Link: https://www.youtube.com/embed/T06-2typm_E"
+  },
+  {
+    "id": "6355",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia: Movimentações e Painel de Gerenciamento de Receituários",
+    "url": "https://www.youtube.com/embed/dxkNb_XhMYE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia: Movimentações e Painel de Gerenciamento de Receituários. Link: https://www.youtube.com/embed/dxkNb_XhMYE"
+  },
+  {
+    "id": "6356",
+    "categoria": "Farmácia",
+    "titulo": "Softshop Farmácia (para técnicos): Configuração de Dados Essenciais",
+    "url": "https://www.youtube.com/embed/HpNUWuk1OZA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Farmácia (para técnicos): Configuração de Dados Essenciais. Link: https://www.youtube.com/embed/HpNUWuk1OZA"
+  },
+  {
+    "id": "6303",
+    "categoria": "Técnico: Emissor NFe",
+    "titulo": "Emissor de notas: Cadastro de E-mail",
+    "url": "https://www.youtube.com/embed/PC5vyAgMKPo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Emissor de notas: Cadastro de E-mail. Link: https://www.youtube.com/embed/PC5vyAgMKPo"
+  },
+  {
+    "id": "114",
+    "categoria": "Técnico: Emissor NFe",
+    "titulo": "Instalação e Configuração",
+    "url": "https://www.youtube.com/watch?v=JdB6kTVqQn0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Instalação e Configuração. Link: https://www.youtube.com/watch?v=JdB6kTVqQn0"
+  },
+  {
+    "id": "125",
+    "categoria": "Técnico: Atualizador de Objetos",
+    "titulo": "Atualizador de Objetos",
+    "url": "https://www.youtube.com/embed/oy00svnlwhs",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Atualizador de Objetos. Link: https://www.youtube.com/embed/oy00svnlwhs"
+  },
+  {
+    "id": "6307",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "Softshop Caixa: Configuração - Funções",
+    "url": "https://www.youtube.com/embed/3RgnfgWw9Fk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Caixa: Configuração - Funções. Link: https://www.youtube.com/embed/3RgnfgWw9Fk"
+  },
+  {
+    "id": "6300",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "Softshop Caixa: Instalação",
+    "url": "https://www.youtube.com/watch?v=fHKFufvqfbo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Caixa: Instalação. Link: https://www.youtube.com/watch?v=fHKFufvqfbo"
+  },
+  {
+    "id": "6304",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "Softshop Caixa: Cadastro de Email",
+    "url": "https://www.youtube.com/embed/ylj0Uue0tNI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Caixa: Cadastro de Email. Link: https://www.youtube.com/embed/ylj0Uue0tNI"
+  },
+  {
+    "id": "6305",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "Softshop caixa: Configuração - Tela de vendas",
+    "url": "https://www.youtube.com/embed/Xxc_zuvWwZA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop caixa: Configuração - Tela de vendas. Link: https://www.youtube.com/embed/Xxc_zuvWwZA"
+  },
+  {
+    "id": "6306",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "Softshop Caixa: Configuração - Funções Caixa",
+    "url": "https://www.youtube.com/embed/8KCZ94gnoGQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softshop Caixa: Configuração - Funções Caixa. Link: https://www.youtube.com/embed/8KCZ94gnoGQ"
+  },
+  {
+    "id": "115",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Configurações Iniciais",
+    "url": "https://www.youtube.com/embed/m1V8_K-uv_c",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Configurações Iniciais. Link: https://www.youtube.com/embed/m1V8_K-uv_c"
+  },
+  {
+    "id": "116",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Tela de Vendas",
+    "url": "https://www.youtube.com/embed/omBKw7mC7d8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Tela de Vendas. Link: https://www.youtube.com/embed/omBKw7mC7d8"
+  },
+  {
+    "id": "117",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Funções",
+    "url": "https://www.youtube.com/embed/LcpymoyQ32Q",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Funções. Link: https://www.youtube.com/embed/LcpymoyQ32Q"
+  },
+  {
+    "id": "118",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: TEF",
+    "url": "https://www.youtube.com/embed/Mz4iFa1WqHw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: TEF. Link: https://www.youtube.com/embed/Mz4iFa1WqHw"
+  },
+  {
+    "id": "119",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Balança",
+    "url": "https://www.youtube.com/embed/Pt4Vn0_sRHk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Balança. Link: https://www.youtube.com/embed/Pt4Vn0_sRHk"
+  },
+  {
+    "id": "120",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: NFC-e",
+    "url": "https://www.youtube.com/embed/e4aO_9rM5bE",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: NFC-e. Link: https://www.youtube.com/embed/e4aO_9rM5bE"
+  },
+  {
+    "id": "6190",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: NFCe (Ceará)",
+    "url": "https://www.youtube.com/embed/q62Uc777S4g",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: NFCe (Ceará). Link: https://www.youtube.com/embed/q62Uc777S4g"
+  },
+  {
+    "id": "121",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Impressoras",
+    "url": "https://www.youtube.com/embed/1fTEUIqmA5Q",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Impressoras. Link: https://www.youtube.com/embed/1fTEUIqmA5Q"
+  },
+  {
+    "id": "122",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: E-mail",
+    "url": "https://www.youtube.com/embed/6NC3i103NV0",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: E-mail. Link: https://www.youtube.com/embed/6NC3i103NV0"
+  },
+  {
+    "id": "123",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Restaurante/Delivery",
+    "url": "https://www.youtube.com/embed/dwJKKzkzhSA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Restaurante/Delivery. Link: https://www.youtube.com/embed/dwJKKzkzhSA"
+  },
+  {
+    "id": "124",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Funções Caixa",
+    "url": "https://www.youtube.com/embed/AMgDULIfgzY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Funções Caixa. Link: https://www.youtube.com/embed/AMgDULIfgzY"
+  },
+  {
+    "id": "160",
+    "categoria": "Técnico: PDV Configurações",
+    "titulo": "PDV: Configuração do Identificador de Chamadas (Bina)",
+    "url": "https://www.youtube.com/embed/OJTulporE08",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Configuração do Identificador de Chamadas (Bina). Link: https://www.youtube.com/embed/OJTulporE08"
+  },
+  {
+    "id": "6187",
+    "categoria": "Técnico: Ceará MFe/NFCe",
+    "titulo": "MFe Ceará: Instalação e Configuração",
+    "url": "https://www.youtube.com/embed/hAmTjYXKmz4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: MFe Ceará: Instalação e Configuração. Link: https://www.youtube.com/embed/hAmTjYXKmz4"
+  },
+  {
+    "id": "6188",
+    "categoria": "Técnico: Ceará MFe/NFCe",
+    "titulo": "PDV: Como configurar a NFCe (Ceará)",
+    "url": "https://www.youtube.com/embed/q62Uc777S4g",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Como configurar a NFCe (Ceará). Link: https://www.youtube.com/embed/q62Uc777S4g"
+  },
+  {
+    "id": "6189",
+    "categoria": "Técnico: Ceará MFe/NFCe",
+    "titulo": "PDV: Como configurar o TEF OFF para uso no Ceará (MFe/NFCe)",
+    "url": "https://www.youtube.com/embed/hOmKeUMgk9M",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: PDV: Como configurar o TEF OFF para uso no Ceará (MFe/NFCe). Link: https://www.youtube.com/embed/hOmKeUMgk9M"
+  },
+  {
+    "id": "132",
+    "categoria": "Técnico: SQL Server",
+    "titulo": "SQL Server 2014: Instalação",
+    "url": "https://www.youtube.com/watch?v=-zt06-Or-mA",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SQL Server 2014: Instalação. Link: https://www.youtube.com/watch?v=-zt06-Or-mA"
+  },
+  {
+    "id": "134",
+    "categoria": "Técnico: SQL Server",
+    "titulo": "SQL Server: Restaurar, Anexar, Desanexar e Realizar Backup",
+    "url": "https://www.youtube.com/embed/8U3WBox48Y4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SQL Server: Restaurar, Anexar, Desanexar e Realizar Backup. Link: https://www.youtube.com/embed/8U3WBox48Y4"
+  },
+  {
+    "id": "135",
+    "categoria": "Técnico: SQL Server",
+    "titulo": "SQL Server: Configurando o Softshop - Módulo de Segurança",
+    "url": "https://www.youtube.com/embed/6uRy497nU2s",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SQL Server: Configurando o Softshop - Módulo de Segurança. Link: https://www.youtube.com/embed/6uRy497nU2s"
+  },
+  {
+    "id": "192",
+    "categoria": "Técnico: SQL Server",
+    "titulo": "SQL Server: Unidade de Disco Exclusiva",
+    "url": "https://www.youtube.com/embed/84vCw7YqwOI",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SQL Server: Unidade de Disco Exclusiva. Link: https://www.youtube.com/embed/84vCw7YqwOI"
+  },
+  {
+    "id": "193",
+    "categoria": "Técnico: SQL Convert",
+    "titulo": "SQL Convert: Análise de Estoque",
+    "url": "https://www.youtube.com/embed/sCCnldC-Rmw",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SQL Convert: Análise de Estoque. Link: https://www.youtube.com/embed/sCCnldC-Rmw"
+  },
+  {
+    "id": "197",
+    "categoria": "Técnico: SQL Convert",
+    "titulo": "SQL Convert: Autocomplete",
+    "url": "https://www.youtube.com/embed/i4U79pN8mhU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SQL Convert: Autocomplete. Link: https://www.youtube.com/embed/i4U79pN8mhU"
+  },
+  {
+    "id": "6423",
+    "categoria": "Técnico: SOFTMOV",
+    "titulo": "Softmov - Overview",
+    "url": "https://www.youtube.com/embed/a8yrpmhoxj4?si=4af6BeLhLCjXLbWe",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softmov - Overview. Link: https://www.youtube.com/embed/a8yrpmhoxj4?si=4af6BeLhLCjXLbWe"
+  },
+  {
+    "id": "51",
+    "categoria": "Técnico: SOFTMOV",
+    "titulo": "SOFTMOV: Criando Contrato",
+    "url": "https://www.youtube.com/embed/qpFZSolTziU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SOFTMOV: Criando Contrato. Link: https://www.youtube.com/embed/qpFZSolTziU"
+  },
+  {
+    "id": "52",
+    "categoria": "Técnico: SOFTMOV",
+    "titulo": "SOFTMOV: Criando usuário.",
+    "url": "https://www.youtube.com/embed/6pMe5PxVwRk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SOFTMOV: Criando usuário.. Link: https://www.youtube.com/embed/6pMe5PxVwRk"
+  },
+  {
+    "id": "6301",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Certificado digital: Instalação",
+    "url": "https://www.youtube.com/embed/Boy0exzi-6c",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Certificado digital: Instalação. Link: https://www.youtube.com/embed/Boy0exzi-6c"
+  },
+  {
+    "id": "6358",
+    "categoria": "Técnico: Diversos",
+    "titulo": "AutoSetup Softcom",
+    "url": "https://www.youtube.com/embed/35dvfQWYe04",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: AutoSetup Softcom. Link: https://www.youtube.com/embed/35dvfQWYe04"
+  },
+  {
+    "id": "6361",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Softcom Smart: Como Habilitar Comanda Eletrônica",
+    "url": "https://www.youtube.com/embed/GIEiX15Mvws",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcom Smart: Como Habilitar Comanda Eletrônica. Link: https://www.youtube.com/embed/GIEiX15Mvws"
+  },
+  {
+    "id": "6379",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Collector: Configurar Novo Collector",
+    "url": "https://www.youtube.com/embed/UPXNotKkvLU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Collector: Configurar Novo Collector. Link: https://www.youtube.com/embed/UPXNotKkvLU"
+  },
+  {
+    "id": "6183",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Configurando a Integração Softshop Caixa x Softcomshop",
+    "url": "https://www.youtube.com/embed/Ojoi_SYdvOc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Configurando a Integração Softshop Caixa x Softcomshop. Link: https://www.youtube.com/embed/Ojoi_SYdvOc"
+  },
+  {
+    "id": "137",
+    "categoria": "Técnico: Diversos",
+    "titulo": "SMobile: Instalação e Configuração",
+    "url": "https://www.youtube.com/embed/pVw8awVnHy4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SMobile: Instalação e Configuração. Link: https://www.youtube.com/embed/pVw8awVnHy4"
+  },
+  {
+    "id": "215",
+    "categoria": "Técnico: Diversos",
+    "titulo": "SMobile: Configurar para Emissão da NFe e NFCe",
+    "url": "https://www.youtube.com/embed/y_7caoTVpTQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: SMobile: Configurar para Emissão da NFe e NFCe. Link: https://www.youtube.com/embed/y_7caoTVpTQ"
+  },
+  {
+    "id": "194",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Integrador Softshop x Softcomshop: Instalação e Configuração",
+    "url": "https://www.youtube.com/embed/aR3qkBXhnjo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Integrador Softshop x Softcomshop: Instalação e Configuração. Link: https://www.youtube.com/embed/aR3qkBXhnjo"
+  },
+  {
+    "id": "130",
+    "categoria": "Técnico: Diversos",
+    "titulo": "TEF: Instalação e Configuração",
+    "url": "https://www.youtube.com/embed/cO9eEoYv3sQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: TEF: Instalação e Configuração. Link: https://www.youtube.com/embed/cO9eEoYv3sQ"
+  },
+  {
+    "id": "136",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Nuvem Fiscal: Instalação e Configuração",
+    "url": "https://www.youtube.com/embed/rjKIRDtPLG4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Nuvem Fiscal: Instalação e Configuração. Link: https://www.youtube.com/embed/rjKIRDtPLG4"
+  },
+  {
+    "id": "149",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Ta Em Ordem: Instalação e Configuração",
+    "url": "https://www.youtube.com/embed/ocl49VZhs_M",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Ta Em Ordem: Instalação e Configuração. Link: https://www.youtube.com/embed/ocl49VZhs_M"
+  },
+  {
+    "id": "150",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Integração Bancária: Configuração",
+    "url": "https://www.youtube.com/embed/kL6StxJNWdM",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Integração Bancária: Configuração. Link: https://www.youtube.com/embed/kL6StxJNWdM"
+  },
+  {
+    "id": "175",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Higienização Fiscal: Laudo",
+    "url": "https://www.youtube.com/embed/88EQh5XWWHc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Higienização Fiscal: Laudo. Link: https://www.youtube.com/embed/88EQh5XWWHc"
+  },
+  {
+    "id": "176",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Higienização Fiscal: Atualizando NCM, CEST e IBPT",
+    "url": "https://www.youtube.com/embed/rAljmpBqYvk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Higienização Fiscal: Atualizando NCM, CEST e IBPT. Link: https://www.youtube.com/embed/rAljmpBqYvk"
+  },
+  {
+    "id": "6186",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Etiquetadora Elgin L42 Pro",
+    "url": "https://www.youtube.com/embed/V7JewkARn6k",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Etiquetadora Elgin L42 Pro. Link: https://www.youtube.com/embed/V7JewkARn6k"
+  },
+  {
+    "id": "195",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Etiquetadora Elgin L42: Instalando o Driver",
+    "url": "https://www.youtube.com/embed/idi3JCRwV1A",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Etiquetadora Elgin L42: Instalando o Driver. Link: https://www.youtube.com/embed/idi3JCRwV1A"
+  },
+  {
+    "id": "196",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Etiquetadora Elgin L42: Criando Papel + Blocagem",
+    "url": "https://www.youtube.com/embed/DoHYIOeut6A",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Etiquetadora Elgin L42: Criando Papel + Blocagem. Link: https://www.youtube.com/embed/DoHYIOeut6A"
+  },
+  {
+    "id": "201",
+    "categoria": "Técnico: Diversos",
+    "titulo": "Aprenda como trocar a Etiqueta, Ribbon e realizar Calibragem na Etiquetadora Elgin L42",
+    "url": "https://www.youtube.com/embed/Hx7WDU-zbkc",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Aprenda como trocar a Etiqueta, Ribbon e realizar Calibragem na Etiquetadora Elgin L42. Link: https://www.youtube.com/embed/Hx7WDU-zbkc"
+  },
+  {
+    "id": "50",
+    "categoria": "Técnico: Diversos",
+    "titulo": "ACCESS: Consultas - Aula01 - Introdução",
+    "url": "https://www.youtube.com/embed/vFJK665bIBU",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: ACCESS: Consultas - Aula01 - Introdução. Link: https://www.youtube.com/embed/vFJK665bIBU"
+  },
+  {
+    "id": "6338",
+    "categoria": "VendaMais - Softshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Venda Mais - Softshop: Cadastro de Contatos",
+    "url": "https://www.youtube.com/embed/g4b69yNC8e4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais - Softshop: Cadastro de Contatos. Link: https://www.youtube.com/embed/g4b69yNC8e4"
+  },
+  {
+    "id": "6339",
+    "categoria": "VendaMais - Softshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Venda Mais - Softshop: Flags e Funcionalidades",
+    "url": "https://www.youtube.com/embed/n6PjkOBkmdg",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais - Softshop: Flags e Funcionalidades. Link: https://www.youtube.com/embed/n6PjkOBkmdg"
+  },
+  {
+    "id": "6340",
+    "categoria": "VendaMais - Softshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Venda Mais - Softshop: Cadastro de Mensagens",
+    "url": "https://www.youtube.com/embed/FVlamGa-HJA?si=C2cr2oVJzvfVuIu6",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais - Softshop: Cadastro de Mensagens. Link: https://www.youtube.com/embed/FVlamGa-HJA?si=C2cr2oVJzvfVuIu6"
+  },
+  {
+    "id": "6341",
+    "categoria": "VendaMais - Softshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Venda Mais - Softshop: Anexando Documentos e Painel de Envio",
+    "url": "https://www.youtube.com/embed/Cvzg9jo-SHQ",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais - Softshop: Anexando Documentos e Painel de Envio. Link: https://www.youtube.com/embed/Cvzg9jo-SHQ"
+  },
+  {
+    "id": "6343",
+    "categoria": "Técnico: Aprenda a Configurar o VendaMais e SoftConnect",
+    "titulo": "Venda Mais: Configuração do SoftConnect",
+    "url": "https://www.youtube.com/embed/NyJXFyeoLvk",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais: Configuração do SoftConnect. Link: https://www.youtube.com/embed/NyJXFyeoLvk"
+  },
+  {
+    "id": "6344",
+    "categoria": "Técnico: Aprenda a Configurar o VendaMais e SoftConnect",
+    "titulo": "Venda Mais: Dicas de Configuração do SoftConnect",
+    "url": "https://www.youtube.com/embed/evGK1-MaZ-E",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais: Dicas de Configuração do SoftConnect. Link: https://www.youtube.com/embed/evGK1-MaZ-E"
+  },
+  {
+    "id": "6345",
+    "categoria": "Técnico: Aprenda a Configurar o VendaMais e SoftConnect",
+    "titulo": "Venda Mais: Funcionalidades do SoftConnect",
+    "url": "https://www.youtube.com/embed/piqeTt3eXv4",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais: Funcionalidades do SoftConnect. Link: https://www.youtube.com/embed/piqeTt3eXv4"
+  },
+  {
+    "id": "6346",
+    "categoria": "Técnico: Aprenda a Configurar o VendaMais e SoftConnect",
+    "titulo": "Venda Mais - Softshop: Configuração e Usabilidade",
+    "url": "https://www.youtube.com/embed/uRH3BinLURY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais - Softshop: Configuração e Usabilidade. Link: https://www.youtube.com/embed/uRH3BinLURY"
+  },
+  {
+    "id": "6347",
+    "categoria": "Técnico: Aprenda a Configurar o VendaMais e SoftConnect",
+    "titulo": "Venda Mais - Softcomshop: Configuração",
+    "url": "https://www.youtube.com/embed/TYxXQEO4doo",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais - Softcomshop: Configuração. Link: https://www.youtube.com/embed/TYxXQEO4doo"
+  },
+  {
+    "id": "6412",
+    "categoria": "VendaMais - Softcomshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Softcomshop Venda Mais - Enviar Notificação de uma Venda",
+    "url": "https://www.youtube.com/embed/Wy7oujM7Boo?si=W8-dwi_zxsM_RoD8",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Venda Mais - Enviar Notificação de uma Venda. Link: https://www.youtube.com/embed/Wy7oujM7Boo?si=W8-dwi_zxsM_RoD8"
+  },
+  {
+    "id": "6411",
+    "categoria": "VendaMais - Softcomshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Softcomshop Venda Mais - Cadastro de Mensagens",
+    "url": "https://www.youtube.com/embed/FVlamGa-HJA?si=9rr4NnHQ0WE9Ig7b",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Venda Mais - Cadastro de Mensagens. Link: https://www.youtube.com/embed/FVlamGa-HJA?si=9rr4NnHQ0WE9Ig7b"
+  },
+  {
+    "id": "6413",
+    "categoria": "VendaMais - Softcomshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Softcomshop Venda Mais - Lista de Transmissão",
+    "url": "https://www.youtube.com/embed/PQlfiC7ZGlg?si=VXWfhR1KP9gTfp-Q",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Softcomshop Venda Mais - Lista de Transmissão. Link: https://www.youtube.com/embed/PQlfiC7ZGlg?si=VXWfhR1KP9gTfp-Q"
+  },
+  {
+    "id": "6342",
+    "categoria": "VendaMais - Softcomshop: Automatize o envio de notificações e mensagens personalizadas para seus clientes.",
+    "titulo": "Venda Mais - Softcomshop: Usabilidade",
+    "url": "https://www.youtube.com/embed/EjFKTeClqmY",
+    "ehVideo": true,
+    "procedimento": "Vídeo tutorial de treinamento oficial Softcom: Venda Mais - Softcomshop: Usabilidade. Link: https://www.youtube.com/embed/EjFKTeClqmY"
+  },
+  {
+    "id": "FAQ-SUP-IMP-CUPOM",
+    "categoria": "Impressoras & Dispositivos (Cupom Térmico)",
+    "titulo": "FAQ Suporte - Configuração e Falhas em Impressora Térmica de Cupom / NFC-e / Danfe (80mm e 58mm)",
+    "url": "https://helptools.softcomsistemas.com.br/conhecimento/ajuda",
+    "ehVideo": false,
+    "procedimento": "Procedimento técnico oficial para Impressoras Térmicas de Cupom (NFC-e / Bobina 80mm / 58mm):\nEquipamentos suportados: Elgin i9, Elgin i7, Bematech MP-4200 TH, Epson TM-T20 / TM-T20X, Daruma DR700/DR800, Control iD Print iD, Dataregis.\nIMPORTANTE: Não confundir com impressora de etiquetas (Elgin L42/Zebra). Este manual aplica-se estritamente a impressoras de bobina térmica para cupons de venda e comprovantes.\n1. Identificação do modelo da impressora e tipo de conexão (USB, Rede Ethernet ou Serial);\n2. Verificação física: conferir se a bobina térmica é de 80mm (ou 58mm), se o lado térmico do papel está correto e se o LED de status está verde (sem erro de papel ou tampa aberta);\n3. Teste no Windows: Acessar Painel de Controle > Dispositivos e Impressoras > Propriedades da impressora > Imprimir Página de Teste;\n4. Configuração no PDV / Softshop: Acessar Configurações > Impressoras > Configurar Impressora de Cupom. Selecionar o driver Spooler do Windows ou Porta Direta (ESC/POS);\n5. Se a impressora não responder: Verificar a fila de impressão do Windows (limpar documentos pendentes e reiniciar o serviço Spooler de Impressão via services.msc ou net stop spooler && net start spooler)."
+  },
+  {
+    "id": "FAQ-SUP-IMP-CORTE",
+    "categoria": "Impressoras & Dispositivos (Cupom Térmico)",
+    "titulo": "FAQ Suporte - Cupom Cortando no Meio ou Não Imprime Todos os Itens da Venda (Ajuste de Margem e Tamanho de Papel)",
+    "url": "https://helptools.softcomsistemas.com.br/conhecimento/ajuda",
+    "ehVideo": false,
+    "procedimento": "Procedimento técnico para cupom fiscal/não fiscal cortando antes do fim da venda ou cortando no meio dos itens:\nCausa: Quando a venda possui muitos itens, se o driver da impressora térmica estiver configurado com tamanho de página fixo (ex: 80x100mm, Carta ou A4), a impressora aciona o corte antecipado ou trava na paginação intermediária.\nPasso a passo de correção:\n1. Solicitar ao cliente o modelo da impressora térmica (ex: Elgin i9, Bematech MP-4200, Epson TM-T20X, etc.);\n2. No Windows do cliente (ou no servidor/terminal): Acessar Dispositivos e Impressoras > Clicar com botão direito na impressora térmica > Preferências de Impressão;\n3. Na aba Configuração de Página (Page Setup): Alterar o tamanho do papel para formato contínuo de bobina (ex: Roll Paper 80 x 297 mm, 80 x 3276 mm ou Receipt / Cupom Contínuo);\n4. Na aba Configurações do Dispositivo (Device Settings): Verificar se a guilhotina (Corte de Papel / Paper Cut) está configurada para cortar apenas no Fim do Documento (Document End / End of Job), e não a cada página;\n5. Salvar e aplicar as preferências;\n6. Realizar um teste de reimpressão da venda completa no PDV Softcom para confirmar que todos os itens saíram no cupom e o corte ocorreu corretamente no rodapé."
+  }
+]
