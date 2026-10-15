@@ -23,6 +23,9 @@
         "https://*.softcomtecnologia.com/*",
         "https://*.softcomsistemas.com.br/*"
       ],
+      "exclude_matches": [
+        "https://softflow.hostsoftcom.cloud/*"
+      ],
       "js": [
         "react-guard.js"
       ],
@@ -34,6 +37,9 @@
         "https://*.hostsoftcom.cloud/*",
         "https://*.softcomtecnologia.com/*",
         "https://*.softcomsistemas.com.br/*"
+      ],
+      "exclude_matches": [
+        "https://softflow.hostsoftcom.cloud/*"
       ],
       "js": [
         "content.js"

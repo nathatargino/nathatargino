@@ -1,6 +1,15 @@
 (function () {
-    const isHub = window.location.hostname.includes('hub.softcomtecnologia.com');
-    const isHelpTools = window.location.hostname.includes('softcomsistemas.com.br');
+    const hostname = window.location.hostname.toLowerCase();
+    const pathname = window.location.pathname.toLowerCase();
+    const href = window.location.href.toLowerCase();
+
+    // 1. Bloqueio absoluto do SoftFlow e plataformas distintas do Workdesk
+    if (hostname.includes('softflow')) {
+        return;
+    }
+
+    const isHub = hostname.includes('hub.softcomtecnologia.com');
+    const isHelpTools = hostname.includes('softcomsistemas.com.br');
 
     // =========================================================
     // 1. EXECUÇÃO DENTRO DO HUB SOFTCOM (AUTO-ABERTURA E PREENCHIMENTO)
@@ -19,8 +28,22 @@
     }
 
     // =========================================================
-    // 3. EXECUÇÃO NO PAINEL DE ATENDIMENTO (HOSTSOFTCOM / CHAT)
+    // 3. EXECUÇÃO NO PAINEL DE ATENDIMENTO (EXCLUSIVO WORKDESK)
     // =========================================================
+    const ehWorkdesk = pathname.includes('workdesk') || href.includes('workdesk') || document.title.toLowerCase().includes('workdesk');
+    if (!ehWorkdesk && hostname.includes('hostsoftcom.cloud')) {
+        // Monitora transição de rotas em SPAs para o caso de carregar e navegar para /workdesk
+        const monitorRotaWorkdesk = setInterval(() => {
+            const p = window.location.pathname.toLowerCase();
+            const h = window.location.href.toLowerCase();
+            if (p.includes('workdesk') || h.includes('workdesk') || document.title.toLowerCase().includes('workdesk')) {
+                clearInterval(monitorRotaWorkdesk);
+                executarPainelAtendimento();
+            }
+        }, 1000);
+        return;
+    }
+
     executarPainelAtendimento();
 
     // ---------------------------------------------------------
@@ -9899,7 +9922,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             panel.innerHTML = `
                 <div class="chama-ai-header">
                     <div class="chama-ai-header-left">
-                        <div class="chama-ai-avatar">✨</div>
+                        <div class="chama-ai-avatar">🔥</div>
                         <div class="chama-ai-title-wrap">
                             <div class="chama-ai-title">ChamaAI <span class="chama-ai-badge">BETA</span></div>
                             <div class="chama-ai-subtitle">Dúvidas de atendimento, FAQs do Help Tools e suporte geral</div>
@@ -10040,7 +10063,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 const welcome = document.createElement('div');
                 welcome.className = 'chama-ai-welcome';
                 welcome.innerHTML = `
-                    <div class="chama-ai-welcome-icon">✨</div>
+                    <div class="chama-ai-welcome-icon">🔥</div>
                     <div class="chama-ai-welcome-title">Olá! Eu sou o ChamaAI</div>
                     <div class="chama-ai-welcome-desc">
                         Sou seu assistente inteligente no atendimento. Fui alimentado com a base completa de <strong>FAQs do Help Tools</strong> para tirar dúvidas de procedimentos do sistema, mas você também pode me perguntar livremente sobre qualquer outro assunto!
@@ -10097,7 +10120,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     row.innerHTML = `
                         <div class="chama-ai-bubble ai-bubble">
                             <div class="chama-ai-bubble-header">
-                                <span class="chama-ai-bubble-sender">✨ ChamaAI</span>
+                                <span class="chama-ai-bubble-sender">🔥 ChamaAI</span>
                                 <span>${horaFmt}</span>
                             </div>
                             ${badgeFaq}
@@ -10439,7 +10462,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             }
 
             btn.innerHTML = `
-                <span style="display: inline-flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; pointer-events: none;">✨</span>
+                <span style="display: inline-flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; pointer-events: none;">🔥</span>
                 <span style="pointer-events: none; margin-left: 2px;">ChamaAI</span>
             `;
 
