@@ -3434,6 +3434,34 @@
             }
         }
 
+        // Garante que o campo nativo contenha EXATAMENTE o texto desejado antes do envio.
+        // Limpa o texto antigo (ex: sugestão anterior da IA que já estava no campo nativo), insere o novo e
+        // confere o valor lido de volta, repetindo se o React/Workdesk ainda mantiver o conteúdo antigo.
+        async function colocarTextoNoCampoConfirmado(texto) {
+            const normalizar = (s) => (s || '').replace(/\r\n/g, '\n').trim();
+            const lerCampo = () => {
+                const c = obterCampoMensagem();
+                if (!c) return null;
+                return c.value !== undefined ? c.value : (c.innerText || c.textContent || '');
+            };
+
+            for (let tentativa = 0; tentativa < 4; tentativa++) {
+                // 1. Remove completamente qualquer conteúdo antigo (sugestão anterior da IA) do campo e do estado do React
+                try { limparCampoNativo(); } catch (_) { }
+                await new Promise(r => setTimeout(r, 60));
+
+                // 2. Insere o texto atual do atendente
+                colocarTextoNoCampo(texto, true);
+                await new Promise(r => setTimeout(r, 100));
+
+                // 3. Confere se o campo realmente contém o texto digitado pelo atendente
+                const atual = lerCampo();
+                if (atual === null || normalizar(atual) === normalizar(texto)) return true;
+            }
+            console.warn('[Extensão Softcom] Não foi possível confirmar o texto no campo nativo antes do envio.');
+            return false;
+        }
+
         // Envia a mensagem que está atualmente no campo (botão de envio OU Enter nativo)
         function enviarMensagemDoCampo() {
             if (enviandoMensagemNativaAgora) return;
@@ -5491,20 +5519,40 @@
                         return; // Quebra linha
                     }
                     e.preventDefault();
-
-                    // Se o layout nativo de imagem do Workdesk estiver aberto na tela, o Enter dispara o envio dele!
-                    const btnLayout = obterBotaoEnviarLayoutImagemNativo();
-                    if (btnLayout) {
-                        dispararCliqueCompleto(btnLayout);
-                        mostrarNotificacao('⚡ Imagem enviada com sucesso ao cliente!', '#2ecc71');
-                        return;
-                    }
+                    // CRÍTICO: o card fica dentro do rodapé nativo do Workdesk. Sem isso, o Enter borbulha até o handler
+                    // nativo, que envia o texto antigo (ex: sugestão da IA) guardado no estado do campo nativo.
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
 
                     const texto = textarea.value.trim();
+
+                    // Se o layout nativo de imagem do Workdesk estiver aberto na tela, o Enter dispara o envio dele!
+                    // CRÍTICO: só vale quando a caixa do SoftCopilot está VAZIA e houve um encaminhamento real de imagem.
+                    // Caso contrário o detector pode achar o botão "Enviar" nativo do rodapé e enviar o texto antigo
+                    // (ex: sugestão da IA) que ainda está no campo nativo, ignorando o que o atendente digitou.
+                    if (!texto && !imagemPendente && layoutImagemNativoRecente()) {
+                        const btnLayout = obterBotaoEnviarLayoutImagemNativo();
+                        if (btnLayout) {
+                            ultimoEncaminhamentoImagemTs = 0;
+                            dispararCliqueCompleto(btnLayout);
+                            mostrarNotificacao('⚡ Imagem enviada com sucesso ao cliente!', '#2ecc71');
+                            return;
+                        }
+                    }
+
                     if (texto || imagemPendente) {
                         enviarTextoAoCliente(texto);
                     }
                 }
+            });
+
+            // Bloqueia também keypress/keyup de Enter para que nenhum handler nativo do Workdesk os processe
+            ['keypress', 'keyup'].forEach(tipo => {
+                textarea.addEventListener(tipo, (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.stopPropagation();
+                    }
+                });
             });
 
             // Fecha popover ao clicar fora
@@ -5657,6 +5705,12 @@
             return processou;
         }
 
+        // Momento do último encaminhamento real de imagem ao Workdesk (o layout de preview só pode estar aberto depois disso)
+        let ultimoEncaminhamentoImagemTs = 0;
+        function layoutImagemNativoRecente() {
+            return ultimoEncaminhamentoImagemTs > 0 && (Date.now() - ultimoEncaminhamentoImagemTs) < 120000;
+        }
+
         // Localiza o botão nativo de confirmação/envio do layout de preview de imagem/arquivo do Workdesk
         function obterBotaoEnviarLayoutImagemNativo() {
             // 1. Procura em modais, diálogos, overlays, drawers ou containers de preview
@@ -5741,6 +5795,7 @@
 
         // Aguarda a renderização do layout de preview nativo do Workdesk e foca o botão de envio
         function aguardarEFocarLayoutImagemNativo() {
+            ultimoEncaminhamentoImagemTs = Date.now();
             let tentativas = 0;
             const intervalo = setInterval(() => {
                 tentativas++;
@@ -5765,10 +5820,12 @@
                     return;
                 }
 
+                if (!layoutImagemNativoRecente()) return;
                 const btnLayout = obterBotaoEnviarLayoutImagemNativo();
                 if (btnLayout) {
                     e.preventDefault();
                     e.stopPropagation();
+                    ultimoEncaminhamentoImagemTs = 0;
                     dispararCliqueCompleto(btnLayout);
                     mostrarNotificacao('⚡ Imagem enviada com sucesso ao cliente!', '#2ecc71');
                 }
@@ -6676,8 +6733,8 @@
 
                 if (temTexto && temImg) {
                     // 1. Envia a mensagem de texto PRIMEIRO enquanto o chat nativo está 100% livre e desbloqueado
-                    colocarTextoNoCampo(textoParaEnviar, true);
-                    await new Promise(r => setTimeout(r, 150));
+                    await colocarTextoNoCampoConfirmado(textoParaEnviar);
+                    await new Promise(r => setTimeout(r, 50));
                     enviarMensagemDoCampo();
 
                     // 2. Aguarda a mensagem de texto ser processada e o campo ser liberado pelo Workdesk
@@ -6695,8 +6752,8 @@
 
                     mostrarNotificacao('⚡ Mensagem e imagem enviadas com sucesso ao cliente!', '#2ecc71');
                 } else if (temTexto) {
-                    colocarTextoNoCampo(textoParaEnviar, true);
-                    await new Promise(r => setTimeout(r, 150));
+                    await colocarTextoNoCampoConfirmado(textoParaEnviar);
+                    await new Promise(r => setTimeout(r, 50));
                     enviarMensagemDoCampo();
                     mostrarNotificacao('⚡ Mensagem enviada com sucesso ao cliente!', '#2ecc71');
                 } else if (temImg) {

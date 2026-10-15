@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SoftCopilot - IA para Suporte Técnico ",
-  "version": "2.65",
+  "version": "2.66",
   "description": "Inteligência Artificial com foco em Produtividade.",
   "permissions": [
     "storage"
