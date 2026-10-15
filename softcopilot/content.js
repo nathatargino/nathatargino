@@ -1574,8 +1574,8 @@
                     <div id="tab-panel-geral" style="display: ${abaInicial === 'geral' ? 'flex' : 'none'}; flex-direction: column; gap: 14px;">
                         <p style="margin: 0; font-size: 12.5px; color: #cbd5e1; line-height: 1.45;">
                             ${ehPrimeiroAcesso
-                        ? 'Informe seu <b>Nome Softcom</b> e configure suas <b>Chaves de API</b> para iniciar. Seus dados serão <b>salvos permanentemente</b> e personalizarão automaticamente suas saudações e sugestões com IA.'
-                        : 'Gerencie suas credenciais de identificação, envio de saudação e chaves de API da IA.'}
+                    ? 'Informe seu <b>Nome Softcom</b> e configure suas <b>Chaves de API</b> para iniciar. Seus dados serão <b>salvos permanentemente</b> e personalizarão automaticamente suas saudações e sugestões com IA.'
+                    : 'Gerencie suas credenciais de identificação, envio de saudação e chaves de API da IA.'}
                         </p>
 
                         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -1648,8 +1648,8 @@
                             </div>
                             <div id="preview-saudacao-tecnico" style="font-size: 12.5px; color: #f1f5f9; font-style: italic; line-height: 1.4;">
                                 ${saudacaoAtiva
-                        ? `"Bom dia, Cliente. Me chamo ${nomeAtual} ${sufixoAtual}, e irei iniciar seu atendimento."`
-                        : `⚠️ Saudação automática desativada (nenhuma mensagem será enviada automaticamente ao entrar em novos chats).`}
+                    ? `"Bom dia, Cliente. Me chamo ${nomeAtual} ${sufixoAtual}, e irei iniciar seu atendimento."`
+                    : `⚠️ Saudação automática desativada (nenhuma mensagem será enviada automaticamente ao entrar em novos chats).`}
                             </div>
                         </div>
 
@@ -2853,40 +2853,29 @@
             if (!chave) return;
             const strTexto = typeof texto === 'string' ? texto : '';
             const tLimpo = strTexto.trim();
+            const chaveStr = String(chave);
+
             if (tLimpo.length > 0) {
                 // Se esse texto for idêntico à mensagem enviada recentemente (nos últimos 10s), NUNCA salva como rascunho
                 if (ultimoTextoEnviadoRecente.texto && tLimpo === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
                     return;
                 }
-                mapaRascunhosPorChat.set(String(chave), strTexto);
-                const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
-                if (ticket) {
-                    mapaRascunhosPorChat.set('ticket_' + String(ticket), strTexto);
-                }
+                mapaRascunhosPorChat.set(chaveStr, strTexto);
             } else {
-                mapaRascunhosPorChat.delete(String(chave));
-                const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
-                if (ticket) {
-                    mapaRascunhosPorChat.delete('ticket_' + String(ticket));
-                }
+                mapaRascunhosPorChat.delete(chaveStr);
             }
             persistirRascunhosSessao();
         }
 
         function obterRascunhoChat(chave) {
             if (!chave) return '';
-            let direto = mapaRascunhosPorChat.get(String(chave));
+            const chaveStr = String(chave);
+            let direto = mapaRascunhosPorChat.get(chaveStr);
             if (!direto) {
-                const nome = (typeof obterNomeClienteParaSaudacao === 'function') ? obterNomeClienteParaSaudacao() : null;
-                if (nome && nome.length >= 2) {
-                    const slug = nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
-                    direto = mapaRascunhosPorChat.get('cliente_' + slug) || mapaRascunhosPorChat.get('card_' + slug);
-                }
-            }
-            if (!direto) {
-                const ticket = (typeof obterTicketChatAtivo === 'function') ? obterTicketChatAtivo() : null;
-                if (ticket) {
-                    direto = mapaRascunhosPorChat.get('ticket_' + String(ticket)) || mapaRascunhosPorChat.get(String(ticket));
+                if (/^\d+$/.test(chaveStr)) {
+                    direto = mapaRascunhosPorChat.get('ticket_' + chaveStr);
+                } else if (chaveStr.startsWith('ticket_')) {
+                    direto = mapaRascunhosPorChat.get(chaveStr.replace('ticket_', ''));
                 }
             }
             if (direto) {
@@ -2904,7 +2893,13 @@
 
         function limparRascunhoChat(chave) {
             if (!chave) return;
-            mapaRascunhosPorChat.delete(String(chave));
+            const chaveStr = String(chave);
+            mapaRascunhosPorChat.delete(chaveStr);
+            if (/^\d+$/.test(chaveStr)) {
+                mapaRascunhosPorChat.delete('ticket_' + chaveStr);
+            } else if (chaveStr.startsWith('ticket_')) {
+                mapaRascunhosPorChat.delete(chaveStr.replace('ticket_', ''));
+            }
             persistirRascunhosSessao();
         }
 
@@ -2914,8 +2909,17 @@
 
         // Verifica com máxima precisão se o contexto atual é o chat interno ("Chama Gestor" / conversa com supervisor/equipe)
         function ehChatInternoOuGestor(campo) {
+            // NUNCA confunde com o painel independente do ChamaAI (ChamaAI NÃO é chat interno)
+            if (campo && campo.closest && campo.closest('#chama-ai-panel')) return false;
+
             // 1. Verifica se o campo ou seus ancestrais pertencem ao container do gestor
-            const elAlvo = campo || (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT') ? document.activeElement : null);
+            let elAlvo = campo;
+            if (!elAlvo && document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) {
+                if (!document.activeElement.closest('#chama-ai-panel, #modal-softcom-bug, #modal-config-tecnico, #gemini-docked-panel')) {
+                    elAlvo = document.activeElement;
+                }
+            }
+            if (elAlvo && elAlvo.closest && elAlvo.closest('#chama-ai-panel')) return false;
             if (elAlvo && elAlvo.id !== 'gemini-suggestion-text') {
                 const ph = (elAlvo.placeholder || elAlvo.getAttribute('data-placeholder') || elAlvo.getAttribute('aria-label') || '').toLowerCase();
                 if (ph.includes('gestor') || ph.includes('interno') || ph.includes('supervisor')) {
@@ -2949,6 +2953,7 @@
             // 3. Verifica se há aba ou item de "Chamar gestor" ativo/selecionado
             const abasAtivas = Array.from(document.querySelectorAll('[role="tab"][aria-selected="true"], [class*="tab"][class*="active"], [class*="item"][class*="active"]'));
             for (const aba of abasAtivas) {
+                if (aba.id === 'btn-workdesk-chama-ai' || (aba.closest && aba.closest('#btn-workdesk-chama-ai, #chama-ai-panel'))) continue;
                 const txt = (aba.textContent || '').toLowerCase().trim();
                 if (txt.includes('chamar gestor') || txt.includes('chama gestor') || txt === 'gestor' || txt.includes('chat interno')) {
                     return true;
@@ -2958,6 +2963,7 @@
             // 4. Verifica se o botão "Chamar gestor" está em estado ativo/expandido (drawer/modal de gestor aberto)
             const botoesTopo = Array.from(document.querySelectorAll('button, [role="button"]'));
             const btnGestorAberto = botoesTopo.find(b => {
+                if (b.id === 'btn-workdesk-chama-ai' || (b.closest && b.closest('#btn-workdesk-chama-ai, #chama-ai-panel'))) return false;
                 const t = (b.textContent || b.title || b.getAttribute('aria-label') || '').toLowerCase();
                 const isGestorBtn = t.includes('chamar gestor') || t.includes('chama gestor');
                 if (!isGestorBtn) return false;
@@ -3030,6 +3036,7 @@
             const marcado = document.querySelector('[data-native-chat-input="true"]');
             if (marcado && document.body.contains(marcado) && marcado.id !== 'gemini-suggestion-text') {
                 if (!ehChatInternoOuGestor(marcado)) {
+                    if (typeof interceptarFocoCampoNativo === 'function') interceptarFocoCampoNativo(marcado);
                     return marcado;
                 }
             }
@@ -3042,7 +3049,8 @@
             ));
 
             const campoValido = candidatos.find(el => {
-                if (el.id === 'gemini-suggestion-text') return false; // NUNCA a nossa textarea
+                if (el.id === 'gemini-suggestion-text' || el.id === 'chama-ai-input-text') return false; // NUNCA a nossa textarea nem do ChamaAI
+                if (el.closest && el.closest('#chama-ai-panel, #gemini-docked-panel')) return false;
                 if (el.disabled || el.readOnly) return false;
 
                 // NUNCA selecionar inputs dentro de modais, diálogos ou popups de formulário
@@ -3093,6 +3101,7 @@
 
             if (campoValido) {
                 campoValido.dataset.nativeChatInput = 'true';
+                if (typeof interceptarFocoCampoNativo === 'function') interceptarFocoCampoNativo(campoValido);
             }
 
             return campoValido || null;
@@ -3487,7 +3496,7 @@
                     '[data-ui="send-button"], ' +
                     'button[class*="send" i]'
                 )).find(b => {
-                    if (b.closest('#gemini-docked-panel')) return false;
+                    if (b.closest('#gemini-docked-panel') || b.closest('#chama-ai-panel')) return false;
                     if (b.disabled) return false;
                     const t = ((b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.getAttribute('title') || '')).toLowerCase();
                     if (t.includes('áudio') || t.includes('audio') || t.includes('anexar') || t.includes('descartar')) return false;
@@ -4259,7 +4268,7 @@
                     "/bloqueado"
                 ],
                 "titulo": "337 - Pendência Financeira",
-                "conteudo": "Verifiquei em seu cadastro que consta uma pendência financeira da sua empresa, o que causou um bloqueio automático em seu sistema. Estamos à disposição para auxiliar na regularização.",
+                "conteudo": "Verifiquei em seu cadastro que consta uma pendência financeira da sua empresa, o que causou um bloqueio automático em seu sistema.",
                 "status": "Aprovado"
             },
             {
@@ -4679,6 +4688,17 @@
                 ],
                 "titulo": "Geração do SPED Fiscal",
                 "conteudo": "Já comecei a gerar o seu SPED Fiscal referente a MM/2026. A geração leva alguns minutinhos e, assim que o arquivo estiver pronto, ele será enviado para os e-mails informados. Depois, é só verificar a sua caixa de entrada.",
+                "status": "Aprovado"
+            },
+            {
+                "atalho": "/prime",
+                "aliases": [
+                    "/clienteprime",
+                    "/primetrasnf",
+                    "/transferirprime"
+                ],
+                "titulo": "Transferência Prime",
+                "conteudo": "Vou encaminhar seu atendimento agora para um dos técnicos do time Prime.",
                 "status": "Aprovado"
             },
             {
@@ -5816,7 +5836,7 @@
                 if (e.target && e.target.id === 'gemini-suggestion-text') {
                     return; // Já tratado no keydown do textarea
                 }
-                if (e.target && e.target.closest && e.target.closest('#modal-softcom-bug, #modal-config-tecnico')) {
+                if (e.target && e.target.closest && e.target.closest('#modal-softcom-bug, #modal-config-tecnico, #chama-ai-panel')) {
                     return;
                 }
 
@@ -6660,6 +6680,33 @@
             atualizarEstadoCard(textarea ? textarea.value.trim().length > 0 : false);
         }
 
+        function focarInputSoftCopilot() {
+            try {
+                const campoNativo = (typeof obterCampoMensagem === 'function') ? obterCampoMensagem() : null;
+                if (campoNativo && document.activeElement === campoNativo) {
+                    try { campoNativo.blur(); } catch (_) { }
+                }
+                const textarea = document.getElementById('gemini-suggestion-text');
+                if (textarea) {
+                    textarea.focus();
+                    const len = textarea.value.length;
+                    try { textarea.setSelectionRange(len, len); } catch (_) { }
+                }
+            } catch (_) { }
+        }
+
+        function interceptarFocoCampoNativo(campo) {
+            if (!campo || campo.dataset.softcomFocusHooked) return;
+            campo.dataset.softcomFocusHooked = 'true';
+            campo.addEventListener('focus', () => {
+                if (enviandoMensagemAoCliente || enviandoMensagemNativaAgora || gravandoAudioAtivo) return;
+                const panel = document.getElementById('gemini-docked-panel');
+                if (panel && panel.style.display !== 'none' && document.body.contains(panel)) {
+                    setTimeout(focarInputSoftCopilot, 10);
+                }
+            });
+        }
+
         let enviandoMensagemAoCliente = false;
 
         async function enviarTextoAoCliente(texto) {
@@ -6736,6 +6783,7 @@
                     await colocarTextoNoCampoConfirmado(textoParaEnviar);
                     await new Promise(r => setTimeout(r, 50));
                     enviarMensagemDoCampo();
+                    focarInputSoftCopilot();
 
                     // 2. Aguarda a mensagem de texto ser processada e o campo ser liberado pelo Workdesk
                     for (let i = 0; i < 6; i++) {
@@ -6749,15 +6797,18 @@
 
                     // 3. Em seguida, anexa e encaminha a imagem para o Workdesk
                     encaminharImagemAoWorkdesk([imgParaEnviar]);
+                    focarInputSoftCopilot();
 
                     mostrarNotificacao('⚡ Mensagem e imagem enviadas com sucesso ao cliente!', '#2ecc71');
                 } else if (temTexto) {
                     await colocarTextoNoCampoConfirmado(textoParaEnviar);
                     await new Promise(r => setTimeout(r, 50));
                     enviarMensagemDoCampo();
+                    focarInputSoftCopilot();
                     mostrarNotificacao('⚡ Mensagem enviada com sucesso ao cliente!', '#2ecc71');
                 } else if (temImg) {
                     encaminharImagemAoWorkdesk([imgParaEnviar]);
+                    focarInputSoftCopilot();
                     mostrarNotificacao('⚡ Imagem enviada com sucesso ao cliente!', '#2ecc71');
                 }
 
@@ -6767,18 +6818,25 @@
                     limparCampoNativo();
                     limparTextareaSoftCopilot(true, textoParaEnviar);
                     limparTodosRascunhosDoChatAtual(textoParaEnviar);
+                    focarInputSoftCopilot();
                 }
             } catch (err) {
                 console.error('[Extensão Softcom] Erro ao enviar mensagem/imagem:', err);
                 mostrarNotificacao('⚠️ Erro ao enviar mensagem/imagem.', '#ef4444');
             } finally {
                 enviandoMensagemAoCliente = false;
+                focarInputSoftCopilot();
                 setTimeout(() => {
                     envioMensagemEmAndamento = false;
                     limparCampoNativo();
                     limparTextareaSoftCopilot(true, textoParaEnviar);
                     limparTodosRascunhosDoChatAtual(textoParaEnviar);
+                    focarInputSoftCopilot();
                 }, 400);
+                setTimeout(focarInputSoftCopilot, 50);
+                setTimeout(focarInputSoftCopilot, 150);
+                setTimeout(focarInputSoftCopilot, 300);
+                setTimeout(focarInputSoftCopilot, 600);
             }
         }
 
@@ -7425,7 +7483,7 @@
 
             // Garante que o painel volte a ficar visível se estava oculto
             const cardPreExistente = document.getElementById('gemini-docked-panel');
-            if (cardPreExistente && cardPreExistente.style.display === 'none') {
+            if (cardPreExistente) {
                 cardPreExistente.style.removeProperty('display');
             }
 
@@ -7556,11 +7614,14 @@
             card.style.setProperty('overflow', 'visible', 'important');
             card.style.setProperty('margin-bottom', '0px', 'important');
 
-            // Se o usuário está com foco no textarea, NUNCA mexe na posição do card para não resetar o foco
+            // Se o usuário está com foco no textarea e o card já está anexado corretamente, não mexe na posição para não resetar o foco
             const textareaAtiva = document.getElementById('gemini-suggestion-text');
             const estaFocado = (document.activeElement === textareaAtiva);
+            const estaNoLugarCerto = (nativeBox && nativeBox.parentElement === footerRow)
+                ? (nativeBox.nextSibling === card && card.parentElement === footerRow)
+                : (card.parentElement === footerRow);
 
-            if (!estaFocado) {
+            if (!estaNoLugarCerto || !estaFocado) {
                 if (nativeBox && nativeBox.parentElement === footerRow) {
                     if (nativeBox.nextSibling !== card || card.parentElement !== footerRow) {
                         footerRow.insertBefore(card, nativeBox.nextSibling);
@@ -7568,6 +7629,10 @@
                 } else if (card.parentElement !== footerRow) {
                     footerRow.appendChild(card);
                 }
+            }
+
+            if (card.style.display === 'none') {
+                card.style.removeProperty('display');
             }
 
             // Sincroniza o banner "Respondendo a..." para ficar fixado no fluxo ACIMA do SoftCopilot
@@ -8179,40 +8244,62 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
 
                     // Se o clique foi em um card ou item da lista de conversas (apenas na listagem de chats)
                     const cardClicado = event.target.closest && event.target.closest(
-                        '[class*="chatCard"], [class*="ticketCard"], [class*="chat-item" i], [class*="ticket-item" i], aside [role="listitem"], aside li'
+                        '[class*="chatCard"], [class*="ticketCard"], [class*="chat-item" i], [class*="ticket-item" i], [class*="conversation" i], [class*="attend" i], aside [role="listitem"], aside li, [role="tablist"] [role="tab"]'
                     );
 
-                    if (cardClicado && !cardClicado.closest('#gemini-docked-panel')) {
-                        const matchTicket = (cardClicado.innerText || '').match(/#(\d{4,8})\b/);
+                    if (cardClicado && !cardClicado.closest('#gemini-docked-panel, #chama-ai-panel, #modal-config-tecnico, #modal-softcom-bug')) {
+                        let novoKey = null;
+                        const matchTicket = (cardClicado.innerText || '').match(/#\s*(\d{4,8})\b/);
                         if (matchTicket) {
-                            const novoKey = 'ticket_' + matchTicket[1];
-                            if (novoKey !== ultimoTicketPainel) {
-                                // Salva imediatamente o rascunho do chat que estava ativo
-                                if (ultimoTicketPainel && textarea) {
-                                    salvarRascunhoChat(ultimoTicketPainel, textarea.value);
+                            novoKey = 'ticket_' + matchTicket[1];
+                        } else {
+                            const dataId = cardClicado.getAttribute('data-ticket-id') || cardClicado.getAttribute('data-id') || cardClicado.getAttribute('data-chat-id');
+                            if (dataId) {
+                                novoKey = 'id_' + dataId;
+                            } else {
+                                const primeiroNome = (cardClicado.innerText || '').split('\n')[0].trim();
+                                if (primeiroNome && primeiroNome.length >= 2) {
+                                    const slug = primeiroNome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '_');
+                                    novoKey = 'card_' + slug;
                                 }
-                                // Pré-atualiza para o novo ticket (zero latência visual)
-                                ultimoTicketPainel = novoKey;
-                                let rascunhoNovo = obterRascunhoChat(novoKey) || '';
-                                if (rascunhoNovo && ultimoTextoEnviadoRecente.texto && rascunhoNovo.trim() === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
-                                    limparTodosRascunhosDoChatAtual(rascunhoNovo);
-                                    rascunhoNovo = '';
+                            }
+                        }
+
+                        if (novoKey && novoKey !== ultimoTicketPainel) {
+                            // Salva imediatamente o rascunho do chat que estava ativo
+                            if (ultimoTicketPainel && textarea) {
+                                salvarRascunhoChat(ultimoTicketPainel, textarea.value);
+                            }
+                            // Pré-atualiza para o novo ticket (zero latência visual)
+                            ultimoTicketPainel = novoKey;
+                            let rascunhoNovo = obterRascunhoChat(novoKey) || '';
+                            if (rascunhoNovo && ultimoTextoEnviadoRecente.texto && rascunhoNovo.trim() === ultimoTextoEnviadoRecente.texto && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000)) {
+                                limparTodosRascunhosDoChatAtual(rascunhoNovo);
+                                rascunhoNovo = '';
+                            }
+                            if (textarea) {
+                                textarea.value = rascunhoNovo;
+                                textarea.style.height = 'auto';
+                                textarea.style.height = Math.min(120, Math.max(38, textarea.scrollHeight)) + 'px';
+                                const origemSalva = origensTextoPorChat.get(novoKey);
+                                if (rascunhoNovo.trim()) {
+                                    origemTextoAtual = origemSalva || 'usuario';
+                                } else {
+                                    origemTextoAtual = 'nenhum';
                                 }
-                                if (textarea) {
-                                    textarea.value = rascunhoNovo;
-                                    textarea.style.height = 'auto';
-                                    textarea.style.height = Math.min(120, Math.max(38, textarea.scrollHeight)) + 'px';
-                                    const origemSalva = origensTextoPorChat.get(novoKey);
-                                    if (rascunhoNovo.trim()) {
-                                        origemTextoAtual = origemSalva || 'usuario';
-                                    } else {
-                                        origemTextoAtual = 'nenhum';
-                                    }
-                                    atualizarEstadoBotaoIA();
-                                    atualizarEstadoCard(rascunhoNovo.trim().length > 0);
-                                    ultimoTextoDigitadoPeloUsuario = rascunhoNovo;
-                                }
-                                removerImagemPendente();
+                                atualizarEstadoBotaoIA();
+                                atualizarEstadoCard(rascunhoNovo.trim().length > 0);
+                                ultimoTextoDigitadoPeloUsuario = rascunhoNovo;
+                            }
+                            if (!rascunhoNovo) {
+                                try { limparCampoNativo(); } catch (_) { }
+                            } else {
+                                try { colocarTextoNoCampo(rascunhoNovo); } catch (_) { }
+                            }
+                            removerImagemPendente();
+                        } else {
+                            if (ultimoTicketPainel && textarea) {
+                                salvarRascunhoChat(ultimoTicketPainel, textarea.value);
                             }
                         }
                     } else {
@@ -9095,6 +9182,1308 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             }
         }
 
+        // =========================================================================
+        // MÓDULO CHAMA-AI: ASSISTENTE DE DÚVIDAS DE ATENDIMENTO E CONHECIMENTO GERAL
+        // Totalmente isolado do SoftCopilot e do chat do cliente (Zero vazamento)
+        // =========================================================================
+
+        let chamaAIPainelAberto = false;
+        let chamaAIHistorico = [];
+        let gerandoRespostaChamaAI = false;
+
+        // Recupera histórico salvo do ChamaAI no storage
+        try {
+            chrome.storage.local.get(['chama_ai_chat_history'], (res) => {
+                if (res?.chama_ai_chat_history && Array.isArray(res.chama_ai_chat_history)) {
+                    chamaAIHistorico = res.chama_ai_chat_history;
+                    renderizarMensagensChamaAI();
+                }
+            });
+        } catch (_) { }
+
+        function persistirHistoricoChamaAI() {
+            try {
+                if (chamaAIHistorico.length > 40) {
+                    chamaAIHistorico = chamaAIHistorico.slice(-40);
+                }
+                chrome.storage.local.set({ chama_ai_chat_history: chamaAIHistorico });
+            } catch (_) { }
+        }
+
+        // Injeta folha de estilos CSS exclusiva do ChamaAI compatível com o tema Workdesk
+        function injetarEstilosChamaAI() {
+            if (document.getElementById('chama-ai-styles')) return;
+            const style = document.createElement('style');
+            style.id = 'chama-ai-styles';
+            style.textContent = `
+                /* Botão ChamaAI na barra de abas de atendimento - Alinhado perfeitamente */
+                #btn-workdesk-chama-ai {
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 6px !important;
+                    cursor: pointer !important;
+                    user-select: none !important;
+                    font-family: inherit !important;
+                    font-size: 13px !important;
+                    font-weight: 500 !important;
+                    padding: 6px 14px !important;
+                    height: 32px !important;
+                    border-radius: 6px !important;
+                    background: transparent !important;
+                    color: #cbd5e1 !important;
+                    border: 1px solid transparent !important;
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                    box-sizing: border-box !important;
+                    white-space: nowrap !important;
+                    line-height: normal !important;
+                    flex-shrink: 0 !important;
+                    margin: 0 !important;
+                }
+                #btn-workdesk-chama-ai:hover {
+                    background: rgba(255, 255, 255, 0.06) !important;
+                    color: #ffd000 !important;
+                }
+                #btn-workdesk-chama-ai.is-active {
+                    background: #1c1f28 !important;
+                    color: #ffd000 !important;
+                    border: 1px solid rgba(227, 180, 0, 0.35) !important;
+                    font-weight: 600 !important;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+                }
+
+                /* Painel Lateral do ChamaAI - Design padrão Workdesk (Alinhado à barra lateral direita) */
+                #chama-ai-panel {
+                    position: fixed !important;
+                    top: 0 !important;
+                    right: 0 !important;
+                    bottom: 0 !important;
+                    width: 340px !important;
+                    max-width: 90vw !important;
+                    background: #12141a !important;
+                    z-index: 999999 !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    box-shadow: -6px 0 28px rgba(0, 0, 0, 0.65) !important;
+                    border-left: 1px solid #272a36 !important;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+                    color: #e2e8f0 !important;
+                    box-sizing: border-box !important;
+                    transform: translateX(100%) !important;
+                    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease !important;
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                }
+                #chama-ai-panel.is-open {
+                    transform: translateX(0) !important;
+                    opacity: 1 !important;
+                    pointer-events: auto !important;
+                }
+
+                /* Header do ChamaAI */
+                .chama-ai-header {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                    padding: 10px 14px !important;
+                    height: 52px !important;
+                    min-height: 52px !important;
+                    background: #171922 !important;
+                    border-bottom: 1px solid #232733 !important;
+                    box-sizing: border-box !important;
+                }
+                .chama-ai-header-left {
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 8px !important;
+                    overflow: hidden !important;
+                }
+                .chama-ai-avatar {
+                    width: 28px !important;
+                    height: 28px !important;
+                    border-radius: 7px !important;
+                    background: linear-gradient(135deg, #E3B400, #b45309) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    font-size: 14px !important;
+                    box-shadow: 0 2px 8px rgba(227, 180, 0, 0.3) !important;
+                    flex-shrink: 0 !important;
+                }
+                .chama-ai-title-wrap {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    line-height: 1.2 !important;
+                    overflow: hidden !important;
+                }
+                .chama-ai-title {
+                    font-size: 13.5px !important;
+                    font-weight: 700 !important;
+                    color: #f8fafc !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 5px !important;
+                }
+                .chama-ai-badge {
+                    font-size: 9.5px !important;
+                    font-weight: 700 !important;
+                    padding: 1px 5px !important;
+                    border-radius: 4px !important;
+                    background: rgba(227, 180, 0, 0.18) !important;
+                    color: #ffd000 !important;
+                    border: 1px solid rgba(227, 180, 0, 0.3) !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.5px !important;
+                }
+                .chama-ai-subtitle {
+                    font-size: 10.5px !important;
+                    color: #94a3b8 !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                }
+                .chama-ai-header-actions {
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 4px !important;
+                    flex-shrink: 0 !important;
+                }
+                .chama-ai-btn-icon {
+                    width: 28px !important;
+                    height: 28px !important;
+                    border-radius: 6px !important;
+                    background: transparent !important;
+                    border: 1px solid transparent !important;
+                    color: #94a3b8 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    cursor: pointer !important;
+                    transition: all 0.15s ease !important;
+                    padding: 0 !important;
+                }
+                .chama-ai-btn-icon:hover {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    color: #f8fafc !important;
+                    border-color: rgba(255, 255, 255, 0.12) !important;
+                }
+
+                /* Lista de Mensagens */
+                .chama-ai-messages {
+                    flex: 1 !important;
+                    overflow-y: auto !important;
+                    padding: 12px 10px !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 10px !important;
+                    box-sizing: border-box !important;
+                    scrollbar-width: thin !important;
+                    scrollbar-color: #2b2f3d transparent !important;
+                }
+                .chama-ai-messages::-webkit-scrollbar {
+                    width: 5px !important;
+                }
+                .chama-ai-messages::-webkit-scrollbar-thumb {
+                    background: #2b2f3d !important;
+                    border-radius: 3px !important;
+                }
+
+                /* Balões de Conversa */
+                .chama-ai-msg-row {
+                    display: flex !important;
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .chama-ai-msg-row.is-user {
+                    justify-content: flex-end !important;
+                }
+                .chama-ai-msg-row.is-ai {
+                    justify-content: flex-start !important;
+                }
+
+                .chama-ai-bubble {
+                    max-width: 92% !important;
+                    padding: 8px 11px !important;
+                    font-size: 12.5px !important;
+                    line-height: 1.45 !important;
+                    box-sizing: border-box !important;
+                    word-break: break-word !important;
+                }
+                .chama-ai-bubble.user-bubble {
+                    background: #232733 !important;
+                    border: 1px solid rgba(227, 180, 0, 0.28) !important;
+                    color: #f8fafc !important;
+                    border-radius: 12px 12px 2px 12px !important;
+                }
+                .chama-ai-bubble.ai-bubble {
+                    background: #181b24 !important;
+                    border: 1px solid #282c3c !important;
+                    color: #e2e8f0 !important;
+                    border-radius: 12px 12px 12px 2px !important;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+                }
+
+                .chama-ai-bubble-header {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                    margin-bottom: 6px !important;
+                    font-size: 11px !important;
+                    color: #94a3b8 !important;
+                }
+                .chama-ai-bubble-sender {
+                    font-weight: 700 !important;
+                    color: #ffd000 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 4px !important;
+                }
+                .chama-ai-faq-badge {
+                    display: inline-block !important;
+                    background: rgba(56, 189, 248, 0.12) !important;
+                    color: #38bdf8 !important;
+                    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+                    border-radius: 4px !important;
+                    padding: 1px 6px !important;
+                    font-size: 10px !important;
+                    font-weight: 600 !important;
+                    margin-bottom: 6px !important;
+                }
+                .chama-ai-bubble-body p {
+                    margin: 0 0 8px 0 !important;
+                }
+                .chama-ai-bubble-body p:last-child {
+                    margin-bottom: 0 !important;
+                }
+                .chama-ai-bubble-body ul, .chama-ai-bubble-body ol {
+                    margin: 4px 0 8px 18px !important;
+                    padding: 0 !important;
+                }
+                .chama-ai-bubble-body li {
+                    margin-bottom: 4px !important;
+                }
+                .chama-ai-bubble-body code {
+                    background: #0d0f14 !important;
+                    border: 1px solid #222530 !important;
+                    padding: 2px 5px !important;
+                    border-radius: 4px !important;
+                    font-family: Consolas, monospace !important;
+                    font-size: 12px !important;
+                    color: #f59e0b !important;
+                }
+                .chama-ai-bubble-body pre {
+                    background: #0d0f14 !important;
+                    border: 1px solid #222530 !important;
+                    padding: 8px !important;
+                    border-radius: 6px !important;
+                    font-family: Consolas, monospace !important;
+                    font-size: 12px !important;
+                    overflow-x: auto !important;
+                    margin: 6px 0 !important;
+                }
+                .chama-ai-bubble-footer {
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: flex-end !important;
+                    margin-top: 8px !important;
+                    padding-top: 6px !important;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+                }
+                .chama-ai-btn-copy {
+                    background: transparent !important;
+                    border: none !important;
+                    color: #94a3b8 !important;
+                    font-size: 11px !important;
+                    font-weight: 600 !important;
+                    cursor: pointer !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 4px !important;
+                    padding: 2px 6px !important;
+                    border-radius: 4px !important;
+                    transition: all 0.15s ease !important;
+                }
+                .chama-ai-btn-copy:hover {
+                    color: #ffd000 !important;
+                    background: rgba(227, 180, 0, 0.1) !important;
+                }
+
+                /* Boas-Vindas e Chips */
+                .chama-ai-welcome {
+                    background: #171922 !important;
+                    border: 1px solid #262a38 !important;
+                    border-radius: 10px !important;
+                    padding: 16px !important;
+                    text-align: center !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    gap: 10px !important;
+                    margin-top: 10px !important;
+                }
+                .chama-ai-welcome-icon {
+                    width: 44px !important;
+                    height: 44px !important;
+                    border-radius: 50% !important;
+                    background: rgba(227, 180, 0, 0.15) !important;
+                    color: #ffd000 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    font-size: 22px !important;
+                }
+                .chama-ai-welcome-title {
+                    font-size: 15px !important;
+                    font-weight: 700 !important;
+                    color: #f8fafc !important;
+                }
+                .chama-ai-welcome-desc {
+                    font-size: 12px !important;
+                    color: #94a3b8 !important;
+                    line-height: 1.5 !important;
+                }
+                .chama-ai-chips-wrap {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 6px !important;
+                    width: 100% !important;
+                    margin-top: 8px !important;
+                }
+                .chama-ai-chip {
+                    background: #1f2330 !important;
+                    border: 1px solid #2e3446 !important;
+                    border-radius: 6px !important;
+                    padding: 8px 12px !important;
+                    color: #cbd5e1 !important;
+                    font-size: 12px !important;
+                    text-align: left !important;
+                    cursor: pointer !important;
+                    transition: all 0.15s ease !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 8px !important;
+                }
+                .chama-ai-chip:hover {
+                    background: rgba(227, 180, 0, 0.14) !important;
+                    border-color: rgba(227, 180, 0, 0.45) !important;
+                    color: #ffd000 !important;
+                    transform: translateX(2px) !important;
+                }
+
+                /* Digitando */
+                .chama-ai-typing {
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 6px !important;
+                    font-size: 12px !important;
+                    color: #ffd000 !important;
+                    font-style: italic !important;
+                    padding: 8px 12px !important;
+                    background: #181b24 !important;
+                    border: 1px solid #282c3c !important;
+                    border-radius: 8px !important;
+                    width: fit-content !important;
+                }
+                .chama-ai-dot {
+                    width: 6px !important;
+                    height: 6px !important;
+                    background: #ffd000 !important;
+                    border-radius: 50% !important;
+                    animation: chamaAiPulse 1.2s infinite ease-in-out !important;
+                }
+                .chama-ai-dot:nth-child(2) { animation-delay: 0.2s !important; }
+                .chama-ai-dot:nth-child(3) { animation-delay: 0.4s !important; }
+                @keyframes chamaAiPulse {
+                    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+                    50% { opacity: 1; transform: scale(1.2); }
+                }
+
+                /* Composer / Footer */
+                .chama-ai-footer {
+                    padding: 10px 12px !important;
+                    background: #171922 !important;
+                    border-top: 1px solid #232733 !important;
+                    box-sizing: border-box !important;
+                }
+                .chama-ai-input-wrap {
+                    display: flex !important;
+                    align-items: flex-end !important;
+                    gap: 6px !important;
+                    background: #0f1117 !important;
+                    border: 1px solid #2a2e3d !important;
+                    border-radius: 8px !important;
+                    padding: 6px 9px !important;
+                    transition: border-color 0.2s ease !important;
+                }
+                .chama-ai-input-wrap:focus-within {
+                    border-color: #E3B400 !important;
+                    box-shadow: 0 0 0 1px rgba(227, 180, 0, 0.3) !important;
+                }
+                #chama-ai-input-text {
+                    flex: 1 !important;
+                    background: transparent !important;
+                    border: none !important;
+                    color: #f8fafc !important;
+                    font-family: inherit !important;
+                    font-size: 13px !important;
+                    line-height: 1.4 !important;
+                    resize: none !important;
+                    outline: none !important;
+                    max-height: 120px !important;
+                    min-height: 22px !important;
+                    height: 22px !important;
+                    padding: 0 !important;
+                    box-sizing: border-box !important;
+                }
+                #chama-ai-input-text::placeholder {
+                    color: #64748b !important;
+                }
+                #chama-ai-btn-send {
+                    width: 32px !important;
+                    height: 32px !important;
+                    border-radius: 6px !important;
+                    background: #E3B400 !important;
+                    color: #0d0e12 !important;
+                    border: none !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    cursor: pointer !important;
+                    transition: all 0.15s ease !important;
+                    flex-shrink: 0 !important;
+                }
+                #chama-ai-btn-send:hover {
+                    background: #ffd000 !important;
+                    transform: scale(1.05) !important;
+                }
+                #chama-ai-btn-send:disabled {
+                    background: #252834 !important;
+                    color: #64748b !important;
+                    cursor: not-allowed !important;
+                    transform: none !important;
+                }
+                .chama-ai-footer-hint {
+                    margin-top: 6px !important;
+                    font-size: 10.5px !important;
+                    color: #64748b !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: space-between !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Higieniza respostas do ChamaAI eliminando prolixidade, tabelas de justificativa e dicas não solicitadas
+        function limparProlixidadeChamaAI(texto) {
+            if (!texto) return '';
+            let limpo = texto.trim();
+
+            // 1. Remove divisores seguidos de qualquer seção de justificativas, tabelas ou dicas
+            limpo = limpo.replace(/\n\s*---+\s*\n[\s\S]*(?:Por que a corre|Motivo|An[áa]lise|Dica|O que mudou|Erro\s*\|)[\s\S]*/i, '').trim();
+
+            // 2. Remove seções diretas de "Por que a correção...", motivos ou justificativas (com ou sem ### ou **)
+            limpo = limpo.replace(/\n\s*(?:#{1,4}\s*|\*{1,2})?(?:Por que a corre[çc][ãa]o|Por que a corre[çc][ãa]o foi (?:feita|boa)|Motivo da corre|Justificativa da corre|An[áa]lise dos erros|O que mudou|O que foi alterado)[\s\S]*/i, '').trim();
+
+            // 3. Remove seções de dicas rápidas e dicas extras não solicitadas
+            limpo = limpo.replace(/\n\s*(?:#{1,4}\s*|\*{1,2})?(?:Dica r[áa]pida|Dica para o atendimento|Dicas extras|Dica)[\s\S]*/i, '').trim();
+
+            // 4. Remove qualquer tabela remanescente de Erro | Correção | Motivo
+            limpo = limpo.replace(/\n\s*\|?\s*Erro\s*\|\s*Corre[çc][ãa]o[\s\S]*/i, '').trim();
+
+            // 5. Remove divisores finais órfãos (---)
+            limpo = limpo.replace(/\n\s*---+\s*$/g, '').trim();
+
+            // 6. Remove despedidas e encerramentos prolixos
+            limpo = limpo.replace(/(?:\n|^)(?:Se precisar de mais detalhes|Qualquer d[úu]vida estou [àa] disposi[çc][ãa]o|Espero ter ajudado|Se precisar de algo mais|Fico [àa] disposi[çc][ãa]o)[!,.\s\w–-]*$/i, '').trim();
+
+            return limpo || texto;
+        }
+
+        // Formata Markdown básico com segurança
+        function formatarMarkdownChamaAI(texto) {
+            if (!texto) return '';
+            const esc = texto
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+
+            // Blocos de código ```código```
+            let formatado = esc.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            // Código inline `código`
+            formatado = formatado.replace(/`([^`]+)`/g, '<code>$1</code>');
+            // Citações em destaque (> Frase corrigida)
+            formatado = formatado.replace(/^&gt;\s*(.*)$/gm, '<blockquote style="border-left: 3px solid #E3B400; padding: 6px 12px; margin: 6px 0; background: rgba(227, 180, 0, 0.08); border-radius: 4px; color: #f8fafc; font-size: 13.5px; font-weight: 500;">$1</blockquote>');
+            // Negrito **texto**
+            formatado = formatado.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            // Itálico *texto*
+            formatado = formatado.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+            // Linhas e listas
+            const linhas = formatado.split('\n');
+            let resultado = '';
+            let emListaUl = false;
+            let emListaOl = false;
+
+            for (let i = 0; i < linhas.length; i++) {
+                const l = linhas[i].trim();
+                const ehItemUl = /^[-*•]\s+(.*)$/.exec(l);
+                const ehItemOl = /^\d+[.)]\s+(.*)$/.exec(l);
+
+                if (ehItemUl) {
+                    if (!emListaUl) {
+                        if (emListaOl) { resultado += '</ol>'; emListaOl = false; }
+                        resultado += '<ul>';
+                        emListaUl = true;
+                    }
+                    resultado += `<li>${ehItemUl[1]}</li>`;
+                } else if (ehItemOl) {
+                    if (!emListaOl) {
+                        if (emListaUl) { resultado += '</ul>'; emListaUl = false; }
+                        resultado += '<ol>';
+                        emListaOl = true;
+                    }
+                    resultado += `<li>${ehItemOl[1]}</li>`;
+                } else {
+                    if (emListaUl) { resultado += '</ul>'; emListaUl = false; }
+                    if (emListaOl) { resultado += '</ol>'; emListaOl = false; }
+                    if (l.length > 0) {
+                        resultado += `<p>${l}</p>`;
+                    }
+                }
+            }
+            if (emListaUl) resultado += '</ul>';
+            if (emListaOl) resultado += '</ol>';
+
+            return resultado || `<p>${esc}</p>`;
+        }
+
+        // Busca rápida e precisa nos 442 FAQs do Help Tools
+        async function buscarFaqsHelpToolsParaChamaAI(pergunta) {
+            try {
+                const dadosKb = await obterBaseConhecimentoEmMemoria();
+                if (!dadosKb || dadosKb.length === 0) return { textoFaqs: '', faqsUsados: [] };
+
+                const stopWords = new Set(['para', 'com', 'como', 'esta', 'esse', 'essa', 'isso', 'pelo', 'pela', 'onde', 'quando', 'mais', 'muito', 'voce', 'você', 'estou', 'está', 'fazer', 'qual', 'pode', 'meu', 'minha', 'meus', 'minhas', 'cliente', 'atendimento', 'suporte', 'ola', 'olá', 'bom', 'boa', 'dia', 'tarde', 'noite', 'favor', 'por', 'sobre', 'aqui', 'tenho', 'tudo', 'bem', 'ajuda', 'duvida', 'dúvida']);
+                const termos = pergunta.toLowerCase()
+                    .split(/[\s,.;:!?/\\()\-"]+/)
+                    .filter(w => w.length >= 3 && !stopWords.has(w));
+
+                if (termos.length === 0) return { textoFaqs: '', faqsUsados: [] };
+
+                // Detecção de número de FAQ explícito (ex: "faq 855", "855")
+                const matchNumFaq = pergunta.match(/\b(?:faq\s*)?(\d{2,4})\b/i);
+                const numFaq = matchNumFaq ? matchNumFaq[1] : null;
+
+                const rankeados = dadosKb.map(m => {
+                    const tit = (m.titulo || '').toLowerCase();
+                    const cat = (m.categoria || '').toLowerCase();
+                    const proc = (m.procedimento || '').toLowerCase();
+                    const idStr = String(m.id || '').toLowerCase();
+
+                    let score = 0;
+                    if (numFaq && (idStr.includes(numFaq) || tit.includes(numFaq))) {
+                        score += 60;
+                    }
+
+                    termos.forEach(t => {
+                        if (idStr.includes(t)) score += 30;
+                        if (tit.includes(t)) score += 15;
+                        if (cat.includes(t)) score += 8;
+                        if (proc.includes(t)) score += 3;
+                    });
+
+                    return { m, score };
+                }).filter(x => x.score >= 18)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 4);
+
+                if (rankeados.length === 0) {
+                    return { textoFaqs: '', faqsUsados: [] };
+                }
+
+                const faqsUsados = rankeados.map(x => x.m.titulo || x.m.id);
+                const textoFaqs = '\n\nBASE OFICIAL DE FAQS E PROCEDIMENTOS DO HELP TOOLS (REFERÊNCIA TÉCNICA):\n' +
+                    rankeados.map(x => `[${x.m.id ? x.m.id + ' - ' : ''}${x.m.titulo} (${x.m.categoria || 'Geral'})]\n${x.m.procedimento || ''}`).join('\n\n');
+
+                return { textoFaqs, faqsUsados };
+            } catch (_) {
+                return { textoFaqs: '', faqsUsados: [] };
+            }
+        }
+
+        // Obtém dinamicamente a largura da barra lateral direita do Workdesk para alinhar o ChamaAI perfeitamente
+        function obterLarguraBarraLateralWorkdesk() {
+            try {
+                // 1. Procura subindo a árvore DOM a partir dos botões de abas da barra lateral (Cliente, Chama Gestor, Histórico)
+                const botoes = Array.from(document.querySelectorAll('button, [role="tab"], a[role="button"], div[class*="tab" i]:not([class*="panel" i])'));
+                for (const b of botoes) {
+                    if (b.closest('#gemini-docked-panel') || b.closest('#chama-ai-panel') || b.id === 'btn-cadastro-cliente') continue;
+                    const txt = (b.textContent || b.title || b.getAttribute('aria-label') || '').toLowerCase().trim();
+                    if (txt === 'cliente' || txt.includes('chama gestor') || txt.includes('chamar gestor') || txt.includes('histórico') || txt.includes('historico')) {
+                        let pai = b.parentElement;
+                        while (pai && pai !== document.body && pai !== document.documentElement) {
+                            const r = pai.getBoundingClientRect();
+                            if (r.width >= 240 && r.width <= 460 && r.right >= window.innerWidth - 35 && r.height > 200) {
+                                return Math.round(r.width);
+                            }
+                            pai = pai.parentElement;
+                        }
+                    }
+                }
+
+                // 2. Procura pelos seletores de containers típicos da barra lateral direita do Workdesk
+                const seletores = [
+                    'aside',
+                    '[class*="inspector" i]',
+                    '[class*="sidePanel" i]',
+                    '[class*="clientPanel" i]',
+                    '[class*="rightSidebar" i]',
+                    '[class*="drawer" i]',
+                    '[role="tabpanel"][aria-label="Cliente"]',
+                    '[class*="inspectorTabPanel"]',
+                    '[role="tabpanel"]'
+                ];
+                for (const sel of seletores) {
+                    const elementos = document.querySelectorAll(sel);
+                    for (const el of elementos) {
+                        if (el.closest('#chama-ai-panel') || el.closest('#gemini-docked-panel')) continue;
+                        const r = el.getBoundingClientRect();
+                        if (r.width >= 240 && r.width <= 460 && r.right >= window.innerWidth - 35 && r.height > 200) {
+                            return Math.round(r.width);
+                        }
+                    }
+                }
+
+                // 3. Mede o espaço entre a borda direita do input do SoftCopilot e a borda da janela
+                const cardSoftCopilot = document.getElementById('gemini-docked-panel');
+                if (cardSoftCopilot) {
+                    const rCard = cardSoftCopilot.getBoundingClientRect();
+                    const espacoDireita = window.innerWidth - rCard.right;
+                    if (espacoDireita >= 240 && espacoDireita <= 460) {
+                        return Math.round(espacoDireita);
+                    }
+                }
+            } catch (_) { }
+
+            // 4. Fallback padrão seguro (largura padrão observada na barra lateral do Workdesk)
+            return 340;
+        }
+
+        // Aplica a largura exata da barra lateral direita ao painel do ChamaAI
+        function atualizarLarguraPainelChamaAI() {
+            const panel = document.getElementById('chama-ai-panel');
+            if (!panel) return;
+            const largura = obterLarguraBarraLateralWorkdesk();
+            panel.style.setProperty('width', `${largura}px`, 'important');
+        }
+
+        // Sincroniza a largura se a janela for redimensionada enquanto o painel estiver aberto
+        window.addEventListener('resize', () => {
+            if (chamaAIPainelAberto) {
+                atualizarLarguraPainelChamaAI();
+            }
+        }, { passive: true });
+
+        // Renderiza o painel do ChamaAI no DOM
+        function garantirPainelChamaAI() {
+            injetarEstilosChamaAI();
+            let panel = document.getElementById('chama-ai-panel');
+            if (panel && document.body.contains(panel)) {
+                atualizarLarguraPainelChamaAI();
+                return panel;
+            }
+
+            panel = document.createElement('div');
+            panel.id = 'chama-ai-panel';
+            panel.innerHTML = `
+                <div class="chama-ai-header">
+                    <div class="chama-ai-header-left">
+                        <div class="chama-ai-avatar">✨</div>
+                        <div class="chama-ai-title-wrap">
+                            <div class="chama-ai-title">ChamaAI <span class="chama-ai-badge">BETA</span></div>
+                            <div class="chama-ai-subtitle">Dúvidas de atendimento, FAQs do Help Tools e suporte geral</div>
+                        </div>
+                    </div>
+                    <div class="chama-ai-header-actions">
+                        <button id="chama-ai-btn-clear" class="chama-ai-btn-icon" title="Limpar conversa" aria-label="Limpar conversa">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        </button>
+                        <button id="chama-ai-btn-close" class="chama-ai-btn-icon" title="Fechar ChamaAI (Esc)" aria-label="Fechar">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="chama-ai-messages-list" class="chama-ai-messages"></div>
+
+                <div class="chama-ai-footer">
+                    <div class="chama-ai-input-wrap">
+                        <textarea id="chama-ai-input-text" placeholder="Pergunte sobre um atendimento, sistema ou qualquer outro assunto..." rows="1"></textarea>
+                        <button id="chama-ai-btn-send" title="Enviar pergunta (Enter)" aria-label="Enviar">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                    <div class="chama-ai-footer-hint">
+                        <span>Enter envia • Shift+Enter quebra</span>
+                        <span>🔒 Isolado do cliente</span>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(panel);
+            atualizarLarguraPainelChamaAI();
+
+            // Blindagem: impede que qualquer clique ou digitação dentro do ChamaAI suba para o Workdesk
+            panel.addEventListener('click', (e) => e.stopPropagation());
+            panel.addEventListener('mousedown', (e) => e.stopPropagation());
+
+            // Ações do Header
+            const btnClose = panel.querySelector('#chama-ai-btn-close');
+            if (btnClose) {
+                btnClose.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    fecharPainelChamaAI();
+                };
+            }
+
+            const btnClear = panel.querySelector('#chama-ai-btn-clear');
+            if (btnClear) {
+                btnClear.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (chamaAIHistorico.length === 0) return;
+                    if (confirm('Deseja limpar todo o histórico de conversas do ChamaAI?')) {
+                        chamaAIHistorico = [];
+                        persistirHistoricoChamaAI();
+                        renderizarMensagensChamaAI();
+                    }
+                };
+            }
+
+            // Input e Envio
+            const textarea = panel.querySelector('#chama-ai-input-text');
+            const btnSend = panel.querySelector('#chama-ai-btn-send');
+
+            if (textarea) {
+                const autoResize = () => {
+                    textarea.style.height = 'auto';
+                    textarea.style.height = Math.min(120, Math.max(22, textarea.scrollHeight)) + 'px';
+                };
+
+                textarea.addEventListener('input', (e) => {
+                    e.stopPropagation();
+                    autoResize();
+                    if (btnSend) {
+                        btnSend.disabled = !textarea.value.trim() || gerandoRespostaChamaAI;
+                    }
+                });
+
+                textarea.addEventListener('keydown', (e) => {
+                    // BLINDAGEM CRÍTICA: bloqueia propagação para o Workdesk
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        fecharPainelChamaAI();
+                        return;
+                    }
+
+                    if (e.key === 'Enter') {
+                        if (e.shiftKey) {
+                            // Quebra de linha permitida
+                            return;
+                        }
+                        e.preventDefault();
+                        const val = textarea.value.trim();
+                        if (val && !gerandoRespostaChamaAI) {
+                            enviarPerguntaChamaAI(val);
+                        }
+                    }
+                });
+
+                ['keyup', 'keypress'].forEach(evt => {
+                    textarea.addEventListener(evt, (e) => {
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                    });
+                });
+            }
+
+            if (btnSend) {
+                btnSend.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (textarea && textarea.value.trim() && !gerandoRespostaChamaAI) {
+                        enviarPerguntaChamaAI(textarea.value.trim());
+                    }
+                };
+            }
+
+            renderizarMensagensChamaAI();
+            return panel;
+        }
+
+        // Renderiza os balões da conversa
+        function renderizarMensagensChamaAI() {
+            const panel = document.getElementById('chama-ai-panel');
+            if (!panel) return;
+            const container = panel.querySelector('#chama-ai-messages-list');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            // Se histórico estiver vazio, exibe o cartão acolhedor de boas-vindas com chips clicáveis
+            if (!chamaAIHistorico || chamaAIHistorico.length === 0) {
+                const welcome = document.createElement('div');
+                welcome.className = 'chama-ai-welcome';
+                welcome.innerHTML = `
+                    <div class="chama-ai-welcome-icon">✨</div>
+                    <div class="chama-ai-welcome-title">Olá! Eu sou o ChamaAI</div>
+                    <div class="chama-ai-welcome-desc">
+                        Sou seu assistente inteligente no atendimento. Fui alimentado com a base completa de <strong>FAQs do Help Tools</strong> para tirar dúvidas de procedimentos do sistema, mas você também pode me perguntar livremente sobre qualquer outro assunto!
+                    </div>
+                    <div class="chama-ai-chips-wrap">
+                        <div class="chama-ai-chip" data-prompt="Como emitir NFC-e em contingência offline no PDV?">
+                            <span>📄</span> <span>Como emitir NFC-e em contingência offline?</span>
+                        </div>
+                        <div class="chama-ai-chip" data-prompt="Impressora no acesso remoto não imprime, como resolver?">
+                            <span>🖨️</span> <span>Impressora no acesso remoto não imprime, como resolver?</span>
+                        </div>
+                        <div class="chama-ai-chip" data-prompt="Como criar atalho de conexão RDP na porta 4009?">
+                            <span>💻</span> <span>Como criar atalho remoto na porta 4009?</span>
+                        </div>
+                        <div class="chama-ai-chip" data-prompt="Qual a diferença entre CSOSN 102 e CSOSN 500 no Simples Nacional?">
+                            <span>💡</span> <span>Qual a diferença entre CSOSN 102 e 500?</span>
+                        </div>
+                    </div>
+                `;
+
+                welcome.querySelectorAll('.chama-ai-chip').forEach(chip => {
+                    chip.onclick = () => {
+                        const prompt = chip.getAttribute('data-prompt');
+                        if (prompt) enviarPerguntaChamaAI(prompt);
+                    };
+                });
+
+                container.appendChild(welcome);
+                return;
+            }
+
+            // Renderiza mensagens do histórico
+            chamaAIHistorico.forEach((msg, idx) => {
+                const row = document.createElement('div');
+                row.className = `chama-ai-msg-row is-${msg.role === 'user' ? 'user' : 'ai'}`;
+
+                const horaFmt = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+
+                if (msg.role === 'user') {
+                    row.innerHTML = `
+                        <div class="chama-ai-bubble user-bubble">
+                            <div class="chama-ai-bubble-header">
+                                <span class="chama-ai-bubble-sender">Você</span>
+                                <span>${horaFmt}</span>
+                            </div>
+                            <div class="chama-ai-bubble-body">${msg.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</div>
+                        </div>
+                    `;
+                } else {
+                    const badgeFaq = (msg.faqsUsados && msg.faqsUsados.length > 0)
+                        ? `<div class="chama-ai-faq-badge">📚 Base Help Tools: ${msg.faqsUsados[0]}</div>`
+                        : '';
+
+                    row.innerHTML = `
+                        <div class="chama-ai-bubble ai-bubble">
+                            <div class="chama-ai-bubble-header">
+                                <span class="chama-ai-bubble-sender">✨ ChamaAI</span>
+                                <span>${horaFmt}</span>
+                            </div>
+                            ${badgeFaq}
+                            <div class="chama-ai-bubble-body">${formatarMarkdownChamaAI(msg.text)}</div>
+                            <div class="chama-ai-bubble-footer">
+                                <button class="chama-ai-btn-copy" data-idx="${idx}" title="Copiar resposta">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                                    <span>Copiar</span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(row);
+            });
+
+            // Configura botões de copiar
+            container.querySelectorAll('.chama-ai-btn-copy').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(btn.getAttribute('data-idx'), 10);
+                    const msg = chamaAIHistorico[idx];
+                    if (msg && msg.text) {
+                        navigator.clipboard.writeText(msg.text).then(() => {
+                            btn.innerHTML = '<span>✓ Copiado!</span>';
+                            setTimeout(() => {
+                                btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> <span>Copiar</span>';
+                            }, 1800);
+                        });
+                    }
+                };
+            });
+
+            // Rola até o final
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Envia pergunta para a IA de forma totalmente autônoma e segura
+        async function enviarPerguntaChamaAI(pergunta) {
+            if (!pergunta || gerandoRespostaChamaAI) return;
+            gerandoRespostaChamaAI = true;
+
+            const panel = garantirPainelChamaAI();
+            const textarea = panel.querySelector('#chama-ai-input-text');
+            const btnSend = panel.querySelector('#chama-ai-btn-send');
+            if (textarea) {
+                textarea.value = '';
+                textarea.style.height = '22px';
+            }
+            if (btnSend) btnSend.disabled = true;
+
+            // 1. Registra mensagem do usuário no histórico local
+            chamaAIHistorico.push({
+                role: 'user',
+                text: pergunta,
+                timestamp: Date.now()
+            });
+            persistirHistoricoChamaAI();
+            renderizarMensagensChamaAI();
+
+            // 2. Exibe balão de digitação
+            const container = panel.querySelector('#chama-ai-messages-list');
+            const typingRow = document.createElement('div');
+            typingRow.id = 'chama-ai-typing-indicator';
+            typingRow.className = 'chama-ai-msg-row is-ai';
+            typingRow.innerHTML = `
+                <div class="chama-ai-typing">
+                    <span class="chama-ai-dot"></span>
+                    <span class="chama-ai-dot"></span>
+                    <span class="chama-ai-dot"></span>
+                    <span>ChamaAI está consultando a base e pensando...</span>
+                </div>
+            `;
+            container.appendChild(typingRow);
+            container.scrollTop = container.scrollHeight;
+
+            try {
+                // 3. Busca inteligente nos 442 FAQs do Help Tools
+                const { textoFaqs, faqsUsados } = await buscarFaqsHelpToolsParaChamaAI(pergunta);
+
+                // 4. Monta o histórico recente para o prompt (últimas 8 mensagens)
+                const ultimasMsgs = chamaAIHistorico.slice(-8, -1);
+                let historicoDialogo = '';
+                if (ultimasMsgs.length > 0) {
+                    historicoDialogo = '\nHISTÓRICO RECENTE DA CONVERSA:\n' +
+                        ultimasMsgs.map(m => `${m.role === 'user' ? 'Atendente' : 'ChamaAI'}: ${m.text}`).join('\n\n');
+                }
+
+                // 5. System Instruction dedicada ao ChamaAI - Focada em respostas ultra concisas, diretas e sem enrolação
+                const systemInstructionChamaAI =
+                    "Você é o ChamaAI, assistente inteligente e consultor prático para atendentes de suporte da Softcom. " +
+                    "SEJA EXTREMAMENTE DIRETO, CONCISO E OBJETIVO. NUNCA ENROLE OU SEJA PROLIXO.\n\n" +
+                    "DIRETRIZES OBRIGATÓRIAS:\n" +
+                    "1. RESPOSTAS ULTRA CURTAS: Vá direto ao ponto. Proibido introduções prolixas, preâmbulos ou despedidas (ex: 'Espero ter ajudado', 'Se precisar de algo mais, é só chamar', 'Fico à disposição').\n" +
+                    "2. CORREÇÃO DE FRASES / TEXTOS:\n" +
+                    "   - Quando o atendente pedir para corrigir, melhorar ou reescrever uma frase ou texto: devolva EXCLUSIVAMENTE a frase corrigida em destaque (ex: '> O CFOP que o senhor deve utilizar é o 500.').\n" +
+                    "   - É EXPRESSAMENTE PROIBIDO criar seções como 'Por que a correção foi feita?', 'Por que a correção foi boa?', 'Motivo da correção', justificativas gramaticais ou tabelas comparativas ('| Erro | Correção | Motivo |').\n" +
+                    "   - É EXPRESSAMENTE PROIBIDO adicionar 'Dicas rápidas para o atendimento' ou dicas extras não solicitadas. Entregue apenas o texto pronto.\n" +
+                    "3. DÚVIDAS E PROCEDIMENTOS:\n" +
+                    "   - Responda em no máximo 3 a 5 passos diretos e concisos.\n" +
+                    "   - Priorize os FAQs do Help Tools fornecidos quando a dúvida for sobre procedimentos do sistema Softcom.\n" +
+                    "   - Para outros assuntos gerais (Windows, redes, banco de dados, etc.), seja igualmente resumido e assertivo.";
+
+                // 6. Monta prompt final
+                const promptFinal = `${textoFaqs}${historicoDialogo}\n\nPERGUNTA DO ATENDENTE:\n"${pergunta}"\n\nInstrução: Responda de forma ultra concisa e direta. Se for correção ou ajuste de frase, forneça APENAS a frase corrigida em destaque (> Frase), sem justificativas, sem tabelas e sem dicas extras:`;
+
+                const apiKey = (typeof obterChaveGeminiParaEnvio === 'function') ? obterChaveGeminiParaEnvio() : '';
+                const groqApiKey = (typeof obterChaveGroqParaEnvio === 'function') ? obterChaveGroqParaEnvio() : '';
+
+                chrome.runtime.sendMessage({
+                    action: 'CALL_AI',
+                    apiKey: apiKey,
+                    groqApiKey: groqApiKey,
+                    prompt: promptFinal,
+                    systemInstruction: systemInstructionChamaAI,
+                    temperature: 0.2,
+                    maxTokens: 400
+                }, (response) => {
+                    const typingEl = document.getElementById('chama-ai-typing-indicator');
+                    if (typingEl) typingEl.remove();
+                    gerandoRespostaChamaAI = false;
+                    if (btnSend && textarea) btnSend.disabled = !textarea.value.trim();
+
+                    if (chrome.runtime.lastError || !response || !response.success) {
+                        const erro = response?.error || chrome.runtime.lastError?.message || 'Erro ao consultar IA';
+                        chamaAIHistorico.push({
+                            role: 'assistant',
+                            text: `⚠️ Desculpe, não consegui obter a resposta no momento (${erro}). Por favor, verifique suas chaves de API nas configurações ou tente novamente em instantes.`,
+                            timestamp: Date.now()
+                        });
+                        persistirHistoricoChamaAI();
+                        renderizarMensagensChamaAI();
+                        return;
+                    }
+
+                    const respostaBruta = (response.text || '').trim();
+                    const respostaIA = limparProlixidadeChamaAI(respostaBruta);
+                    chamaAIHistorico.push({
+                        role: 'assistant',
+                        text: respostaIA || 'Não foi possível gerar uma resposta para esta pergunta.',
+                        timestamp: Date.now(),
+                        faqsUsados: faqsUsados
+                    });
+                    persistirHistoricoChamaAI();
+                    renderizarMensagensChamaAI();
+                });
+            } catch (err) {
+                const typingEl = document.getElementById('chama-ai-typing-indicator');
+                if (typingEl) typingEl.remove();
+                gerandoRespostaChamaAI = false;
+                if (btnSend && textarea) btnSend.disabled = !textarea.value.trim();
+
+                chamaAIHistorico.push({
+                    role: 'assistant',
+                    text: `⚠️ Ocorreu uma falha ao processar sua dúvida: ${err.message || 'Erro inesperado'}.`,
+                    timestamp: Date.now()
+                });
+                persistirHistoricoChamaAI();
+                renderizarMensagensChamaAI();
+            }
+        }
+
+        // Abre o painel do ChamaAI
+        function abrirPainelChamaAI() {
+            chamaAIPainelAberto = true;
+            const panel = garantirPainelChamaAI();
+            atualizarLarguraPainelChamaAI();
+            panel.classList.add('is-open');
+
+            const btn = document.getElementById('btn-workdesk-chama-ai');
+            if (btn) btn.classList.add('is-active');
+
+            const textarea = panel.querySelector('#chama-ai-input-text');
+            if (textarea) {
+                setTimeout(() => {
+                    try { textarea.focus(); } catch (_) { }
+                }, 100);
+            }
+
+            // Garante que o input do SoftCopilot continue perfeitamente visível
+            const card = document.getElementById('gemini-docked-panel');
+            if (card && card.style.display === 'none') {
+                card.style.removeProperty('display');
+            }
+        }
+
+        // Fecha o painel do ChamaAI
+        function fecharPainelChamaAI() {
+            chamaAIPainelAberto = false;
+            const panel = document.getElementById('chama-ai-panel');
+            if (panel) {
+                panel.classList.remove('is-open');
+            }
+            const btn = document.getElementById('btn-workdesk-chama-ai');
+            if (btn) btn.classList.remove('is-active');
+
+            // Garante que o input do SoftCopilot permaneça presente e visível
+            setTimeout(() => {
+                try {
+                    const card = document.getElementById('gemini-docked-panel');
+                    if (card && card.style.display === 'none') {
+                        card.style.removeProperty('display');
+                    }
+                    if (ehChatDoClienteLegitimo()) {
+                        injetarPainelGemini();
+                    }
+                } catch (_) { }
+            }, 60);
+        }
+
+        function alternarPainelChamaAI() {
+            if (chamaAIPainelAberto) {
+                fecharPainelChamaAI();
+            } else {
+                abrirPainelChamaAI();
+            }
+        }
+
+        // Injeta o botão ChamaAI junto com os botões (Cliente, Chama Gestor e Histórico)
+        function injetarBotaoChamaAI() {
+            injetarEstilosChamaAI();
+
+            // 1. Procura por todos os botões/abas da interface de atendimento
+            const botoes = Array.from(document.querySelectorAll('button, [role="tab"], a[role="button"], div[class*="tab" i]:not([class*="panel" i])'));
+
+            let btnHistorico = null;
+            let btnGestor = null;
+            let btnCliente = null;
+
+            for (const b of botoes) {
+                if (b.closest('#gemini-docked-panel') || b.closest('#chama-ai-panel') || b.id === 'btn-cadastro-cliente') continue;
+                const txt = (b.textContent || b.title || b.getAttribute('aria-label') || '').toLowerCase().trim();
+                if (!txt) continue;
+
+                if (!btnHistorico && (txt === 'histórico' || txt === 'historico' || txt.includes('histórico') || txt.includes('historico'))) {
+                    btnHistorico = b;
+                    continue;
+                }
+                if (!btnGestor && (txt.includes('chama gestor') || txt.includes('chamar gestor') || txt === 'gestor')) {
+                    btnGestor = b;
+                    continue;
+                }
+                if (!btnCliente && (txt === 'cliente' || txt === 'dados do cliente' || (txt.includes('cliente') && txt.length < 15))) {
+                    btnCliente = b;
+                    continue;
+                }
+            }
+
+            // O botão âncora prioritário é o Chama Gestor (pedido explícito do usuário: "ao lado do chama gestor e alinhado")
+            const btnRef = btnGestor || btnHistorico || btnCliente;
+            if (!btnRef || !btnRef.parentElement) return;
+
+            // Determina o container real da barra preta e o elemento de referência para inserção
+            let container = btnRef.parentElement;
+            let elementoReferencia = btnRef;
+
+            // Caso o botão esteja dentro de um wrapper interno (ex: div > button), sobe para a barra que contém os outros botões
+            if (btnCliente && !container.contains(btnCliente) && container.parentElement && container.parentElement.contains(btnCliente)) {
+                elementoReferencia = container;
+                container = container.parentElement;
+            } else if (btnHistorico && !container.contains(btnHistorico) && container.parentElement && container.parentElement.contains(btnHistorico)) {
+                elementoReferencia = container;
+                container = container.parentElement;
+            }
+
+            // Garante que o container da barra preta mantenha flex em linha única (sem quebra), botões alinhados e sem espaço ocioso
+            if (container) {
+                container.style.setProperty('display', 'flex', 'important');
+                container.style.setProperty('flex-direction', 'row', 'important');
+                container.style.setProperty('flex-wrap', 'nowrap', 'important');
+                container.style.setProperty('align-items', 'center', 'important');
+                container.style.setProperty('width', 'fit-content', 'important');
+                container.style.setProperty('max-width', 'fit-content', 'important');
+                container.style.setProperty('padding-right', '4px', 'important');
+            }
+
+            // Remove o espaço em branco ao lado do botão Histórico
+            const limparEspacoHistorico = () => {
+                if (btnHistorico) {
+                    btnHistorico.style.setProperty('margin-right', '0px', 'important');
+                    const wrapperHistorico = (btnHistorico.parentElement === container) ? btnHistorico : btnHistorico.parentElement;
+                    if (wrapperHistorico) {
+                        wrapperHistorico.style.setProperty('margin-right', '0px', 'important');
+                        let prox = wrapperHistorico.nextSibling;
+                        while (prox) {
+                            const nextNode = prox.nextSibling;
+                            if (prox.nodeType === Node.TEXT_NODE) {
+                                if (!prox.textContent || !prox.textContent.trim()) {
+                                    prox.remove();
+                                }
+                            } else if (prox.nodeType === Node.ELEMENT_NODE) {
+                                if (prox.id !== 'btn-workdesk-chama-ai') {
+                                    const txt = (prox.textContent || '').trim();
+                                    if (!txt || prox.offsetWidth === 0 || prox.getAttribute('aria-hidden') === 'true') {
+                                        prox.style.setProperty('display', 'none', 'important');
+                                        prox.style.setProperty('width', '0px', 'important');
+                                        prox.style.setProperty('margin', '0px', 'important');
+                                        prox.style.setProperty('padding', '0px', 'important');
+                                    }
+                                }
+                            }
+                            prox = nextNode;
+                        }
+                    }
+                }
+            };
+            limparEspacoHistorico();
+
+            // Se o botão já existe no mesmo container e imediatamente ao lado do elementoReferencia, apenas sincroniza classe ativa
+            let btnExistente = document.getElementById('btn-workdesk-chama-ai');
+            if (btnExistente && btnExistente.parentElement === container && btnExistente.previousElementSibling === elementoReferencia) {
+                if (chamaAIPainelAberto) {
+                    btnExistente.classList.add('is-active');
+                } else {
+                    btnExistente.classList.remove('is-active');
+                }
+                limparEspacoHistorico();
+                return;
+            }
+
+            // Se já existia em posição incorreta (ex: abaixo ou em outro container), remove para reposicionar
+            if (btnExistente) {
+                try { btnExistente.remove(); } catch (_) { }
+            }
+
+            const btn = document.createElement('button');
+            btn.id = 'btn-workdesk-chama-ai';
+            btn.type = 'button';
+            btn.title = 'ChamaAI - Tirar dúvidas de atendimentos, FAQs do Help Tools e suporte geral';
+            btn.setAttribute('aria-label', 'ChamaAI');
+
+            // Copia classes de estilo do botão nativo para herdar tipografia e dimensões
+            if (btnRef.className && typeof btnRef.className === 'string') {
+                const classesLimpos = btnRef.className
+                    .replace(/\b(is-active|active|selected|ant-tabs-tab-active)\b/g, '')
+                    .trim();
+                if (classesLimpos) btn.className = classesLimpos;
+            }
+
+            btn.innerHTML = `
+                <span style="display: inline-flex; align-items: center; justify-content: center; font-size: 13px; line-height: 1; pointer-events: none;">✨</span>
+                <span style="pointer-events: none; margin-left: 2px;">ChamaAI</span>
+            `;
+
+            if (chamaAIPainelAberto) {
+                btn.classList.add('is-active');
+            }
+
+            btn.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                alternarPainelChamaAI();
+            };
+
+            // Insere imediatamente AO LADO DO CHAMA GESTOR (entre Chama Gestor e Histórico)
+            if (elementoReferencia.nextSibling) {
+                container.insertBefore(btn, elementoReferencia.nextSibling);
+            } else {
+                container.appendChild(btn);
+            }
+
+            limparEspacoHistorico();
+        }
+
+        // Listener global: se o atendente clicar em "Cliente", "Chama Gestor" ou "Histórico" nativos, fecha o ChamaAI
+        document.addEventListener('click', (e) => {
+            const alvo = e.target;
+            if (!alvo || alvo.closest('#chama-ai-panel') || alvo.closest('#btn-workdesk-chama-ai')) return;
+            const t = (alvo.textContent || alvo.title || alvo.getAttribute?.('aria-label') || '').toLowerCase().trim();
+            if (t.includes('chama gestor') || t.includes('chamar gestor') || t === 'gestor' ||
+                t === 'histórico' || t === 'historico' || t.includes('histórico') ||
+                t === 'cliente' || t === 'dados do cliente') {
+                if (chamaAIPainelAberto) {
+                    fecharPainelChamaAI();
+                }
+            }
+        }, true);
+
+        // Listener global de Esc para fechar o ChamaAI
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && chamaAIPainelAberto) {
+                fecharPainelChamaAI();
+            }
+        }, true);
+
         let observerAgendado = false;
         let observerExecutando = false;
         function executarCiclosDoObserver() {
@@ -9103,6 +10492,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             try { suprimirPopupsPausa(document.body); } catch (_) { }
             try { injetarBotao(); } catch (_) { }
             try { injetarBotaoReportarBugNoCabecalho(); } catch (_) { }
+            try { injetarBotaoChamaAI(); } catch (_) { }
             try { injetarPainelGemini(); } catch (e) { console.error('[Extensão Softcom] Erro ao injetar painel:', e); }
             try { fixarOrdemChats(); } catch (_) { }
             try { vincularCliquesCards(); } catch (_) { }
@@ -9129,13 +10519,26 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             // Ignora mutações geradas pela própria execução e agrupa rajadas (debounce de 150ms)
             if (observerExecutando || observerAgendado) return;
 
-            // Ignora mutações que ocorreram exclusivamente dentro do nosso próprio painel
+            // Ignora mutações que ocorreram exclusivamente dentro dos nossos próprios painéis (SoftCopilot ou ChamaAI)
             if (mutations && mutations.length > 0) {
                 const todasNossas = mutations.every(m => {
                     const target = m.target;
-                    return target && (target.id === 'gemini-docked-panel' || (target.closest && target.closest('#gemini-docked-panel')));
+                    return target && (
+                        target.id === 'gemini-docked-panel' || (target.closest && target.closest('#gemini-docked-panel')) ||
+                        target.id === 'chama-ai-panel' || (target.closest && target.closest('#chama-ai-panel'))
+                    );
                 });
                 if (todasNossas) return;
+            }
+
+            // Monitoramento ativo de resiliência: se o input do SoftCopilot foi desanexado do DOM, reinjeta imediatamente
+            if (ehChatDoClienteLegitimo()) {
+                const cardAtual = document.getElementById('gemini-docked-panel');
+                if (!cardAtual || !document.body.contains(cardAtual)) {
+                    try { injetarPainelGemini(); } catch (_) { }
+                } else if (cardAtual.style.display === 'none') {
+                    cardAtual.style.removeProperty('display');
+                }
             }
 
             observerAgendado = true;
@@ -9147,6 +10550,18 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             subtree: true
         });
 
+        // Monitoramento periódico de resiliência do input do SoftCopilot (a cada 600ms)
+        setInterval(() => {
+            if (ehChatDoClienteLegitimo()) {
+                const card = document.getElementById('gemini-docked-panel');
+                if (!card || !document.body.contains(card)) {
+                    try { injetarPainelGemini(); } catch (_) { }
+                } else if (card.style.display === 'none') {
+                    card.style.removeProperty('display');
+                }
+            }
+        }, 600);
+
         // Execução inicial ao carregar a página
         try { limparResiduosModoMelhorado(); } catch (_) { }
         try { suprimirPopupsPausa(document.body); } catch (_) { }
@@ -9155,6 +10570,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
         }, 1200);
         try { injetarBotao(); } catch (_) { }
         try { injetarBotaoReportarBugNoCabecalho(); } catch (_) { }
+        try { injetarBotaoChamaAI(); } catch (_) { }
         try { injetarPainelGemini(); } catch (e) { console.error('[Extensão Softcom] Erro inicial ao injetar painel:', e); }
         try { fixarOrdemChats(); } catch (_) { }
         try { vincularCliquesCards(); } catch (_) { }
