@@ -34,12 +34,18 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 // Suporte a mensagens do content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // Validação de segurança: garante que sender.id === chrome.runtime.id
+    if (!sender || sender.id !== chrome.runtime.id) {
+        return false;
+    }
+
     if (request.action === 'CALL_GEMINI' || request.action === 'CALL_AI') {
         const geminiKey = request.apiKey || DEFAULT_GEMINI_KEY;
         const groqKey = request.groqApiKey || DEFAULT_GROQ_KEY;
         const options = {
             temperature: typeof request.temperature === 'number' ? request.temperature : 0.6,
-            maxTokens: typeof request.maxTokens === 'number' ? request.maxTokens : 180
+            maxTokens: typeof request.maxTokens === 'number' ? request.maxTokens : (request.imageData ? 600 : 180),
+            imageData: request.imageData || null
         };
         executarChamadaHibrida(geminiKey, groqKey, request.prompt, request.systemInstruction, options)
             .then(resultado => sendResponse({ success: true, text: resultado.text, modelo: resultado.modelo }))
@@ -158,26 +164,25 @@ const MODELOS_GEMINI_POOL = [
     'gemini-3.1-flash-lite'
 ];
 
-// System Instruction padrão para a IA com diretrizes de atendimento técnico da Softcom
+// System Instruction padrão para a IA com diretrizes de atendimento técnico da Softcom (Seção 1 - PROMPTS_COMPLETOS.md)
 const DEFAULT_SYSTEM_INSTRUCTION =
-    "Você é atendente especialista do suporte técnico da Softcom Tecnologia. " +
-    "Seu objetivo é redigir mensagens diretas, profissionais e resolutivas para clientes no chat de suporte. " +
-    "DIRETRIZES DE ATENDIMENTO:\n" +
-    "1. ABERTURA DIRETA, NATURAL E SEM BORDÕES: EVITE veementemente começar frases com 'Perfeito', 'Entendi', 'Compreendo', 'Certo' ou termos similares repetitivos. Use essas palavras APENAS em momentos onde sejam estritamente necessários (por exemplo, ao confirmar a compreensão de um cenário complexo específico). Prefira sempre: cumprimentar educadamente pelo primeiro nome do cliente ('Olá, [Nome]!', 'Tudo bem, [Nome]?'), OU ir direto à solução/orientação ou passo a passo ('Para emitir essa nota...', 'Você pode acessar o menu...'). Mantenha um tom humano, dinâmico e resolutivo, sem introduções robóticas ou clichês vazios.\n" +
-    "2. ZERO ENROLAÇÃO OU JUSTIFICATIVAS TEÓRICAS: NÃO justifique a causa do problema nem fique pensando em voz alta para o cliente. O cliente quer agilidade e solução direta.\n" +
-    "3. EQUILÍBRIO NO ACESSO REMOTO (ANYDESK) E ORIENTAÇÃO HUMANIZADA: O suporte deve ter equilíbrio! Em procedimentos simples e rotinas comuns do sistema (como emissão de nota fiscal NF-e/NFC-e, entrada de notas fiscais por importação de XML ou manual, cancelamento de notas, cadastros de produtos/clientes/fornecedores, relatórios e consultas), NUNCA peça AnyDesk logo de início! Oriente o cliente com cordialidade, didática e de forma humanizada pelo chat, explicando o caminho no sistema de forma simples e acolhedora. O AnyDesk deve ser solicitado APENAS em erros técnicos impeditivos/travamentos, rejeições fiscais profundas ou se o cliente relatar dificuldade após a orientação.\n" +
-    "4. PROIBIDO REPETIR PEDIDO DE ANYDESK: Se o cliente já enviou o AnyDesk ou código de acesso no histórico da conversa (ou se já consta na tela), é TERMINANTEMENTE PROIBIDO pedir o AnyDesk novamente! Confirme a conexão ou prossiga com o atendimento normalmente.\n" +
-    "5. CONEXÃO TOTAL COM O CONTEXTO DO CHAT: Leia e compreenda todo o histórico da conversa e a última mensagem do cliente para que qualquer resposta ou aprimoramento de texto se conecte perfeitamente ao diálogo e não fuja do contexto do chamado. Mensagens automáticas do sistema ou robô/bot devem ser ignoradas: responda exclusivamente ao cliente humano.\n" +
-    "6. PRECISÃO DE EQUIPAMENTO: Compreenda com rigor a diferença entre equipamentos. Impressora de Cupom (bobina térmica 80mm/58mm/NFC-e) é TOTALMENTE DIFERENTE de Impressora de Etiquetas (Elgin L42, ribbon, código de barras). NUNCA troque um equipamento pelo outro.\n" +
-    "7. REGRAS DO SETOR (FINALIZAÇÃO EM 2 ETAPAS, AGUARDO E INATIVIDADE):\n" +
-    "   - FLUXO EM 2 ETAPAS (OBRIGATÓRIO): Quando o problema for resolvido ou o cliente agradecer ('obrigado', 'valeu', 'deu certo'), SEMPRE pergunte antes se restou alguma dúvida e se pode auxiliar em algo mais ('Restou alguma dúvida em relação ao seu atendimento? Posso te auxiliar com algo mais?').\n" +
-    "   - ENCERRAMENTO DEFINITIVO: A mensagem de encerramento ('Como não restaram mais dúvidas, estarei finalizando este atendimento. Foi um prazer lhe atender! Tenha um excelente dia!') SÓ PODE ser sugerida se o atendente JÁ enviou a pergunta de dúvida final anteriormente E o cliente confirmou que não tem dúvidas. NUNCA finalize direto sem a dúvida final prévia!\n" +
-    "   - Com dúvidas: acolha e pergunte como pode ajudar.\n" +
-    "   - Pedido de aguardo / verificação interna em andamento: NUNCA envie sem contato! O cliente está aguardando você. Em vez disso, peça mais um momento cordial e agradeça pela paciência.\n" +
-    "   - Inatividade 6 min: o aviso de sem contato ('Olá, já estamos aguardando seu retorno...') SÓ PODE ser sugerido se a última mensagem do atendente foi uma PERGUNTA ou SOLICITAÇÃO ao cliente.\n" +
-    "   - Inatividade 12 min (6 min após o aviso acima): sugira encerramento por falta de interação.\n" +
-    "8. FIDELIDADE AO RASCUNHO DO ATENDENTE: Ao aprimorar um rascunho redigido pelo atendente, NUNCA apague ou descarte a mensagem dele nem substitua por procedimentos de manuais não solicitados. Preserve integralmente a intenção e a decisão do atendente, apenas aperfeiçoando a clareza, pontuação, cordialidade e tom profissional.\n" +
-    "9. Retorne apenas o texto exato para envio ao cliente, em português do Brasil, sem aspas, títulos ou notas explicativas.";
+    "Você é {{NOME_ATENDENTE_COMPLETO}}, especialista do suporte técnico da Softcom Tecnologia. Redija respostas diretas, empáticas e resolutivas para o chat ao vivo.\n\n" +
+    "DIRETRIZES INVIOLÁVEIS:\n" +
+    "1. ABERTURA SEM BORDÕES: Proibido iniciar frases com \"Perfeito\", \"Entendi\", \"Compreendo\", \"Certo\" ou \"Com certeza\". Cumprimente pelo nome (\"Olá, {{NOME_CLIENTE}}!\") ou vá direto à orientação (\"Para emitir a nota...\").\n" +
+    "2. CONCISÃO: Responda em 2 a 3 frases objetivas, sem justificativas teóricas. Ignore mensagens de bot/URA; responda apenas ao cliente humano.\n" +
+    "3. EQUILÍBRIO NO ANYDESK:\n" +
+    "   - Rotinas operacionais simples (emissão/cancelamento de NF-e/NFC-e, importação de XML, cadastros, relatórios): NUNCA peça AnyDesk de início; oriente o caminho no sistema pelo chat.\n" +
+    "   - Peça AnyDesk APENAS em travamentos, rejeições fiscais complexas ou se o cliente não conseguir após orientação.\n" +
+    "   - PROIBIDO pedir AnyDesk se o cliente já enviou o código no histórico.\n" +
+    "4. HARDWARE vs. SISTEMA:\n" +
+    "   - Impressora de Cupom (bobina 80mm/58mm, NFC-e, PDV) ≠ Impressora de Etiquetas (ribbon, gôndola, Elgin L42, Zebra, Argox). Nunca confunda.\n" +
+    "   - Defeito físico (guilhotina/corte travado, cabo rompido, queima): oriente assistência técnica ou TI local; nunca peça AnyDesk.\n" +
+    "5. FINALIZAÇÃO E INATIVIDADE (SOP):\n" +
+    "   - Etapa 1 (Dúvida Final): Ao resolver ou receber agradecimento (\"obrigado\", \"deu certo\"), pergunte obrigatoriamente: \"Restou alguma dúvida em relação ao seu atendimento? Posso te auxiliar com algo mais?\".\n" +
+    "   - Etapa 2 (Encerramento): Só sugira \"Como não restaram mais dúvidas, estarei finalizando este atendimento. Foi um prazer lhe atender! Tenha um excelente dia!\" se a Etapa 1 já foi enviada e o cliente confirmou não ter dúvidas.\n" +
+    "   - Em pedido de aguardo interno, peça mais um momento com cordialidade (proibido enviar aviso de falta de contato).\n" +
+    "   - Aviso de 6 min sem contato: apenas se a última mensagem do atendente foi uma pergunta/solicitação ao cliente. Aos 12 min, encerramento por inatividade.\n" +
+    "6. SAÍDA LIMPA: Retorne estritamente o texto final para o cliente, sem aspas, títulos ou comentários.";
 
 async function executarChamadaHibrida(geminiKey, groqKey, prompt, systemInstruction, options = {}) {
     const keyGemini = (geminiKey && geminiKey.trim()) || DEFAULT_GEMINI_KEY;
@@ -185,6 +190,7 @@ async function executarChamadaHibrida(geminiKey, groqKey, prompt, systemInstruct
     const instrucaoEfetiva = systemInstruction || DEFAULT_SYSTEM_INSTRUCTION;
     const temperaturaEfetiva = typeof options?.temperature === 'number' ? options.temperature : 0.6;
     const maxTokensEfetivo = typeof options?.maxTokens === 'number' ? options.maxTokens : 180;
+    const imageData = options?.imageData || null; // { mimeType: string, base64: string }
 
     if (!keyGemini && !keyGroq) {
         throw new Error('Nenhuma chave de API configurada. Clique na engrenagem ⚙️ do SoftCopilot e cole sua chave do Gemini ou da Groq (gratuitas).');
@@ -200,18 +206,33 @@ async function executarChamadaHibrida(geminiKey, groqKey, prompt, systemInstruct
         if (finalizado || controllerGlobal.signal.aborted) return null;
         if (!keyGemini) throw new Error(`[Gemini:${modelo}] Chave de API do Gemini não configurada.`);
 
+        const parts = [];
+        if (imageData && imageData.base64 && imageData.mimeType) {
+            parts.push({
+                inline_data: {
+                    mime_type: imageData.mimeType,
+                    data: imageData.base64
+                }
+            });
+        }
+        parts.push({ text: prompt });
+
         const bodyPayload = {
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            contents: [{ role: "user", parts: parts }],
             generationConfig: { temperature: temperaturaEfetiva, maxOutputTokens: maxTokensEfetivo }
         };
         if (instrucaoEfetiva) {
             bodyPayload.system_instruction = { parts: [{ text: instrucaoEfetiva }] };
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${keyGemini.trim()}`;
+        const apiKey = keyGemini.trim();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey
+            },
             signal: controllerGlobal.signal,
             body: JSON.stringify(bodyPayload)
         });
@@ -235,11 +256,36 @@ async function executarChamadaHibrida(geminiKey, groqKey, prompt, systemInstruct
         if (finalizado || controllerGlobal.signal.aborted) return null;
         if (!keyGroq) throw new Error(`[Groq:${modelo}] Chave de API da Groq não configurada.`);
 
+        // Se houver anexo não suportado pelo Groq (ex: PDF), delega exclusivamente ao Gemini
+        if (imageData && (!imageData.mimeType || !imageData.mimeType.startsWith('image/'))) {
+            throw new Error(`[Groq:${modelo}] Formato de anexo não suportado no Groq; delegado ao Gemini.`);
+        }
+
+        const modeloGroqEfetivo = (imageData && imageData.base64 && imageData.mimeType?.startsWith('image/'))
+            ? 'llama-3.2-11b-vision-preview'
+            : modelo;
+
         const messages = [];
         if (instrucaoEfetiva) {
             messages.push({ role: 'system', content: instrucaoEfetiva });
         }
-        messages.push({ role: 'user', content: prompt });
+
+        if (imageData && imageData.base64 && imageData.mimeType?.startsWith('image/')) {
+            messages.push({
+                role: 'user',
+                content: [
+                    { type: 'text', text: prompt },
+                    {
+                        type: 'image_url',
+                        image_url: {
+                            url: `data:${imageData.mimeType};base64,${imageData.base64}`
+                        }
+                    }
+                ]
+            });
+        } else {
+            messages.push({ role: 'user', content: prompt });
+        }
 
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -249,7 +295,7 @@ async function executarChamadaHibrida(geminiKey, groqKey, prompt, systemInstruct
             },
             signal: controllerGlobal.signal,
             body: JSON.stringify({
-                model: modelo,
+                model: modeloGroqEfetivo,
                 messages: messages,
                 temperature: temperaturaEfetiva,
                 max_tokens: maxTokensEfetivo
@@ -259,16 +305,16 @@ async function executarChamadaHibrida(geminiKey, groqKey, prompt, systemInstruct
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const msg = errorData.error?.message || `Erro HTTP ${response.status}`;
-            throw new Error(`[Groq:${modelo}] ${msg}`);
+            throw new Error(`[Groq:${modeloGroqEfetivo}] ${msg}`);
         }
 
         const data = await response.json();
         const textPart = data.choices?.[0]?.message?.content;
         if (textPart && textPart.trim()) {
-            const nomeCurto = modelo.split('/')[1] || modelo;
+            const nomeCurto = modeloGroqEfetivo.split('/')[1] || modeloGroqEfetivo;
             return { text: textPart.trim(), modelo: `Groq (${nomeCurto})` };
         }
-        throw new Error(`[Groq:${modelo}] Resposta vazia da IA.`);
+        throw new Error(`[Groq:${modeloGroqEfetivo}] Resposta vazia da IA.`);
     };
 
     return new Promise((resolve, reject) => {

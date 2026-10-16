@@ -2075,9 +2075,12 @@
                 };
             }
 
-            // Contador de correções aprendidas
-            chrome.storage.local.get(['softcom_correcoes_ia'], (res) => {
-                const total = Array.isArray(res?.softcom_correcoes_ia) ? res.softcom_correcoes_ia.length : 0;
+            // Contador de correções aprendidas (cumulativo e contínuo)
+            chrome.storage.local.get(['softcom_correcoes_ia', 'softcom_contador_correcoes_total'], (res) => {
+                const totalLista = Array.isArray(res?.softcom_correcoes_ia) ? res.softcom_correcoes_ia.length : 0;
+                const total = (typeof res?.softcom_contador_correcoes_total === 'number')
+                    ? res.softcom_contador_correcoes_total
+                    : totalLista;
                 const badge = overlay.querySelector('#badge-contador-correcoes');
                 if (badge) {
                     badge.textContent = `🧠 ${total} ${total === 1 ? 'correção aprendida no seu perfil' : 'correções aprendidas no seu perfil'}`;
@@ -2089,7 +2092,10 @@
             if (btnLimparCorrecoes) {
                 btnLimparCorrecoes.onclick = () => {
                     if (confirm('Deseja realmente apagar todas as correções aprendidas pela IA? O estilo retornará às diretrizes padrão.')) {
-                        chrome.storage.local.set({ 'softcom_correcoes_ia': [] }, () => {
+                        chrome.storage.local.set({
+                            'softcom_correcoes_ia': [],
+                            'softcom_contador_correcoes_total': 0
+                        }, () => {
                             cacheCorrecoesAprendidas = [];
                             const badge = overlay.querySelector('#badge-contador-correcoes');
                             if (badge) badge.textContent = '🧠 0 correções aprendidas no seu perfil';
@@ -2872,11 +2878,16 @@
         }
 
         function salvarRascunhoChat(chave, texto) {
-            if (envioMensagemEmAndamento) return;
             if (!chave) return;
             const strTexto = typeof texto === 'string' ? texto : '';
             const tLimpo = strTexto.trim();
             const chaveStr = String(chave);
+
+            if (envioMensagemEmAndamento) {
+                if (!tLimpo || (ultimoTextoEnviadoRecente.texto && tLimpo === ultimoTextoEnviadoRecente.texto.trim())) {
+                    return;
+                }
+            }
 
             if (tLimpo.length > 0) {
                 // Se esse texto for idêntico à mensagem enviada recentemente (nos últimos 10s), NUNCA salva como rascunho
@@ -3391,6 +3402,9 @@
         // =========================================================
         let gerandoSugestaoGemini = false;
         let enviandoMensagemNativaAgora = false;
+        let manipulandoCampoNativoSincrono = false;
+        let aguardandoDisparoEnvioNativo = false;
+        let ultimoTextoInjetadoNoCampoNativo = '';
 
         // Coloca o texto no campo de resposta nativo do Workdesk (execCommand + React Value Tracker + setter nativo)
         function colocarTextoNoCampo(texto, manterFocoNoCampo = false) {
@@ -3398,71 +3412,90 @@
             if (!campo) return;
 
             const textareaAtiva = document.getElementById('gemini-suggestion-text');
+            const painelAtivo = document.getElementById('gemini-docked-panel');
+            const painelVisivel = !!(painelAtivo && painelAtivo.style.display !== 'none' && document.body.contains(painelAtivo));
             const estavaFocadoNaNossaTextarea = (document.activeElement === textareaAtiva);
+            const selStartAnterior = textareaAtiva ? textareaAtiva.selectionStart : null;
+            const selEndAnterior = textareaAtiva ? textareaAtiva.selectionEnd : null;
 
-            // 1. Se for para manter foco no campo nativo e a nossa textarea estava focada, desfoca ela
-            if (manterFocoNoCampo && estavaFocadoNaNossaTextarea && textareaAtiva) {
-                try { textareaAtiva.blur(); } catch (_) { }
-            }
+            ultimoTextoInjetadoNoCampoNativo = String(texto || '');
+            manipulandoCampoNativoSincrono = true;
 
-            // 2. Garante foco e seleção no campo nativo apenas se solicitado
-            if (manterFocoNoCampo) {
-                try {
-                    campo.focus();
-                    if (campo.select) campo.select();
-                } catch (_) { }
-            }
-
-            // 3. Execução de execCommand SOMENTE se o campo nativo estiver REALMENTE com foco ativo!
-            // CRÍTICO: NUNCA executa execCommand se document.activeElement for a nossa textarea ou body!
-            if (document.activeElement === campo) {
-                try {
-                    document.execCommand('selectAll', false, null);
-                    document.execCommand('insertText', false, texto);
-                } catch (_) { }
-            }
-
-            // 4. Setter nativo do protótipo com bypass do _valueTracker do React (garante inserção 100% confiável)
             try {
-                if (campo.value !== undefined) {
-                    const prototype = Object.getPrototypeOf(campo);
-                    const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value') ||
-                        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value') ||
-                        Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
-                    const setter = descriptor ? descriptor.set : null;
-                    if (setter) {
-                        setter.call(campo, texto);
-                    } else {
-                        campo.value = texto;
-                    }
-
-                    // Força o tracker do React a registrar diferença de valor para disparar onChange
-                    const tracker = campo._valueTracker;
-                    if (tracker) {
-                        tracker.setValue(texto === '' ? '__softcom_force_reset__' : '');
-                    }
-                } else {
-                    campo.innerText = texto;
+                // 1. Se for para manipular foco no campo nativo e a nossa textarea estava focada, desfoca temporariamente
+                if (manterFocoNoCampo && estavaFocadoNaNossaTextarea && textareaAtiva) {
+                    try { textareaAtiva.blur(); } catch (_) { }
                 }
-            } catch (_) {
-                try { campo.value = texto; } catch (__) { }
-            }
 
-            // 5. Dispara todos os eventos de entrada para o React
-            try {
-                campo.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
-                campo.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-                campo.dispatchEvent(new InputEvent('input', {
-                    bubbles: true,
-                    cancelable: true,
-                    data: texto,
-                    inputType: texto ? 'insertText' : 'deleteContentBackward'
-                }));
-            } catch (_) { }
+                // 2. Garante foco e seleção no campo nativo apenas durante a inserção síncrona
+                if (manterFocoNoCampo) {
+                    try {
+                        campo.focus();
+                        if (campo.select) campo.select();
+                    } catch (_) { }
+                }
 
-            // 6. Se não for para manter o foco no campo nativo (ex: digitação do usuário ou template), devolve à textarea
-            if (!manterFocoNoCampo && estavaFocadoNaNossaTextarea && textareaAtiva) {
-                try { textareaAtiva.focus(); } catch (_) { }
+                // 3. Execução de execCommand SOMENTE se o campo nativo estiver REALMENTE com foco ativo!
+                // CRÍTICO: NUNCA executa execCommand se document.activeElement for a nossa textarea ou body!
+                if (document.activeElement === campo) {
+                    try {
+                        document.execCommand('selectAll', false, null);
+                        document.execCommand('insertText', false, texto);
+                    } catch (_) { }
+                }
+
+                // 4. Setter nativo do protótipo com bypass do _valueTracker do React (garante inserção 100% confiável)
+                try {
+                    if (campo.value !== undefined) {
+                        const prototype = Object.getPrototypeOf(campo);
+                        const descriptor = Object.getOwnPropertyDescriptor(prototype, 'value') ||
+                            Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value') ||
+                            Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+                        const setter = descriptor ? descriptor.set : null;
+                        if (setter) {
+                            setter.call(campo, texto);
+                        } else {
+                            campo.value = texto;
+                        }
+
+                        // Força o tracker do React a registrar diferença de valor para disparar onChange
+                        const tracker = campo._valueTracker;
+                        if (tracker) {
+                            tracker.setValue(texto === '' ? '__softcom_force_reset__' : '');
+                        }
+                    } else {
+                        campo.innerText = texto;
+                    }
+                } catch (_) {
+                    try { campo.value = texto; } catch (__) { }
+                }
+
+                // 5. Dispara todos os eventos de entrada para o React
+                try {
+                    campo.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
+                    campo.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+                    campo.dispatchEvent(new InputEvent('input', {
+                        bubbles: true,
+                        cancelable: true,
+                        data: texto,
+                        inputType: texto ? 'insertText' : 'deleteContentBackward'
+                    }));
+                } catch (_) { }
+            } finally {
+                manipulandoCampoNativoSincrono = false;
+                // 6. Devolve o foco sincronamente para #gemini-suggestion-text imediatamente, evitando janela de perda de digitação
+                if (textareaAtiva && (estavaFocadoNaNossaTextarea || manterFocoNoCampo || painelVisivel)) {
+                    try {
+                        if (document.activeElement === campo) {
+                            campo.blur();
+                        }
+                        textareaAtiva.focus();
+                        if (typeof selStartAnterior === 'number' && typeof selEndAnterior === 'number') {
+                            const maxLen = textareaAtiva.value.length;
+                            textareaAtiva.setSelectionRange(Math.min(selStartAnterior, maxLen), Math.min(selEndAnterior, maxLen));
+                        }
+                    } catch (_) { }
+                }
             }
         }
 
@@ -3478,15 +3511,25 @@
             };
 
             for (let tentativa = 0; tentativa < 4; tentativa++) {
-                // 1. Remove completamente qualquer conteúdo antigo (sugestão anterior da IA) do campo e do estado do React
+                // 1. Resgata eventuais caracteres novos antes de limpar qualquer conteúdo antigo do campo e do estado do React
+                if (typeof resgatarTextoNovoDoCampoNativo === 'function') {
+                    try { resgatarTextoNovoDoCampoNativo(texto); } catch (_) { }
+                }
                 try { limparCampoNativo(); } catch (_) { }
                 await new Promise(r => setTimeout(r, 60));
 
-                // 2. Insere o texto atual do atendente
+                // 2. Resgata eventuais caracteres digitados durante a espera e insere o texto a enviar
+                if (typeof resgatarTextoNovoDoCampoNativo === 'function') {
+                    try { resgatarTextoNovoDoCampoNativo(texto); } catch (_) { }
+                }
+                aguardandoDisparoEnvioNativo = true;
                 colocarTextoNoCampo(texto, true);
                 await new Promise(r => setTimeout(r, 100));
 
-                // 3. Confere se o campo realmente contém o texto digitado pelo atendente
+                // 3. Resgata eventuais caracteres novos e confere se o campo realmente contém o texto a enviar
+                if (typeof resgatarTextoNovoDoCampoNativo === 'function') {
+                    try { resgatarTextoNovoDoCampoNativo(texto); } catch (_) { }
+                }
                 const atual = lerCampo();
                 if (atual === null || normalizar(atual) === normalizar(texto)) return true;
             }
@@ -3504,43 +3547,70 @@
             enviandoMensagemNativaAgora = true;
             setTimeout(() => { enviandoMensagemNativaAgora = false; }, 600);
 
-            // 1. Garante foco ativo no campo nativo
-            try { campo.focus(); } catch (_) { }
+            const textareaAtiva = document.getElementById('gemini-suggestion-text');
+            const selStartAnterior = textareaAtiva ? textareaAtiva.selectionStart : null;
+            const selEndAnterior = textareaAtiva ? textareaAtiva.selectionEnd : null;
 
-            // 2. Procura um botão de envio legítimo prioritariamente dentro do container do footer/composer
-            const footerInfo = (typeof localizarElementosFooter === 'function') ? localizarElementosFooter() : null;
-            const containerComposer = (footerInfo && (footerInfo.footerRow || footerInfo.nativeBox)) || campo.closest('form') || campo.parentElement;
-
-            let btnEnviar = null;
-            if (containerComposer) {
-                btnEnviar = Array.from(containerComposer.querySelectorAll(
-                    'button[aria-label*="enviar" i], ' +
-                    'button[title*="enviar" i], ' +
-                    '[data-ui="send-button"], ' +
-                    'button[class*="send" i]'
-                )).find(b => {
-                    if (b.closest('#gemini-docked-panel') || b.closest('#chama-ai-panel')) return false;
-                    if (b.disabled) return false;
-                    const t = ((b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.getAttribute('title') || '')).toLowerCase();
-                    if (t.includes('áudio') || t.includes('audio') || t.includes('anexar') || t.includes('descartar')) return false;
-                    return true;
-                });
-            }
-
-            if (btnEnviar) {
-                try {
-                    btnEnviar.click();
-                    return;
-                } catch (_) { }
-            }
-
-            // 3. Fallback: dispara teclado Enter nativo no campo focado apenas se nao houver botao de envio
-            const enterOpts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true };
-            campo.dispatchEvent(new KeyboardEvent('keydown', enterOpts));
+            manipulandoCampoNativoSincrono = true;
             try {
-                campo.dispatchEvent(new KeyboardEvent('keypress', enterOpts));
-            } catch (_) { }
-            campo.dispatchEvent(new KeyboardEvent('keyup', enterOpts));
+                // 1. Garante foco ativo no campo nativo apenas durante o disparo síncrono de envio
+                try { campo.focus(); } catch (_) { }
+
+                // 2. Procura um botão de envio legítimo prioritariamente dentro do container do footer/composer
+                const footerInfo = (typeof localizarElementosFooter === 'function') ? localizarElementosFooter() : null;
+                const containerComposer = (footerInfo && (footerInfo.footerRow || footerInfo.nativeBox)) || campo.closest('form') || campo.parentElement;
+
+                let btnEnviar = null;
+                if (containerComposer) {
+                    btnEnviar = Array.from(containerComposer.querySelectorAll(
+                        'button[aria-label*="enviar" i], ' +
+                        'button[title*="enviar" i], ' +
+                        '[data-ui="send-button"], ' +
+                        'button[class*="send" i]'
+                    )).find(b => {
+                        if (b.closest('#gemini-docked-panel') || b.closest('#chama-ai-panel')) return false;
+                        if (b.disabled) return false;
+                        const t = ((b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.getAttribute('title') || '')).toLowerCase();
+                        if (t.includes('áudio') || t.includes('audio') || t.includes('anexar') || t.includes('descartar')) return false;
+                        return true;
+                    });
+                }
+
+                let enviouViaBotao = false;
+                if (btnEnviar) {
+                    try {
+                        btnEnviar.click();
+                        enviouViaBotao = true;
+                    } catch (_) { }
+                }
+
+                if (!enviouViaBotao) {
+                    // 3. Fallback: dispara teclado Enter nativo no campo focado apenas se nao houver botao de envio
+                    const enterOpts = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true };
+                    campo.dispatchEvent(new KeyboardEvent('keydown', enterOpts));
+                    try {
+                        campo.dispatchEvent(new KeyboardEvent('keypress', enterOpts));
+                    } catch (_) { }
+                    campo.dispatchEvent(new KeyboardEvent('keyup', enterOpts));
+                }
+            } finally {
+                aguardandoDisparoEnvioNativo = false;
+                ultimoTextoInjetadoNoCampoNativo = '';
+                manipulandoCampoNativoSincrono = false;
+                // Devolve o foco sincronamente para #gemini-suggestion-text logo ao final de enviarMensagemDoCampo
+                if (textareaAtiva) {
+                    try {
+                        if (document.activeElement === campo) {
+                            campo.blur();
+                        }
+                        textareaAtiva.focus();
+                        if (typeof selStartAnterior === 'number' && typeof selEndAnterior === 'number') {
+                            const maxLen = textareaAtiva.value.length;
+                            textareaAtiva.setSelectionRange(Math.min(selStartAnterior, maxLen), Math.min(selEndAnterior, maxLen));
+                        }
+                    } catch (_) { }
+                }
+            }
         }
 
         function calcularMinutosDesdeHorario(horaStr) {
@@ -4208,32 +4278,49 @@
             if (!corrLimpa || corrLimpa.length < 5 || !origLimpa || origLimpa.length < 5) return;
             if (corrLimpa.toLowerCase() === origLimpa.toLowerCase()) return; // Idênticos sem alteração real
 
-            chrome.storage.local.get(['softcom_correcoes_ia'], (result) => {
+            chrome.storage.local.get(['softcom_correcoes_ia', 'softcom_contador_correcoes_total'], (result) => {
                 let lista = result?.softcom_correcoes_ia;
                 if (!Array.isArray(lista)) lista = [];
 
-                // Evita duplicar se exatamente a mesma correção já foi gravada
-                if (lista.some(c => c.correcao === corrLimpa && c.sugestaoOriginal === origLimpa)) {
-                    return;
+                // Contador contínuo cumulativo: incrementa a cada melhoria realizada pelo atendente
+                let contadorTotal = (typeof result?.softcom_contador_correcoes_total === 'number')
+                    ? result.softcom_contador_correcoes_total
+                    : lista.length;
+                contadorTotal++;
+
+                // Atualiza ou insere o exemplo na lista de aprendizado
+                const idxExistente = lista.findIndex(c => c.correcao === corrLimpa && c.sugestaoOriginal === origLimpa);
+                if (idxExistente >= 0) {
+                    lista[idxExistente].timestamp = Date.now();
+                    lista[idxExistente].contextoCliente = ctxLimpo.slice(0, 200);
+                } else {
+                    lista.push({
+                        id: 'corr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        contextoCliente: ctxLimpo.slice(0, 200),
+                        sugestaoOriginal: origLimpa.slice(0, 300),
+                        correcao: corrLimpa.slice(0, 300),
+                        timestamp: Date.now()
+                    });
                 }
 
-                lista.push({
-                    id: 'corr_' + Date.now(),
-                    contextoCliente: ctxLimpo.slice(0, 200),
-                    sugestaoOriginal: origLimpa.slice(0, 300),
-                    correcao: corrLimpa.slice(0, 300),
-                    timestamp: Date.now()
-                });
-
-                // Mantém até 40 correções mais recentes
-                if (lista.length > 40) {
-                    lista = lista.slice(-40);
+                // Mantém até 60 exemplos mais recentes para contexto da IA sem limitar o contador cumulativo
+                if (lista.length > 60) {
+                    lista = lista.slice(-60);
                 }
 
                 cacheCorrecoesAprendidas = lista;
-                chrome.storage.local.set({ 'softcom_correcoes_ia': lista }, () => {
-                    console.log('[Extensão Softcom] 🧠 Correção aprendida do atendente:', corrLimpa.slice(0, 50));
-                    mostrarNotificacao('🧠 Estilo aprendido! A IA usará sua correção como referência.', '#8b5cf6');
+                chrome.storage.local.set({
+                    'softcom_correcoes_ia': lista,
+                    'softcom_contador_correcoes_total': contadorTotal
+                }, () => {
+                    console.log(`[Extensão Softcom] 🧠 Correção aprendida do atendente (${contadorTotal}ª):`, corrLimpa.slice(0, 50));
+                    mostrarNotificacao(`🧠 Estilo aprendido! (${contadorTotal}ª melhoria registrada)`, '#8b5cf6');
+
+                    // Atualiza o badge no modal de configurações caso esteja aberto na tela
+                    const badge = document.querySelector('#badge-contador-correcoes');
+                    if (badge) {
+                        badge.textContent = `🧠 ${contadorTotal} ${contadorTotal === 1 ? 'correção aprendida no seu perfil' : 'correções aprendidas no seu perfil'}`;
+                    }
                 });
             });
         }
@@ -4954,56 +5041,311 @@
         // PAINEL DE SUGESTÃO GEMINI AI E INPUT UNIFICADO
         // =========================================================
 
-        let imagemPendente = null;
-        let imagemPreviewUrl = null;
+        let imagensPendentes = []; // Array<{ id: string, file: File, previewUrl: string }>
+        let imagemPendente = null; // Mantido para retrocompatibilidade (aponta para a primeira foto)
+        let imagemPreviewUrl = null; // Mantido para retrocompatibilidade
 
-        function definirImagemPendente(file) {
-            if (!file) return;
-            imagemPendente = file;
+        function adicionarImagensPendentes(novosArquivos) {
+            if (!novosArquivos) return;
+            const lista = Array.isArray(novosArquivos)
+                ? novosArquivos
+                : (novosArquivos instanceof FileList ? Array.from(novosArquivos) : [novosArquivos]);
 
-            if (imagemPreviewUrl) {
-                try { URL.revokeObjectURL(imagemPreviewUrl); } catch (e) { }
+            let adicionou = 0;
+            for (const f of lista) {
+                if (!f || !(f instanceof File || f instanceof Blob)) continue;
+                const mime = f.type || '';
+                const nome = f.name || '';
+                const ehImagem = mime.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(nome);
+
+                // Evita duplicatas idênticas adicionadas em sequência
+                const jaExiste = imagensPendentes.some(item =>
+                    item.file.name === f.name && item.file.size === f.size && item.file.lastModified === f.lastModified
+                );
+                if (jaExiste) continue;
+
+                let previewUrl = '';
+                if (ehImagem) {
+                    try {
+                        previewUrl = URL.createObjectURL(f);
+                    } catch (_) { }
+                }
+
+                const id = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                imagensPendentes.push({
+                    id,
+                    file: f,
+                    previewUrl,
+                    ehImagem
+                });
+                adicionou++;
             }
-            imagemPreviewUrl = URL.createObjectURL(file);
 
-            const card = document.getElementById('gemini-docked-panel');
-            if (card) {
-                const container = card.querySelector('#gemini-image-preview-container');
-                const thumb = card.querySelector('#gemini-image-preview-thumb');
-                const nameEl = card.querySelector('#gemini-image-preview-name');
-                const sizeEl = card.querySelector('#gemini-image-preview-size');
+            if (adicionou === 0) return;
 
-                if (container && thumb && nameEl && sizeEl) {
-                    thumb.src = imagemPreviewUrl;
-                    nameEl.textContent = file.name || 'imagem_anexada.png';
-                    const kb = (file.size / 1024).toFixed(0);
-                    sizeEl.textContent = `${kb} KB · Imagem anexada (pronta para envio)`;
-                    container.style.display = 'flex';
+            // Sincroniza referências legadas
+            imagemPendente = imagensPendentes.length > 0 ? imagensPendentes[0].file : null;
+            imagemPreviewUrl = imagensPendentes.length > 0 ? imagensPendentes[0].previewUrl : null;
+
+            renderizarPreviewImagensSoftCopilot();
+            atualizarEstadoCard();
+
+            if (imagensPendentes.length === 1) {
+                const ehImgUnico = imagensPendentes[0].ehImagem;
+                mostrarNotificacao(ehImgUnico ? '📷 Imagem anexada! Clique em "Enviar" ou pressione Enter para enviar ao cliente.' : '📎 Arquivo anexado! Clique em "Enviar" ou pressione Enter para enviar ao cliente.', '#3b82f6');
+            } else {
+                mostrarNotificacao(`📎 ${imagensPendentes.length} arquivos anexados! Clique em "Enviar" ou pressione Enter para enviar ao cliente.`, '#3b82f6');
+            }
+        }
+
+        // Mantido para total compatibilidade retroativa (agrega em vez de sobrescrever)
+        function definirImagemPendente(fileOrFiles) {
+            adicionarImagensPendentes(fileOrFiles);
+        }
+
+        function removerImagemPendentePorId(id) {
+            const idx = imagensPendentes.findIndex(item => item.id === id);
+            if (idx >= 0) {
+                const [removido] = imagensPendentes.splice(idx, 1);
+                if (removido && removido.previewUrl) {
+                    try { URL.revokeObjectURL(removido.previewUrl); } catch (_) { }
                 }
             }
 
+            imagemPendente = imagensPendentes.length > 0 ? imagensPendentes[0].file : null;
+            imagemPreviewUrl = imagensPendentes.length > 0 ? imagensPendentes[0].previewUrl : null;
+
+            if (imagensPendentes.length === 0) {
+                const card = document.getElementById('gemini-docked-panel');
+                if (card) {
+                    const fileInput = card.querySelector('#gemini-file-input');
+                    if (fileInput) fileInput.value = '';
+                }
+            }
+
+            renderizarPreviewImagensSoftCopilot();
             atualizarEstadoCard();
-            mostrarNotificacao('📷 Imagem anexada! Clique em "Enviar" ou pressione Enter para enviar ao cliente.', '#3b82f6');
+            mostrarNotificacao('Anexo removido.', '#64748b');
         }
 
         function removerImagemPendente() {
-            imagemPendente = null;
-            if (imagemPreviewUrl) {
-                try { URL.revokeObjectURL(imagemPreviewUrl); } catch (e) { }
-                imagemPreviewUrl = null;
+            limparImagensPendentes();
+        }
+
+        function limparImagensPendentes() {
+            for (const item of imagensPendentes) {
+                if (item && item.previewUrl) {
+                    try { URL.revokeObjectURL(item.previewUrl); } catch (_) { }
+                }
             }
+            imagensPendentes = [];
+            imagemPendente = null;
+            imagemPreviewUrl = null;
 
             const card = document.getElementById('gemini-docked-panel');
             if (card) {
-                const container = card.querySelector('#gemini-image-preview-container');
-                const thumb = card.querySelector('#gemini-image-preview-thumb');
-                if (container) container.style.display = 'none';
-                if (thumb) thumb.src = '';
                 const fileInput = card.querySelector('#gemini-file-input');
                 if (fileInput) fileInput.value = '';
             }
 
+            renderizarPreviewImagensSoftCopilot();
             atualizarEstadoCard();
+        }
+
+        function escaparHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderizarPreviewImagensSoftCopilot() {
+            const card = document.getElementById('gemini-docked-panel');
+            if (!card) return;
+            const container = card.querySelector('#gemini-image-preview-container');
+            if (!container) return;
+
+            if (!imagensPendentes || imagensPendentes.length === 0) {
+                container.innerHTML = '';
+                container.style.display = 'none';
+                return;
+            }
+
+            const total = imagensPendentes.length;
+            const todasImagens = imagensPendentes.every(item => item.ehImagem !== false);
+            const labelAnexos = total === 1
+                ? (todasImagens ? '1 foto pronta para envio' : '1 arquivo pronto para envio')
+                : (todasImagens ? `${total} fotos prontas para envio` : `${total} arquivos prontos para envio`);
+
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,0.07);">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 11px;">${todasImagens ? '📷' : '📎'}</span>
+                        <span style="font-size: 10.5px; font-weight: 600; color: #94a3b8;">${labelAnexos}</span>
+                    </div>
+                    <button type="button" id="btn-gemini-remove-all-images" title="Remover todos os anexos" style="
+                        background: transparent;
+                        border: none;
+                        color: #ef4444;
+                        font-size: 10px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        padding: 1px 4px;
+                        border-radius: 3px;
+                        transition: all 0.2s;
+                    ">Limpar todos</button>
+                </div>
+                <div id="gemini-image-preview-list" style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    width: 100%;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    padding: 2px 1px 4px 1px;
+                    box-sizing: border-box;
+                    scrollbar-width: thin;
+                ">
+            `;
+
+            imagensPendentes.forEach((item, idx) => {
+                const kb = Math.max(1, Math.round(item.file.size / 1024));
+                const nomeCru = item.file.name || (item.ehImagem ? `foto_${idx + 1}.png` : `arquivo_${idx + 1}`);
+                const nome = escaparHtml(nomeCru);
+                const iconeDoc = /\.pdf$/i.test(nomeCru) ? '📑' : '📄';
+                const visualThumb = (item.ehImagem && item.previewUrl)
+                    ? `<img src="${item.previewUrl}" alt="Preview" class="gemini-thumb-clickable" data-img-url="${item.previewUrl}" title="Clique para ampliar" style="
+                            width: 30px;
+                            height: 30px;
+                            object-fit: cover;
+                            border-radius: 3px;
+                            border: 1px solid #3f3f46;
+                            background: #000;
+                            cursor: pointer;
+                            flex-shrink: 0;
+                        " />`
+                    : `<div title="${nome}" style="
+                            width: 30px;
+                            height: 30px;
+                            border-radius: 3px;
+                            border: 1px solid #2d3c48;
+                            background: #162227;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 15px;
+                            flex-shrink: 0;
+                        ">${iconeDoc}</div>`;
+
+                html += `
+                    <div class="gemini-img-item" data-img-id="${item.id}" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        background: rgba(0, 0, 0, 0.35);
+                        border: 1px solid #2d3c48;
+                        border-radius: 5px;
+                        padding: 3px 6px;
+                        flex-shrink: 0;
+                        max-width: 170px;
+                        transition: border-color 0.2s;
+                    ">
+                        ${visualThumb}
+                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px;">
+                            <span style="
+                                font-size: 10.5px;
+                                font-weight: 500;
+                                color: #f4f4f5;
+                                white-space: nowrap;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                            " title="${nome}">${nome}</span>
+                            <span style="
+                                font-size: 9.5px;
+                                color: #94a3b8;
+                            ">${kb} KB</span>
+                        </div>
+                        <button type="button" class="btn-gemini-remove-single-img" data-img-id="${item.id}" title="Remover este anexo" style="
+                            background: #27272a;
+                            border: 1px solid #3f3f46;
+                            color: #ef4444;
+                            cursor: pointer;
+                            font-size: 10px;
+                            font-weight: bold;
+                            width: 18px;
+                            height: 18px;
+                            border-radius: 3px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 0;
+                            flex-shrink: 0;
+                            transition: all 0.2s;
+                        ">✕</button>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            container.innerHTML = html;
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+
+            // Eventos dos botões de remoção individual
+            container.querySelectorAll('.btn-gemini-remove-single-img').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = btn.getAttribute('data-img-id');
+                    if (id) removerImagemPendentePorId(id);
+                };
+            });
+
+            // Evento do botão limpar todas
+            const btnClearAll = container.querySelector('#btn-gemini-remove-all-images');
+            if (btnClearAll) {
+                btnClearAll.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    limparImagensPendentes();
+                    mostrarNotificacao('Todos os anexos foram removidos.', '#64748b');
+                };
+            }
+
+            // Clique nas thumbnails para ampliar em janela limpa (usando DOM seguro, sem document.write)
+            container.querySelectorAll('.gemini-thumb-clickable').forEach(thumb => {
+                thumb.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const url = thumb.getAttribute('data-img-url');
+                    if (url) {
+                        try {
+                            const win = window.open('');
+                            if (win && win.document) {
+                                win.document.title = 'Visualização de Foto';
+                                win.document.body.style.margin = '0';
+                                win.document.body.style.background = '#0d0e12';
+                                win.document.body.style.display = 'flex';
+                                win.document.body.style.alignItems = 'center';
+                                win.document.body.style.justifyContent = 'center';
+                                win.document.body.style.height = '100vh';
+                                const imgEl = win.document.createElement('img');
+                                imgEl.src = url;
+                                imgEl.style.maxWidth = '98%';
+                                imgEl.style.maxHeight = '98%';
+                                imgEl.style.objectFit = 'contain';
+                                imgEl.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
+                                imgEl.style.borderRadius = '6px';
+                                win.document.body.appendChild(imgEl);
+                            }
+                        } catch (_) { }
+                    }
+                };
+            });
         }
 
         let origemTextoAtual = 'nenhum'; // 'nenhum' | 'usuario' | 'ia'
@@ -5012,6 +5354,18 @@
 
         // Limpa todos os possíveis aliases de chave do chat ativo em mapaRascunhos, origens e sugestões
         function limparTodosRascunhosDoChatAtual(textoEnviado = '') {
+            const textarea = document.getElementById('gemini-suggestion-text');
+            const textoAtualTextarea = textarea ? (textarea.value || '') : '';
+            if (textoEnviado && textoAtualTextarea.trim().length > 0 && textoAtualTextarea.trim() !== textoEnviado.trim()) {
+                const chaveAtiva = (typeof obterChaveIdentificadoraChatAtivo === 'function') ? obterChaveIdentificadoraChatAtivo() : ultimoTicketPainel;
+                if (chaveAtiva) {
+                    mapaRascunhosPorChat.set(String(chaveAtiva), textoAtualTextarea);
+                    origensTextoPorChat.set(String(chaveAtiva), 'usuario');
+                    persistirRascunhosSessao();
+                }
+                return;
+            }
+
             const chaves = new Set();
             const chaveAtual = (typeof obterChaveIdentificadoraChatAtivo === 'function') ? obterChaveIdentificadoraChatAtivo() : null;
             if (chaveAtual) chaves.add(String(chaveAtual));
@@ -5092,13 +5446,125 @@
             persistirRascunhosSessao();
         }
 
+        // Resgata imediatamente quaisquer caracteres novos digitados pelo usuário que tenham caído no campo nativo do Workdesk,
+        // transferindo-os/concatenando-os no início ou cursor de #gemini-suggestion-text antes de limpar o campo nativo
+        function resgatarTextoNovoDoCampoNativo(textoEnviado = '') {
+            if (manipulandoCampoNativoSincrono || gravandoAudioAtivo || emProcessamentoSaudacao) return false;
+            const campo = (typeof obterCampoMensagem === 'function') ? obterCampoMensagem() : null;
+            const textarea = document.getElementById('gemini-suggestion-text');
+            if (!campo || !textarea) return false;
+
+            const bruto = campo.value !== undefined
+                ? String(campo.value)
+                : String(campo.innerText || campo.textContent || '');
+            if (!bruto || bruto.length === 0) return false;
+
+            const refRecente = (ultimoTextoEnviadoRecente && (Date.now() - ultimoTextoEnviadoRecente.timestamp < 10000))
+                ? (ultimoTextoEnviadoRecente.texto || '')
+                : '';
+            const refEnviado = (textoEnviado || refRecente || '');
+            const norm = (s) => String(s || '').replace(/\r\n/g, '\n').trim();
+
+            // Ignora se o conteúdo do campo nativo for exatamente a mensagem enviada, texto injetado pelo SoftCopilot, sugestão da IA ou o que já está na textarea
+            if (refEnviado && (bruto === refEnviado || norm(bruto) === norm(refEnviado))) {
+                return false;
+            }
+            if (ultimoTextoInjetadoNoCampoNativo && (bruto === ultimoTextoInjetadoNoCampoNativo || norm(bruto) === norm(ultimoTextoInjetadoNoCampoNativo))) {
+                return false;
+            }
+            if (ultimoTextoGeradoPorIA && norm(bruto) === norm(ultimoTextoGeradoPorIA)) {
+                return false;
+            }
+            const atualSoft = textarea.value || '';
+            if (atualSoft && (bruto === atualSoft || norm(bruto) === norm(atualSoft))) {
+                return false;
+            }
+
+            // Extrai apenas os caracteres novos caso o texto enviado ou injetado ainda esteja concatenado no campo nativo
+            let textoNovo = bruto;
+            const candidatosBase = [refEnviado, ultimoTextoInjetadoNoCampoNativo].filter(s => s && s.trim().length > 0);
+            for (const base of candidatosBase) {
+                const baseTrim = base.trim();
+                if (textoNovo.startsWith(base)) {
+                    textoNovo = textoNovo.slice(base.length);
+                    break;
+                } else if (textoNovo.startsWith(baseTrim)) {
+                    textoNovo = textoNovo.slice(baseTrim.length);
+                    break;
+                } else if (textoNovo.endsWith(base)) {
+                    textoNovo = textoNovo.slice(0, textoNovo.length - base.length);
+                    break;
+                } else if (textoNovo.endsWith(baseTrim)) {
+                    textoNovo = textoNovo.slice(0, textoNovo.length - baseTrim.length);
+                    break;
+                }
+            }
+
+            if (!textoNovo || textoNovo.length === 0) return false;
+
+            // Evita duplicação caso o trecho já tenha sido resgatado
+            if (atualSoft === textoNovo || (atualSoft.length > 0 && atualSoft.startsWith(textoNovo))) {
+                if (!aguardandoDisparoEnvioNativo) {
+                    limparCampoNativo();
+                }
+                return false;
+            }
+
+            const selStart = typeof textarea.selectionStart === 'number' ? textarea.selectionStart : atualSoft.length;
+            const selEnd = typeof textarea.selectionEnd === 'number' ? textarea.selectionEnd : atualSoft.length;
+
+            if (atualSoft.length === 0) {
+                textarea.value = textoNovo;
+                const pos = textoNovo.length;
+                try { textarea.setSelectionRange(pos, pos); } catch (_) { }
+            } else if (document.activeElement === textarea) {
+                // O início da frase saiu no campo nativo antes da alternância para #gemini-suggestion-text: concatena no início
+                textarea.value = textoNovo + atualSoft;
+                try {
+                    textarea.setSelectionRange(selStart + textoNovo.length, selEnd + textoNovo.length);
+                } catch (_) { }
+            } else {
+                // Digitação capturada em tempo real no campo nativo: transfere para o cursor atual de #gemini-suggestion-text
+                textarea.value = atualSoft.slice(0, selStart) + textoNovo + atualSoft.slice(selEnd);
+                const novaPos = selStart + textoNovo.length;
+                try { textarea.setSelectionRange(novaPos, novaPos); } catch (_) { }
+            }
+
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(120, Math.max(38, textarea.scrollHeight)) + 'px';
+            origemTextoAtual = 'usuario';
+            ultimoTextoDigitadoPeloUsuario = textarea.value.trim();
+            atualizarEstadoCard(textarea.value.trim().length > 0);
+            atualizarEstadoBotaoIA();
+
+            const chaveAtual = (typeof obterChaveIdentificadoraChatAtivo === 'function')
+                ? obterChaveIdentificadoraChatAtivo()
+                : ultimoTicketPainel;
+            if (chaveAtual) {
+                salvarRascunhoChat(chaveAtual, textarea.value);
+            }
+
+            if (aguardandoDisparoEnvioNativo && refEnviado) {
+                colocarTextoNoCampo(refEnviado, false);
+            } else {
+                limparCampoNativo();
+            }
+
+            focarInputSoftCopilot();
+            return true;
+        }
+
         // Força a limpeza segura e total do campo de digitação nativo do Workdesk (execCommand + setter nativo + React tracker)
         function limparCampoNativo() {
             const campo = obterCampoMensagem();
             if (!campo) return;
+            const textareaAtiva = document.getElementById('gemini-suggestion-text');
+            const campoEstavaFocado = (document.activeElement === campo);
+            ultimoTextoInjetadoNoCampoNativo = '';
+            manipulandoCampoNativoSincrono = true;
             try {
                 // ExecCommand SOMENTE se o campo nativo estiver com o foco ativo!
-                if (document.activeElement === campo) {
+                if (campoEstavaFocado) {
                     try {
                         document.execCommand('selectAll', false, null);
                         document.execCommand('delete', false, null);
@@ -5124,7 +5590,16 @@
 
                 campo.dispatchEvent(new Event('input', { bubbles: true, cancelable: true }));
                 campo.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
-            } catch (_) { }
+            } catch (_) {
+            } finally {
+                manipulandoCampoNativoSincrono = false;
+                if (campoEstavaFocado && textareaAtiva) {
+                    try {
+                        campo.blur();
+                        textareaAtiva.focus();
+                    } catch (_) { }
+                }
+            }
         }
 
         // Limpa integralmente o campo de digitação do SoftCopilot e reseta seus estados visuais
@@ -5132,8 +5607,11 @@
             const textarea = document.getElementById('gemini-suggestion-text');
             if (textarea) {
                 // Se não for forçado, não limpa se o usuário já tiver começado a digitar algo novo
-                if (!forcar && textoEnviado && textarea.value && textarea.value.trim() !== textoEnviado.trim()) {
-                    return;
+                if (!forcar) {
+                    const valorAtual = textarea.value || '';
+                    if (valorAtual.length > 0 && valorAtual.trim() !== (textoEnviado || '').trim()) {
+                        return;
+                    }
                 }
                 textarea.value = '';
                 textarea.style.height = '38px';
@@ -5175,7 +5653,7 @@
             if (!card) return;
             const textarea = card.querySelector('#gemini-suggestion-text');
             const temConteudoTexto = temTexto !== undefined ? temTexto : (textarea ? textarea.value.trim().length > 0 : false);
-            const temImagem = (imagemPendente !== null);
+            const temImagem = (imagensPendentes.length > 0) || (imagemPendente !== null);
             const podeEnviar = temConteudoTexto || temImagem;
 
             const btnEnviar = card.querySelector('#btn-gemini-send-now');
@@ -5573,7 +6051,8 @@
                     // CRÍTICO: só vale quando a caixa do SoftCopilot está VAZIA e houve um encaminhamento real de imagem.
                     // Caso contrário o detector pode achar o botão "Enviar" nativo do rodapé e enviar o texto antigo
                     // (ex: sugestão da IA) que ainda está no campo nativo, ignorando o que o atendente digitou.
-                    if (!texto && !imagemPendente && layoutImagemNativoRecente()) {
+                    const temImagens = (imagensPendentes.length > 0) || (imagemPendente !== null);
+                    if (!texto && !temImagens && layoutImagemNativoRecente()) {
                         const btnLayout = obterBotaoEnviarLayoutImagemNativo();
                         if (btnLayout) {
                             ultimoEncaminhamentoImagemTs = 0;
@@ -5583,7 +6062,7 @@
                         }
                     }
 
-                    if (texto || imagemPendente) {
+                    if (texto || temImagens) {
                         enviarTextoAoCliente(texto);
                     }
                 }
@@ -5677,15 +6156,17 @@
             if (inputsArquivo.length === 0) {
                 const todos = Array.from(document.querySelectorAll('input[type="file"]'));
                 inputsArquivo = todos.filter(inp => {
-                    if (inp.closest('#gemini-docked-panel')) return false;
-                    const aceita = (inp.accept || '').toLowerCase();
-                    return aceita.includes('image') || aceita === '*' || aceita === '' || aceita.includes('.png') || aceita.includes('.jpg');
+                    if (inp.closest('#gemini-docked-panel') || inp.closest('#chama-ai-panel')) return false;
+                    return true;
                 });
             }
 
             for (const input of inputsArquivo) {
-                if (input.closest('#gemini-docked-panel')) continue;
+                if (input.closest('#gemini-docked-panel') || input.closest('#chama-ai-panel')) continue;
                 try {
+                    if (!input.multiple) {
+                        input.multiple = true;
+                    }
                     input.files = dt.files;
                     input.dispatchEvent(new Event('change', { bubbles: true }));
                     input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -5868,7 +6349,7 @@
                 if (btnLayout) {
                     e.preventDefault();
                     e.stopPropagation();
-                    ultimoEncaminhamentoImagemTs = 0;
+                    ultimoEncaminhamentoImagemTs = Date.now();
                     dispararCliqueCompleto(btnLayout);
                     mostrarNotificacao('⚡ Imagem enviada com sucesso ao cliente!', '#2ecc71');
                 }
@@ -6540,7 +7021,7 @@
                     const imageFiles = extrairArquivosImagem(clipboardData);
                     if (imageFiles.length > 0) {
                         e.preventDefault();
-                        definirImagemPendente(imageFiles[0]);
+                        adicionarImagensPendentes(imageFiles);
                     }
                 });
 
@@ -6564,29 +7045,30 @@
                     const imageFiles = extrairArquivosImagem(dt);
                     if (imageFiles.length > 0) {
                         e.preventDefault();
-                        definirImagemPendente(imageFiles[0]);
+                        adicionarImagensPendentes(imageFiles);
                     }
                 });
             }
 
-            // Botão de remover imagem anexada
+            // Botão de remover imagem anexada (legado / fallback)
             const btnRemoveImage = card.querySelector('#btn-gemini-remove-image');
             if (btnRemoveImage) {
                 btnRemoveImage.onclick = (e) => {
                     e.preventDefault();
-                    removerImagemPendente();
+                    limparImagensPendentes();
                     mostrarNotificacao('Imagem removida do anexo.', '#64748b');
                 };
             }
 
-            // Botão de anexar imagem do computador
+            // Botão de anexar imagem do computador (suporta múltiplas seleções)
             const btnAttach = card.querySelector('#btn-gemini-attach-image');
             const fileInput = card.querySelector('#gemini-file-input');
             if (btnAttach && fileInput) {
                 btnAttach.onclick = () => fileInput.click();
                 fileInput.onchange = () => {
                     if (fileInput.files && fileInput.files.length > 0) {
-                        definirImagemPendente(fileInput.files[0]);
+                        adicionarImagensPendentes(fileInput.files);
+                        fileInput.value = '';
                     }
                 };
             }
@@ -6692,8 +7174,9 @@
                 };
                 btnEnviar.onclick = () => {
                     const texto = (textarea ? textarea.value : '').trim();
-                    if (!texto && !imagemPendente) {
-                        mostrarNotificacao('⚠️ Digite uma mensagem ou anexe uma imagem para enviar.', '#f59e0b');
+                    const temImagens = (imagensPendentes.length > 0) || (imagemPendente !== null);
+                    if (!texto && !temImagens) {
+                        mostrarNotificacao('⚠️ Digite uma mensagem ou anexe imagens para enviar.', '#f59e0b');
                         return;
                     }
                     enviarTextoAoCliente(texto);
@@ -6711,9 +7194,12 @@
                 }
                 const textarea = document.getElementById('gemini-suggestion-text');
                 if (textarea) {
-                    textarea.focus();
-                    const len = textarea.value.length;
-                    try { textarea.setSelectionRange(len, len); } catch (_) { }
+                    const jaFocado = (document.activeElement === textarea);
+                    if (!jaFocado) {
+                        textarea.focus();
+                        const len = textarea.value.length;
+                        try { textarea.setSelectionRange(len, len); } catch (_) { }
+                    }
                 }
             } catch (_) { }
         }
@@ -6722,10 +7208,25 @@
             if (!campo || campo.dataset.softcomFocusHooked) return;
             campo.dataset.softcomFocusHooked = 'true';
             campo.addEventListener('focus', () => {
-                if (enviandoMensagemAoCliente || enviandoMensagemNativaAgora || gravandoAudioAtivo) return;
+                if (manipulandoCampoNativoSincrono || gravandoAudioAtivo) return;
                 const panel = document.getElementById('gemini-docked-panel');
                 if (panel && panel.style.display !== 'none' && document.body.contains(panel)) {
-                    setTimeout(focarInputSoftCopilot, 10);
+                    resgatarTextoNovoDoCampoNativo();
+                    focarInputSoftCopilot();
+                    setTimeout(() => {
+                        if (!manipulandoCampoNativoSincrono && !gravandoAudioAtivo) {
+                            resgatarTextoNovoDoCampoNativo();
+                            focarInputSoftCopilot();
+                        }
+                    }, 10);
+                }
+            });
+            campo.addEventListener('input', () => {
+                if (manipulandoCampoNativoSincrono || gravandoAudioAtivo) return;
+                const panel = document.getElementById('gemini-docked-panel');
+                if (panel && panel.style.display !== 'none' && document.body.contains(panel)) {
+                    resgatarTextoNovoDoCampoNativo();
+                    focarInputSoftCopilot();
                 }
             });
         }
@@ -6737,10 +7238,24 @@
             enviandoMensagemAoCliente = true;
             envioMensagemEmAndamento = true;
 
-            const imgParaEnviar = imagemPendente;
+            const imgsParaEnviar = imagensPendentes.length > 0
+                ? imagensPendentes.map(item => item.file)
+                : (imagemPendente ? [imagemPendente] : []);
             const textoParaEnviar = (texto || '').trim();
             const temTexto = (textoParaEnviar.length > 0);
-            const temImg = !!imgParaEnviar;
+            const temImg = imgsParaEnviar.length > 0;
+
+            // SNAPSHOT CRÍTICO: captura chave, sugestão da IA e origem do texto ANTES de qualquer limpeza de rascunhos ou textarea
+            const chaveAtualSnapshot = (typeof obterChaveIdentificadoraChatAtivo === 'function') ? obterChaveIdentificadoraChatAtivo() : null;
+            const sugestaoIAAtivaSnapshot = (sugestoesIAPorChat.get(chaveAtualSnapshot) || ultimoTextoGeradoPorIA || '').trim();
+            const origemTextoSnapshot = origensTextoPorChat.get(chaveAtualSnapshot) || origemTextoAtual || 'nenhum';
+            let ultimaMensagemClienteSnapshot = '';
+            if (temTexto) {
+                try {
+                    const { ultimaMensagemCliente } = extrairHistoricoConversaParaIA();
+                    ultimaMensagemClienteSnapshot = ultimaMensagemCliente || '';
+                } catch (_) { }
+            }
 
             // Registra para proteção anti-ressurreição de rascunhos nos próximos 10 segundos
             if (temTexto) {
@@ -6758,7 +7273,7 @@
                 descartarQualquerAudioPendente();
 
                 if (!temTexto && !temImg) {
-                    mostrarNotificacao('⚠️ Digite uma mensagem ou anexe uma imagem para enviar.', '#f59e0b');
+                    mostrarNotificacao('⚠️ Digite uma mensagem ou anexe imagens para enviar.', '#f59e0b');
                     return;
                 }
 
@@ -6768,22 +7283,19 @@
 
                 // Registra para aprendizado de estilo da IA e rastreio de inatividade (SOP 6 min / 12 min)
                 if (temTexto) {
-                    const chaveAtual = (typeof obterChaveIdentificadoraChatAtivo === 'function') ? obterChaveIdentificadoraChatAtivo() : null;
                     try {
-                        const { ultimaMensagemCliente } = extrairHistoricoConversaParaIA();
                         // 1. Aprendizado geral do estilo do atendente
-                        salvarMensagemParaAprendizado(textoParaEnviar, ultimaMensagemCliente);
+                        salvarMensagemParaAprendizado(textoParaEnviar, ultimaMensagemClienteSnapshot);
 
                         // 2. Aprendizado adaptativo quando o atendente corrigiu a sugestão gerada pela IA
-                        const sugestaoIAAtiva = (sugestoesIAPorChat.get(chaveAtual) || ultimoTextoGeradoPorIA || '').trim();
-                        if (sugestaoIAAtiva && (textoParaEnviar !== sugestaoIAAtiva) && obterAprendizadoCorrecoesHabilitado()) {
-                            salvarCorrecaoDeSugestaoIA(sugestaoIAAtiva, textoParaEnviar, ultimaMensagemCliente);
+                        if (sugestaoIAAtivaSnapshot && (textoParaEnviar !== sugestaoIAAtivaSnapshot) && obterAprendizadoCorrecoesHabilitado()) {
+                            salvarCorrecaoDeSugestaoIA(sugestaoIAAtivaSnapshot, textoParaEnviar, ultimaMensagemClienteSnapshot);
                         }
                     } catch (_) { }
 
-                    if (chaveAtual) {
-                        sugestoesIAPorChat.delete(chaveAtual);
-                        origensTextoPorChat.delete(chaveAtual);
+                    if (chaveAtualSnapshot) {
+                        sugestoesIAPorChat.delete(chaveAtualSnapshot);
+                        origensTextoPorChat.delete(chaveAtualSnapshot);
                     }
                     ultimoTextoGeradoPorIA = '';
                     origemTextoAtual = 'nenhum';
@@ -6805,12 +7317,14 @@
                     // 1. Envia a mensagem de texto PRIMEIRO enquanto o chat nativo está 100% livre e desbloqueado
                     await colocarTextoNoCampoConfirmado(textoParaEnviar);
                     await new Promise(r => setTimeout(r, 50));
+                    resgatarTextoNovoDoCampoNativo(textoParaEnviar);
                     enviarMensagemDoCampo();
                     focarInputSoftCopilot();
 
                     // 2. Aguarda a mensagem de texto ser processada e o campo ser liberado pelo Workdesk
                     for (let i = 0; i < 6; i++) {
                         await new Promise(r => setTimeout(r, 150));
+                        resgatarTextoNovoDoCampoNativo(textoParaEnviar);
                         const campoAtual = obterCampoMensagem();
                         if (!campoAtual || !campoAtual.value || campoAtual.value.trim().length === 0) {
                             break;
@@ -6818,28 +7332,36 @@
                     }
                     await new Promise(r => setTimeout(r, 150));
 
-                    // 3. Em seguida, anexa e encaminha a imagem para o Workdesk
-                    encaminharImagemAoWorkdesk([imgParaEnviar]);
+                    // 3. Em seguida, anexa e encaminha todas as imagens para o Workdesk
+                    encaminharImagemAoWorkdesk(imgsParaEnviar);
                     focarInputSoftCopilot();
 
-                    mostrarNotificacao('⚡ Mensagem e imagem enviadas com sucesso ao cliente!', '#2ecc71');
+                    const msgNotif = imgsParaEnviar.length === 1
+                        ? '⚡ Mensagem e imagem enviadas com sucesso ao cliente!'
+                        : `⚡ Mensagem e ${imgsParaEnviar.length} imagens enviadas com sucesso ao cliente!`;
+                    mostrarNotificacao(msgNotif, '#2ecc71');
                 } else if (temTexto) {
                     await colocarTextoNoCampoConfirmado(textoParaEnviar);
                     await new Promise(r => setTimeout(r, 50));
+                    resgatarTextoNovoDoCampoNativo(textoParaEnviar);
                     enviarMensagemDoCampo();
                     focarInputSoftCopilot();
                     mostrarNotificacao('⚡ Mensagem enviada com sucesso ao cliente!', '#2ecc71');
                 } else if (temImg) {
-                    encaminharImagemAoWorkdesk([imgParaEnviar]);
+                    encaminharImagemAoWorkdesk(imgsParaEnviar);
                     focarInputSoftCopilot();
-                    mostrarNotificacao('⚡ Imagem enviada com sucesso ao cliente!', '#2ecc71');
+                    const msgNotif = imgsParaEnviar.length === 1
+                        ? '⚡ Imagem enviada com sucesso ao cliente!'
+                        : `⚡ ${imgsParaEnviar.length} imagens enviadas com sucesso ao cliente!`;
+                    mostrarNotificacao(msgNotif, '#2ecc71');
                 }
 
-                // Ciclos de verificação e limpeza garantida (limpa resíduos de input nativo e rascunhos)
+                // Ciclos de verificação e limpeza garantida (resgata digitação rápida, limpa resíduos nativos e preserva novo texto)
                 for (let i = 0; i < 3; i++) {
                     await new Promise(r => setTimeout(r, 120));
+                    resgatarTextoNovoDoCampoNativo(textoParaEnviar);
                     limparCampoNativo();
-                    limparTextareaSoftCopilot(true, textoParaEnviar);
+                    limparTextareaSoftCopilot(false, textoParaEnviar);
                     limparTodosRascunhosDoChatAtual(textoParaEnviar);
                     focarInputSoftCopilot();
                 }
@@ -6847,12 +7369,14 @@
                 console.error('[Extensão Softcom] Erro ao enviar mensagem/imagem:', err);
                 mostrarNotificacao('⚠️ Erro ao enviar mensagem/imagem.', '#ef4444');
             } finally {
+                aguardandoDisparoEnvioNativo = false;
                 enviandoMensagemAoCliente = false;
                 focarInputSoftCopilot();
                 setTimeout(() => {
                     envioMensagemEmAndamento = false;
+                    resgatarTextoNovoDoCampoNativo(textoParaEnviar);
                     limparCampoNativo();
-                    limparTextareaSoftCopilot(true, textoParaEnviar);
+                    limparTextareaSoftCopilot(false, textoParaEnviar);
                     limparTodosRascunhosDoChatAtual(textoParaEnviar);
                     focarInputSoftCopilot();
                 }, 400);
@@ -7227,53 +7751,15 @@
                         transition: border-color 0.2s;
                     "></textarea>
 
-                    <!-- Preview de imagem anexada/colada (estágio antes do envio) -->
+                    <!-- Preview de imagem anexada/colada (estágio antes do envio com suporte a múltiplas fotos) -->
                     <div id="gemini-image-preview-container" style="
                         display: none;
-                        align-items: center;
-                        gap: 8px;
                         margin-top: 5px;
                         padding: 5px 8px;
                         background: #18222a;
                         border: 1px solid #2d3c48;
                         border-radius: 5px;
-                    ">
-                        <img id="gemini-image-preview-thumb" src="" alt="Preview" style="
-                            width: 32px;
-                            height: 32px;
-                            object-fit: cover;
-                            border-radius: 4px;
-                            border: 1px solid #3f3f46;
-                            background: #000;
-                            flex-shrink: 0;
-                        " />
-                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px;">
-                            <span id="gemini-image-preview-name" style="
-                                font-size: 11px;
-                                font-weight: 600;
-                                color: #f4f4f5;
-                                white-space: nowrap;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            ">imagem.png</span>
-                            <span id="gemini-image-preview-size" style="
-                                font-size: 10px;
-                                color: #94a3b8;
-                            ">0 KB · Imagem pronta para envio</span>
-                        </div>
-                        <button id="btn-gemini-remove-image" type="button" title="Remover imagem" style="
-                            background: #27272a;
-                            border: 1px solid #3f3f46;
-                            color: #ef4444;
-                            cursor: pointer;
-                            font-size: 11px;
-                            font-weight: bold;
-                            padding: 2px 6px;
-                            border-radius: 3px;
-                            transition: all 0.2s;
-                            flex-shrink: 0;
-                        ">✕</button>
-                    </div>
+                    "></div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
@@ -7338,7 +7824,7 @@
                                 <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
                             </svg>
                         </button>
-                        <input type="file" id="gemini-file-input" accept="image/*" style="display: none;" />
+                        <input type="file" id="gemini-file-input" multiple style="display: none;" />
 
                         <button id="btn-gemini-record-audio" class="gemini-btn-icon-square" type="button" title="Gravar áudio" style="
                             display: inline-flex !important;
@@ -7923,10 +8409,6 @@ DIRETRIZES FUNDAMENTAIS:
 4. EVITE BORDÕES INICIAIS: A menos que o atendente tenha digitado expressamente no rascunho, NÃO adicione palavras de abertura como "Perfeito", "Entendi" ou "Compreendo".
 Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, títulos ou explicações.`;
             } else {
-                const diretrizAnydesk = anydeskJaNoHistorico
-                    ? '4. REGRA ABSOLUTA DE ANYDESK: O cliente JÁ INFORMOU o AnyDesk ou ID de acesso nesta conversa! É ABSOLUTAMENTE PROIBIDO pedir o AnyDesk, ID ou código de acesso novamente. Confirme que já está acessando ou solicite para aceitar a conexão na tela caso precise.'
-                    : '4. EQUILÍBRIO NO ANYDESK E ORIENTAÇÃO HUMANIZADA:\n   - Em procedimentos e rotinas comuns do sistema (como emissão de notas fiscais NF-e/NFC-e, entrada de notas XML, cadastros de produtos/clientes, relatórios e consultas): NÃO peça AnyDesk de início! Oriente o cliente com cordialidade e didática pelo chat.\n   - Solicite AnyDesk APENAS se for erro impeditivo/travamento do sistema ou se o cliente relatar dificuldade após a orientação.';
-
                 return `Você é ${nomeTecnicoCompletoAtual}, atendente do suporte técnico da Softcom Tecnologia.
 Redija a resposta ideal e definitiva para ser enviada agora ao cliente no chat.
 
@@ -7948,13 +8430,6 @@ DIRETRIZES DE ATENDIMENTO E ESTILO:
    ${diretrizBordoes}
 2. ${diretrizTom}
 3. ${diretrizTamanho}
-${diretrizAnydesk}
-5. DISTINÇÃO DE HARDWARE vs SISTEMA: Se for problema mecânico de impressora (corte de guilhotina, cabo solto, queima), oriente técnico de TI particular ou assistência técnica.
-6. Distinga rigorosamente Impressora de Cupom (bobina 80mm/58mm/NFC-e) de Impressora de Etiquetas (ribbon/L42/código de barras).
-7. FLUXO DE FINALIZAÇÃO EM 2 ETAPAS (SEMPRE PERGUNTE DÚVIDA FINAL ANTES DE ENCERRAR):
-   - Etapa 1: Quando resolvido ou o cliente agradecer ("obrigado", "valeu", "deu certo"), pergunte se restou alguma dúvida e se pode auxiliar em algo mais.
-   - Etapa 2: Só encerre com "Como não restaram mais dúvidas, estarei finalizando este atendimento..." se a pergunta de dúvida final já foi feita e o cliente respondeu confirmando que não tem dúvidas. NUNCA finalize direto!
-8. MENSAGENS DE SISTEMA/BOT: Mensagens marcadas com [Sistema/Bot] no histórico são mensagens automáticas do Workdesk. NUNCA responda ao bot ou à URA; responda exclusivamente ao cliente humano (${nomeCliente}) e à dúvida/solicitação dele.
 Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, títulos ou explicações.`;
             }
         }
@@ -9211,8 +9686,40 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
         // =========================================================================
 
         let chamaAIPainelAberto = false;
+        let chamaAIFixado = false;
+        try {
+            chamaAIFixado = (localStorage.getItem('softcom_chama_ai_pinned') === 'true');
+        } catch (_) { }
         let chamaAIHistorico = [];
         let gerandoRespostaChamaAI = false;
+        let chamaAIAnexoPendente = null; // { tipo: 'imagem'|'documento'|'texto', nome, mimeType, tamanhoFmt, dataUrl, base64, conteudoTexto }
+
+        function alternarFixacaoChamaAI() {
+            chamaAIFixado = !chamaAIFixado;
+            try {
+                localStorage.setItem('softcom_chama_ai_pinned', chamaAIFixado ? 'true' : 'false');
+            } catch (_) { }
+            atualizarBotaoPinChamaAI();
+            if (chamaAIFixado) {
+                mostrarNotificacao('📌 ChamaAI fixado na tela! O painel permanecerá aberto ao clicar fora.', '#E3B400');
+            } else {
+                mostrarNotificacao('📌 ChamaAI desfixado! Ele fechará automaticamente ao clicar fora.', '#64748b');
+            }
+        }
+
+        function atualizarBotaoPinChamaAI() {
+            const btnPin = document.getElementById('chama-ai-btn-pin');
+            if (!btnPin) return;
+            if (chamaAIFixado) {
+                btnPin.classList.add('is-pinned');
+                btnPin.setAttribute('title', 'Desafixar ChamaAI (fixado atualmente)');
+                btnPin.setAttribute('aria-pressed', 'true');
+            } else {
+                btnPin.classList.remove('is-pinned');
+                btnPin.setAttribute('title', 'Fixar ChamaAI na tela (impedir fechamento ao clicar fora)');
+                btnPin.setAttribute('aria-pressed', 'false');
+            }
+        }
 
         // Recupera histórico salvo do ChamaAI no storage
         try {
@@ -9229,7 +9736,15 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 if (chamaAIHistorico.length > 40) {
                     chamaAIHistorico = chamaAIHistorico.slice(-40);
                 }
-                chrome.storage.local.set({ chama_ai_chat_history: chamaAIHistorico });
+                // Sanitiza dataUrls muito grandes (>120KB) antes de salvar no storage local para evitar exceder cotas
+                const historicoParaSalvar = chamaAIHistorico.map(m => {
+                    if (m.anexo && m.anexo.dataUrl && m.anexo.dataUrl.length > 120000) {
+                        const { dataUrl, ...resto } = m.anexo;
+                        return { ...m, anexo: { ...resto, semPreviewArmazenado: true } };
+                    }
+                    return m;
+                });
+                chrome.storage.local.set({ chama_ai_chat_history: historicoParaSalvar });
             } catch (_) { }
         }
 
@@ -9278,17 +9793,19 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 /* Painel Lateral do ChamaAI - Design padrão Workdesk (Alinhado à barra lateral direita) */
                 #chama-ai-panel {
                     position: fixed !important;
-                    top: 0 !important;
-                    right: 0 !important;
+                    top: auto !important;
+                    right: 7px !important;
                     bottom: 0 !important;
-                    width: 340px !important;
-                    max-width: 90vw !important;
-                    background: #12141a !important;
+                    width: 385px !important;
+                    max-width: 91vw !important;
+                    height: 91vh !important;
+                    background: #121C20 !important;
                     z-index: 999999 !important;
                     display: flex !important;
                     flex-direction: column !important;
                     box-shadow: -6px 0 28px rgba(0, 0, 0, 0.65) !important;
-                    border-left: 1px solid #272a36 !important;
+                    border-left: 1px solid #24343B !important;
+                    border-radius: 10px !important;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
                     color: #e2e8f0 !important;
                     box-sizing: border-box !important;
@@ -9311,9 +9828,10 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     padding: 10px 14px !important;
                     height: 52px !important;
                     min-height: 52px !important;
-                    background: #171922 !important;
-                    border-bottom: 1px solid #232733 !important;
+                    background: #162227 !important;
+                    border-bottom: 1px solid #24343B !important;
                     box-sizing: border-box !important;
+                    border-radius: 12px !important;
                 }
                 .chama-ai-header-left {
                     display: flex !important;
@@ -9340,7 +9858,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     overflow: hidden !important;
                 }
                 .chama-ai-title {
-                    font-size: 13.5px !important;
+                    font-size: 14px !important;
                     font-weight: 700 !important;
                     color: #f8fafc !important;
                     display: flex !important;
@@ -9353,13 +9871,13 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     padding: 1px 5px !important;
                     border-radius: 4px !important;
                     background: rgba(227, 180, 0, 0.18) !important;
-                    color: #ffd000 !important;
+                    color: #E3B400 !important;
                     border: 1px solid rgba(227, 180, 0, 0.3) !important;
                     text-transform: uppercase !important;
                     letter-spacing: 0.5px !important;
                 }
                 .chama-ai-subtitle {
-                    font-size: 10.5px !important;
+                    font-size: 11px !important;
                     color: #94a3b8 !important;
                     white-space: nowrap !important;
                     overflow: hidden !important;
@@ -9390,6 +9908,16 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     color: #f8fafc !important;
                     border-color: rgba(255, 255, 255, 0.12) !important;
                 }
+                .chama-ai-btn-icon.is-pinned {
+                    color: #E3B400 !important;
+                    background: rgba(227, 180, 0, 0.2) !important;
+                    border-color: rgba(227, 180, 0, 0.45) !important;
+                    box-shadow: 0 0 8px rgba(227, 180, 0, 0.25) !important;
+                }
+                .chama-ai-btn-icon.is-pinned:hover {
+                    background: rgba(227, 180, 0, 0.3) !important;
+                    color: #ffd000 !important;
+                }
 
                 /* Lista de Mensagens */
                 .chama-ai-messages {
@@ -9399,15 +9927,16 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     display: flex !important;
                     flex-direction: column !important;
                     gap: 10px !important;
+                    background: #121C20 !important;
                     box-sizing: border-box !important;
                     scrollbar-width: thin !important;
-                    scrollbar-color: #2b2f3d transparent !important;
+                    scrollbar-color: #24343B transparent !important;
                 }
                 .chama-ai-messages::-webkit-scrollbar {
                     width: 5px !important;
                 }
                 .chama-ai-messages::-webkit-scrollbar-thumb {
-                    background: #2b2f3d !important;
+                    background: #24343B !important;
                     border-radius: 3px !important;
                 }
 
@@ -9426,21 +9955,21 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
 
                 .chama-ai-bubble {
                     max-width: 92% !important;
-                    padding: 8px 11px !important;
-                    font-size: 12.5px !important;
-                    line-height: 1.45 !important;
+                    padding: 8px 12px !important;
+                    font-size: 13px !important;
+                    line-height: 1.5 !important;
                     box-sizing: border-box !important;
                     word-break: break-word !important;
                 }
                 .chama-ai-bubble.user-bubble {
-                    background: #232733 !important;
+                    background: #1B292E !important;
                     border: 1px solid rgba(227, 180, 0, 0.28) !important;
                     color: #f8fafc !important;
                     border-radius: 12px 12px 2px 12px !important;
                 }
                 .chama-ai-bubble.ai-bubble {
-                    background: #181b24 !important;
-                    border: 1px solid #282c3c !important;
+                    background: #162227 !important;
+                    border: 1px solid #24343B !important;
                     color: #e2e8f0 !important;
                     border-radius: 12px 12px 12px 2px !important;
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
@@ -9456,7 +9985,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 }
                 .chama-ai-bubble-sender {
                     font-weight: 700 !important;
-                    color: #ffd000 !important;
+                    color: #E3B400 !important;
                     display: flex !important;
                     align-items: center !important;
                     gap: 4px !important;
@@ -9486,17 +10015,17 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     margin-bottom: 4px !important;
                 }
                 .chama-ai-bubble-body code {
-                    background: #0d0f14 !important;
-                    border: 1px solid #222530 !important;
+                    background: #121C20 !important;
+                    border: 1px solid #24343B !important;
                     padding: 2px 5px !important;
                     border-radius: 4px !important;
                     font-family: Consolas, monospace !important;
                     font-size: 12px !important;
-                    color: #f59e0b !important;
+                    color: #E3B400 !important;
                 }
                 .chama-ai-bubble-body pre {
-                    background: #0d0f14 !important;
-                    border: 1px solid #222530 !important;
+                    background: #121C20 !important;
+                    border: 1px solid #24343B !important;
                     padding: 8px !important;
                     border-radius: 6px !important;
                     font-family: Consolas, monospace !important;
@@ -9527,14 +10056,14 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     transition: all 0.15s ease !important;
                 }
                 .chama-ai-btn-copy:hover {
-                    color: #ffd000 !important;
+                    color: #E3B400 !important;
                     background: rgba(227, 180, 0, 0.1) !important;
                 }
 
                 /* Boas-Vindas e Chips */
                 .chama-ai-welcome {
-                    background: #171922 !important;
-                    border: 1px solid #262a38 !important;
+                    background: #162227 !important;
+                    border: 1px solid #24343B !important;
                     border-radius: 10px !important;
                     padding: 16px !important;
                     text-align: center !important;
@@ -9549,7 +10078,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     height: 44px !important;
                     border-radius: 50% !important;
                     background: rgba(227, 180, 0, 0.15) !important;
-                    color: #ffd000 !important;
+                    color: #E3B400 !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
@@ -9573,12 +10102,12 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     margin-top: 8px !important;
                 }
                 .chama-ai-chip {
-                    background: #1f2330 !important;
-                    border: 1px solid #2e3446 !important;
+                    background: #1B292E !important;
+                    border: 1px solid #2d3c48 !important;
                     border-radius: 6px !important;
                     padding: 8px 12px !important;
                     color: #cbd5e1 !important;
-                    font-size: 12px !important;
+                    font-size: 12.5px !important;
                     text-align: left !important;
                     cursor: pointer !important;
                     transition: all 0.15s ease !important;
@@ -9589,7 +10118,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 .chama-ai-chip:hover {
                     background: rgba(227, 180, 0, 0.14) !important;
                     border-color: rgba(227, 180, 0, 0.45) !important;
-                    color: #ffd000 !important;
+                    color: #E3B400 !important;
                     transform: translateX(2px) !important;
                 }
 
@@ -9599,18 +10128,18 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     align-items: center !important;
                     gap: 6px !important;
                     font-size: 12px !important;
-                    color: #ffd000 !important;
+                    color: #E3B400 !important;
                     font-style: italic !important;
                     padding: 8px 12px !important;
-                    background: #181b24 !important;
-                    border: 1px solid #282c3c !important;
+                    background: #162227 !important;
+                    border: 1px solid #24343B !important;
                     border-radius: 8px !important;
                     width: fit-content !important;
                 }
                 .chama-ai-dot {
                     width: 6px !important;
                     height: 6px !important;
-                    background: #ffd000 !important;
+                    background: #E3B400 !important;
                     border-radius: 50% !important;
                     animation: chamaAiPulse 1.2s infinite ease-in-out !important;
                 }
@@ -9624,23 +10153,129 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 /* Composer / Footer */
                 .chama-ai-footer {
                     padding: 10px 12px !important;
-                    background: #171922 !important;
-                    border-top: 1px solid #232733 !important;
+                    background: #162227 !important;
+                    border-top: 1px solid #24343B !important;
                     box-sizing: border-box !important;
                 }
+
+                /* Card de Preview de Anexo Pendente */
+                .chama-ai-attachment-preview {
+                    margin-bottom: 8px !important;
+                }
+                .chama-ai-attach-card {
+                    display: flex !important;
+                    align-items: center !important;
+                    gap: 8px !important;
+                    background: #162227 !important;
+                    border: 1px solid #2d3c48 !important;
+                    border-left: 3px solid #E3B400 !important;
+                    border-radius: 6px !important;
+                    padding: 5px 8px !important;
+                    box-sizing: border-box !important;
+                    animation: chamaAiSlideDown 0.2s ease !important;
+                }
+                @keyframes chamaAiSlideDown {
+                    from { opacity: 0; transform: translateY(-4px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .chama-ai-attach-thumb {
+                    width: 34px !important;
+                    height: 34px !important;
+                    object-fit: cover !important;
+                    border-radius: 4px !important;
+                    border: 1px solid #2d3c48 !important;
+                    flex-shrink: 0 !important;
+                }
+                .chama-ai-attach-icon {
+                    width: 32px !important;
+                    height: 32px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    background: #1B292E !important;
+                    border-radius: 4px !important;
+                    font-size: 15px !important;
+                    flex-shrink: 0 !important;
+                }
+                .chama-ai-attach-info {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    overflow: hidden !important;
+                    flex: 1 !important;
+                    line-height: 1.25 !important;
+                }
+                .chama-ai-attach-name {
+                    font-size: 11.5px !important;
+                    font-weight: 600 !important;
+                    color: #f1f5f9 !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                }
+                .chama-ai-attach-size {
+                    font-size: 10px !important;
+                    color: #94a3b8 !important;
+                }
+                .chama-ai-attach-remove {
+                    background: transparent !important;
+                    border: none !important;
+                    color: #94a3b8 !important;
+                    cursor: pointer !important;
+                    padding: 3px !important;
+                    border-radius: 4px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    transition: all 0.15s ease !important;
+                    flex-shrink: 0 !important;
+                }
+                .chama-ai-attach-remove:hover {
+                    color: #ef4444 !important;
+                    background: rgba(239, 68, 68, 0.12) !important;
+                }
+
                 .chama-ai-input-wrap {
                     display: flex !important;
-                    align-items: flex-end !important;
+                    align-items: center !important;
                     gap: 6px !important;
-                    background: #0f1117 !important;
-                    border: 1px solid #2a2e3d !important;
+                    background: #1B292E !important;
+                    border: 1px solid #24343B !important;
                     border-radius: 8px !important;
-                    padding: 6px 9px !important;
+                    padding: 5px 8px !important;
                     transition: border-color 0.2s ease !important;
                 }
                 .chama-ai-input-wrap:focus-within {
                     border-color: #E3B400 !important;
                     box-shadow: 0 0 0 1px rgba(227, 180, 0, 0.3) !important;
+                }
+                #chama-ai-btn-attach {
+                    width: 32px !important;
+                    height: 32px !important;
+                    min-width: 32px !important;
+                    max-width: 32px !important;
+                    min-height: 32px !important;
+                    max-height: 32px !important;
+                    aspect-ratio: 1 / 1 !important;
+                    flex: 0 0 32px !important;
+                    border-radius: 6px !important;
+                    background: transparent !important;
+                    color: #94a3b8 !important;
+                    border: 1px solid transparent !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    cursor: pointer !important;
+                    transition: all 0.15s ease !important;
+                    flex-shrink: 0 !important;
+                    padding: 0 !important;
+                    box-sizing: border-box !important;
+                }
+                #chama-ai-btn-attach:hover {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    color: #E3B400 !important;
+                }
+                #chama-ai-btn-attach:active {
+                    transform: scale(0.95) !important;
                 }
                 #chama-ai-input-text {
                     flex: 1 !important;
@@ -9655,8 +10290,21 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     max-height: 120px !important;
                     min-height: 22px !important;
                     height: 22px !important;
-                    padding: 0 !important;
+                    padding: 4px 0 !important;
                     box-sizing: border-box !important;
+                    overflow-y: hidden !important;
+                    scrollbar-width: none !important;
+                    -ms-overflow-style: none !important;
+                }
+                #chama-ai-input-text::-webkit-scrollbar,
+                #chama-ai-input-text::-webkit-scrollbar-button,
+                #chama-ai-input-text::-webkit-scrollbar-track,
+                #chama-ai-input-text::-webkit-scrollbar-thumb,
+                #chama-ai-input-text::-webkit-resizer {
+                    display: none !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                    -webkit-appearance: none !important;
                 }
                 #chama-ai-input-text::placeholder {
                     color: #64748b !important;
@@ -9664,6 +10312,12 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 #chama-ai-btn-send {
                     width: 32px !important;
                     height: 32px !important;
+                    min-width: 32px !important;
+                    max-width: 32px !important;
+                    min-height: 32px !important;
+                    max-height: 32px !important;
+                    aspect-ratio: 1 / 1 !important;
+                    flex: 0 0 32px !important;
                     border-radius: 6px !important;
                     background: #E3B400 !important;
                     color: #0d0e12 !important;
@@ -9674,24 +10328,84 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     cursor: pointer !important;
                     transition: all 0.15s ease !important;
                     flex-shrink: 0 !important;
+                    padding: 0 !important;
+                    box-sizing: border-box !important;
                 }
                 #chama-ai-btn-send:hover {
                     background: #ffd000 !important;
                     transform: scale(1.05) !important;
                 }
                 #chama-ai-btn-send:disabled {
-                    background: #252834 !important;
+                    background: #24343B !important;
                     color: #64748b !important;
                     cursor: not-allowed !important;
                     transform: none !important;
                 }
                 .chama-ai-footer-hint {
                     margin-top: 6px !important;
-                    font-size: 10.5px !important;
+                    font-size: 10px !important;
                     color: #64748b !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: space-between !important;
+                }
+
+                /* Anexos nos Balões de Mensagem */
+                .chama-ai-msg-attach-wrap {
+                    margin-bottom: 6px !important;
+                    max-width: 100% !important;
+                    border-radius: 6px !important;
+                    overflow: hidden !important;
+                }
+                .chama-ai-msg-attach-img {
+                    max-width: 100% !important;
+                    max-height: 180px !important;
+                    object-fit: contain !important;
+                    border-radius: 6px !important;
+                    background: #121C20 !important;
+                    border: 1px solid #24343B !important;
+                    display: block !important;
+                    cursor: pointer !important;
+                    transition: transform 0.15s ease, opacity 0.15s ease !important;
+                }
+                .chama-ai-msg-attach-img:hover {
+                    opacity: 0.95 !important;
+                    transform: scale(1.01) !important;
+                }
+                .chama-ai-msg-attach-doc {
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    gap: 7px !important;
+                    background: rgba(0, 0, 0, 0.3) !important;
+                    border: 1px solid #24343B !important;
+                    border-radius: 6px !important;
+                    padding: 5px 9px !important;
+                    margin-bottom: 6px !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .chama-ai-msg-attach-doc-icon {
+                    font-size: 15px !important;
+                    flex-shrink: 0 !important;
+                }
+                .chama-ai-msg-attach-doc-info {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    overflow: hidden !important;
+                    line-height: 1.2 !important;
+                }
+                .chama-ai-msg-attach-doc-name {
+                    font-size: 11.5px !important;
+                    font-weight: 600 !important;
+                    color: #f8fafc !important;
+                    white-space: nowrap !important;
+                    overflow: hidden !important;
+                    text-overflow: ellipsis !important;
+                    max-width: 190px !important;
+                }
+                .chama-ai-msg-attach-doc-size {
+                    font-size: 9.5px !important;
+                    color: #94a3b8 !important;
                 }
             `;
             document.head.appendChild(style);
@@ -9826,7 +10540,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 }
 
                 const faqsUsados = rankeados.map(x => x.m.titulo || x.m.id);
-                const textoFaqs = '\n\nBASE OFICIAL DE FAQS E PROCEDIMENTOS DO HELP TOOLS (REFERÊNCIA TÉCNICA):\n' +
+                const textoFaqs = '\n\nBASE OFICIAL DE FAQS E PROCEDIMENTOS DO HELP TOOLS (REFERÊNCIA TÉCNICA - Utilize estes FAQs APENAS se tiverem relação direta com a pergunta; ignore-os completamente caso seja uma pergunta de uso geral, diário ou fora do sistema Softcom):\n' +
                     rankeados.map(x => `[${x.m.id ? x.m.id + ' - ' : ''}${x.m.titulo} (${x.m.categoria || 'Geral'})]\n${x.m.procedimento || ''}`).join('\n\n');
 
                 return { textoFaqs, faqsUsados };
@@ -9838,16 +10552,17 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
         // Obtém dinamicamente a largura da barra lateral direita do Workdesk para alinhar o ChamaAI perfeitamente
         function obterLarguraBarraLateralWorkdesk() {
             try {
-                // 1. Procura subindo a árvore DOM a partir dos botões de abas da barra lateral (Cliente, Chama Gestor, Histórico)
+                // 1. Procura subindo a árvore DOM a partir dos botões de abas da barra lateral (Cliente, Clientes, Histórico, MDM, Telefone, Chama Gestor)
                 const botoes = Array.from(document.querySelectorAll('button, [role="tab"], a[role="button"], div[class*="tab" i]:not([class*="panel" i])'));
+                const abasAlvo = ['cliente', 'clientes', 'histórico', 'historico', 'mdm', 'telefone', 'chama gestor', 'chamar gestor'];
                 for (const b of botoes) {
                     if (b.closest('#gemini-docked-panel') || b.closest('#chama-ai-panel') || b.id === 'btn-cadastro-cliente') continue;
                     const txt = (b.textContent || b.title || b.getAttribute('aria-label') || '').toLowerCase().trim();
-                    if (txt === 'cliente' || txt.includes('chama gestor') || txt.includes('chamar gestor') || txt.includes('histórico') || txt.includes('historico')) {
+                    if (abasAlvo.some(aba => txt === aba || txt.includes(aba))) {
                         let pai = b.parentElement;
                         while (pai && pai !== document.body && pai !== document.documentElement) {
                             const r = pai.getBoundingClientRect();
-                            if (r.width >= 240 && r.width <= 460 && r.right >= window.innerWidth - 35 && r.height > 200) {
+                            if (r.width >= 260 && r.width <= 520 && r.right >= window.innerWidth - 45 && r.height > 200) {
                                 return Math.round(r.width);
                             }
                             pai = pai.parentElement;
@@ -9863,7 +10578,11 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     '[class*="clientPanel" i]',
                     '[class*="rightSidebar" i]',
                     '[class*="drawer" i]',
-                    '[role="tabpanel"][aria-label="Cliente"]',
+                    '[role="tabpanel"][aria-label*="Cliente" i]',
+                    '[role="tabpanel"][aria-label*="Histórico" i]',
+                    '[role="tabpanel"][aria-label*="Historico" i]',
+                    '[role="tabpanel"][aria-label*="MDM" i]',
+                    '[role="tabpanel"][aria-label*="Telefone" i]',
                     '[class*="inspectorTabPanel"]',
                     '[role="tabpanel"]'
                 ];
@@ -9872,7 +10591,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     for (const el of elementos) {
                         if (el.closest('#chama-ai-panel') || el.closest('#gemini-docked-panel')) continue;
                         const r = el.getBoundingClientRect();
-                        if (r.width >= 240 && r.width <= 460 && r.right >= window.innerWidth - 35 && r.height > 200) {
+                        if (r.width >= 260 && r.width <= 520 && r.right >= window.innerWidth - 45 && r.height > 200) {
                             return Math.round(r.width);
                         }
                     }
@@ -9883,14 +10602,14 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 if (cardSoftCopilot) {
                     const rCard = cardSoftCopilot.getBoundingClientRect();
                     const espacoDireita = window.innerWidth - rCard.right;
-                    if (espacoDireita >= 240 && espacoDireita <= 460) {
+                    if (espacoDireita >= 260 && espacoDireita <= 520) {
                         return Math.round(espacoDireita);
                     }
                 }
             } catch (_) { }
 
-            // 4. Fallback padrão seguro (largura padrão observada na barra lateral do Workdesk)
-            return 340;
+            // 4. Fallback padrão seguro (largura base 385px conforme novo alinhamento visual do Workdesk)
+            return 385;
         }
 
         // Aplica a largura exata da barra lateral direita ao painel do ChamaAI
@@ -9908,12 +10627,179 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             }
         }, { passive: true });
 
+        // Formata tamanho de arquivo em bytes para formato legível (KB, MB)
+        function formatarTamanhoBytesChamaAI(bytes) {
+            if (!bytes || bytes <= 0) return '0 B';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Atualiza a disponibilidade do botão de envio de acordo com texto ou anexo
+        function atualizarBotaoEnvioChamaAI() {
+            const panel = document.getElementById('chama-ai-panel');
+            if (!panel) return;
+            const textarea = panel.querySelector('#chama-ai-input-text');
+            const btnSend = panel.querySelector('#chama-ai-btn-send');
+            if (!btnSend) return;
+            const temTexto = textarea && textarea.value.trim().length > 0;
+            const temAnexo = chamaAIAnexoPendente !== null;
+            btnSend.disabled = (!temTexto && !temAnexo) || gerandoRespostaChamaAI;
+        }
+
+        // Processa arquivo anexado via botão ou colado via clipboard
+        function processarArquivoChamaAI(file) {
+            if (!file) return;
+
+            // Limite de 15 MB
+            if (file.size > 15 * 1024 * 1024) {
+                alert('O arquivo selecionado excede o limite máximo permitido de 15 MB.');
+                return;
+            }
+
+            const mime = file.type || '';
+            const nome = file.name || 'anexo';
+            const tamanhoFmt = formatarTamanhoBytesChamaAI(file.size);
+
+            const isImage = (mime && mime.startsWith('image/')) || /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(nome);
+            const isPdf = mime === 'application/pdf' || nome.toLowerCase().endsWith('.pdf');
+            const isText = (mime && (mime.startsWith('text/') || mime.includes('json') || mime.includes('xml') || mime.includes('javascript'))) ||
+                /\.(txt|log|csv|json|xml|sql|md|html|css|js|ts|ini|cfg|env)$/i.test(nome);
+
+            if (isImage || isPdf) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    const base64 = (typeof dataUrl === 'string' && dataUrl.includes(',')) ? dataUrl.split(',')[1] : '';
+                    chamaAIAnexoPendente = {
+                        tipo: isImage ? 'imagem' : 'documento',
+                        nome: nome,
+                        mimeType: mime || (isImage ? 'image/png' : 'application/pdf'),
+                        tamanhoFmt: tamanhoFmt,
+                        dataUrl: dataUrl,
+                        base64: base64
+                    };
+                    renderizarPreviewAnexoChamaAI();
+                    atualizarBotaoEnvioChamaAI();
+                };
+                reader.readAsDataURL(file);
+            } else if (isText) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const texto = e.target.result || '';
+                    chamaAIAnexoPendente = {
+                        tipo: 'texto',
+                        nome: nome,
+                        mimeType: mime || 'text/plain',
+                        tamanhoFmt: tamanhoFmt,
+                        conteudoTexto: texto
+                    };
+                    renderizarPreviewAnexoChamaAI();
+                    atualizarBotaoEnvioChamaAI();
+                };
+                reader.readAsText(file);
+            } else {
+                // Outro documento genérico
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    const base64 = (typeof dataUrl === 'string' && dataUrl.includes(',')) ? dataUrl.split(',')[1] : '';
+                    chamaAIAnexoPendente = {
+                        tipo: 'documento',
+                        nome: nome,
+                        mimeType: mime || 'application/octet-stream',
+                        tamanhoFmt: tamanhoFmt,
+                        dataUrl: dataUrl,
+                        base64: base64
+                    };
+                    renderizarPreviewAnexoChamaAI();
+                    atualizarBotaoEnvioChamaAI();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Renderiza card de anexo pendente no footer do composer
+        function renderizarPreviewAnexoChamaAI() {
+            const panel = document.getElementById('chama-ai-panel');
+            if (!panel) return;
+            const previewEl = panel.querySelector('#chama-ai-attachment-preview');
+            if (!previewEl) return;
+
+            if (!chamaAIAnexoPendente) {
+                previewEl.innerHTML = '';
+                previewEl.style.display = 'none';
+                return;
+            }
+
+            const { tipo, nome, tamanhoFmt, dataUrl } = chamaAIAnexoPendente;
+            const nomeEscapado = escaparHtml(nome);
+            let thumbHtml = '';
+            if (tipo === 'imagem' && dataUrl) {
+                thumbHtml = `<img class="chama-ai-attach-thumb" src="${dataUrl}" alt="Preview" />`;
+            } else {
+                const icone = (tipo === 'documento' && (nome.toLowerCase().endsWith('.pdf') || tipo === 'documento')) ? '📑' : '📄';
+                thumbHtml = `<div class="chama-ai-attach-icon">${icone}</div>`;
+            }
+
+            previewEl.innerHTML = `
+                <div class="chama-ai-attach-card">
+                    ${thumbHtml}
+                    <div class="chama-ai-attach-info">
+                        <span class="chama-ai-attach-name" title="${nomeEscapado}">${nomeEscapado}</span>
+                        <span class="chama-ai-attach-size">${tamanhoFmt}</span>
+                    </div>
+                    <button type="button" id="chama-ai-btn-remove-attach" class="chama-ai-attach-remove" title="Remover anexo" aria-label="Remover anexo">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+            `;
+            previewEl.style.display = 'block';
+
+            const btnRemove = previewEl.querySelector('#chama-ai-btn-remove-attach');
+            if (btnRemove) {
+                btnRemove.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removerAnexoPendenteChamaAI();
+                };
+            }
+        }
+
+        // Remove o anexo pendente
+        function removerAnexoPendenteChamaAI() {
+            chamaAIAnexoPendente = null;
+            const fileInput = document.getElementById('chama-ai-file-input');
+            if (fileInput) fileInput.value = '';
+            renderizarPreviewAnexoChamaAI();
+            atualizarBotaoEnvioChamaAI();
+        }
+
         // Renderiza o painel do ChamaAI no DOM
         function garantirPainelChamaAI() {
             injetarEstilosChamaAI();
             let panel = document.getElementById('chama-ai-panel');
             if (panel && document.body.contains(panel)) {
+                // Garante que o botão de PIN esteja presente mesmo se o painel foi criado anteriormente
+                if (!panel.querySelector('#chama-ai-btn-pin')) {
+                    const actions = panel.querySelector('.chama-ai-header-actions');
+                    if (actions) {
+                        const pinBtn = document.createElement('button');
+                        pinBtn.id = 'chama-ai-btn-pin';
+                        pinBtn.className = 'chama-ai-btn-icon';
+                        pinBtn.title = 'Fixar ChamaAI na tela';
+                        pinBtn.setAttribute('aria-label', 'Fixar');
+                        pinBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>';
+                        pinBtn.onclick = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            alternarFixacaoChamaAI();
+                        };
+                        actions.insertBefore(pinBtn, actions.firstChild);
+                    }
+                }
                 atualizarLarguraPainelChamaAI();
+                atualizarBotaoPinChamaAI();
                 return panel;
             }
 
@@ -9925,10 +10811,13 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                         <div class="chama-ai-avatar">🔥</div>
                         <div class="chama-ai-title-wrap">
                             <div class="chama-ai-title">ChamaAI <span class="chama-ai-badge">BETA</span></div>
-                            <div class="chama-ai-subtitle">Dúvidas de atendimento, FAQs do Help Tools e suporte geral</div>
+                            <div class="chama-ai-subtitle">Dúvidas e suporte geral</div>
                         </div>
                     </div>
                     <div class="chama-ai-header-actions">
+                        <button id="chama-ai-btn-pin" class="chama-ai-btn-icon" title="Fixar ChamaAI na tela" aria-label="Fixar">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+                        </button>
                         <button id="chama-ai-btn-clear" class="chama-ai-btn-icon" title="Limpar conversa" aria-label="Limpar conversa">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                         </button>
@@ -9941,14 +10830,19 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 <div id="chama-ai-messages-list" class="chama-ai-messages"></div>
 
                 <div class="chama-ai-footer">
+                    <div id="chama-ai-attachment-preview" class="chama-ai-attachment-preview" style="display: none;"></div>
                     <div class="chama-ai-input-wrap">
-                        <textarea id="chama-ai-input-text" placeholder="Pergunte sobre um atendimento, sistema ou qualquer outro assunto..." rows="1"></textarea>
-                        <button id="chama-ai-btn-send" title="Enviar pergunta (Enter)" aria-label="Enviar">
+                        <input type="file" id="chama-ai-file-input" style="display: none !important;" />
+                        <button id="chama-ai-btn-attach" type="button" title="Anexar foto ou arquivo" aria-label="Anexar arquivo">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                        </button>
+                        <textarea id="chama-ai-input-text" placeholder="Pergunte ao ChamaAI..." rows="1"></textarea>
+                        <button id="chama-ai-btn-send" title="Enviar pergunta (Enter)" aria-label="Enviar" disabled>
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </button>
                     </div>
                     <div class="chama-ai-footer-hint">
-                        <span>Enter envia • Shift+Enter quebra</span>
+                        <span>Enter envia • Shift+Enter quebra • Ctrl+V cola print</span>
                         <span>🔒 Isolado do cliente</span>
                     </div>
                 </div>
@@ -9962,6 +10856,16 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             panel.addEventListener('mousedown', (e) => e.stopPropagation());
 
             // Ações do Header
+            const btnPin = panel.querySelector('#chama-ai-btn-pin');
+            if (btnPin) {
+                btnPin.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alternarFixacaoChamaAI();
+                };
+            }
+            atualizarBotaoPinChamaAI();
+
             const btnClose = panel.querySelector('#chama-ai-btn-close');
             if (btnClose) {
                 btnClose.onclick = (e) => {
@@ -9979,11 +10883,47 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     if (chamaAIHistorico.length === 0) return;
                     if (confirm('Deseja limpar todo o histórico de conversas do ChamaAI?')) {
                         chamaAIHistorico = [];
+                        removerAnexoPendenteChamaAI();
                         persistirHistoricoChamaAI();
                         renderizarMensagensChamaAI();
                     }
                 };
             }
+
+            // Botão de Anexo e Input de Arquivo
+            const btnAttach = panel.querySelector('#chama-ai-btn-attach');
+            const fileInput = panel.querySelector('#chama-ai-file-input');
+            if (btnAttach && fileInput) {
+                btnAttach.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    fileInput.click();
+                };
+                fileInput.onchange = () => {
+                    const f = fileInput.files?.[0];
+                    if (f) processarArquivoChamaAI(f);
+                    fileInput.value = '';
+                };
+            }
+
+            // Tratador de colagem (Paste de imagens e arquivos via Ctrl+V)
+            const tratarColagemChamaAI = (e) => {
+                const items = e.clipboardData?.items;
+                if (!items || items.length === 0) return;
+
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    if (item.kind === 'file') {
+                        const file = item.getAsFile();
+                        if (file) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            processarArquivoChamaAI(file);
+                            return;
+                        }
+                    }
+                }
+            };
 
             // Input e Envio
             const textarea = panel.querySelector('#chama-ai-input-text');
@@ -9992,16 +10932,18 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             if (textarea) {
                 const autoResize = () => {
                     textarea.style.height = 'auto';
-                    textarea.style.height = Math.min(120, Math.max(22, textarea.scrollHeight)) + 'px';
+                    const scrollH = textarea.scrollHeight;
+                    textarea.style.height = Math.min(120, Math.max(22, scrollH)) + 'px';
+                    textarea.style.overflowY = scrollH > 120 ? 'auto' : 'hidden';
                 };
 
                 textarea.addEventListener('input', (e) => {
                     e.stopPropagation();
                     autoResize();
-                    if (btnSend) {
-                        btnSend.disabled = !textarea.value.trim() || gerandoRespostaChamaAI;
-                    }
+                    atualizarBotaoEnvioChamaAI();
                 });
+
+                textarea.addEventListener('paste', tratarColagemChamaAI);
 
                 textarea.addEventListener('keydown', (e) => {
                     // BLINDAGEM CRÍTICA: bloqueia propagação para o Workdesk
@@ -10021,7 +10963,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                         }
                         e.preventDefault();
                         const val = textarea.value.trim();
-                        if (val && !gerandoRespostaChamaAI) {
+                        if ((val || chamaAIAnexoPendente) && !gerandoRespostaChamaAI) {
                             enviarPerguntaChamaAI(val);
                         }
                     }
@@ -10035,17 +10977,26 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 });
             }
 
+            // Suporta colar também diretamente no painel caso o foco não esteja no textarea
+            panel.addEventListener('paste', (e) => {
+                if (chamaAIPainelAberto) {
+                    tratarColagemChamaAI(e);
+                }
+            });
+
             if (btnSend) {
                 btnSend.onclick = (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (textarea && textarea.value.trim() && !gerandoRespostaChamaAI) {
-                        enviarPerguntaChamaAI(textarea.value.trim());
+                    const val = textarea ? textarea.value.trim() : '';
+                    if ((val || chamaAIAnexoPendente) && !gerandoRespostaChamaAI) {
+                        enviarPerguntaChamaAI(val);
                     }
                 };
             }
 
             renderizarMensagensChamaAI();
+            atualizarBotaoEnvioChamaAI();
             return panel;
         }
 
@@ -10103,12 +11054,35 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 const horaFmt = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
 
                 if (msg.role === 'user') {
+                    let anexoHtml = '';
+                    if (msg.anexo) {
+                        if (msg.anexo.tipo === 'imagem' && msg.anexo.dataUrl) {
+                            anexoHtml = `
+                                <div class="chama-ai-msg-attach-wrap">
+                                    <img class="chama-ai-msg-attach-img" src="${msg.anexo.dataUrl}" alt="${msg.anexo.nome || 'Imagem'}" title="Clique para abrir imagem em tamanho original" />
+                                </div>
+                            `;
+                        } else {
+                            const icone = (msg.anexo.tipo === 'documento' && (msg.anexo.nome?.toLowerCase().endsWith('.pdf') || msg.anexo.tipo === 'documento')) ? '📑' : '📄';
+                            anexoHtml = `
+                                <div class="chama-ai-msg-attach-doc">
+                                    <span class="chama-ai-msg-attach-doc-icon">${icone}</span>
+                                    <div class="chama-ai-msg-attach-doc-info">
+                                        <span class="chama-ai-msg-attach-doc-name" title="${msg.anexo.nome}">${msg.anexo.nome}</span>
+                                        <span class="chama-ai-msg-attach-doc-size">${msg.anexo.tamanhoFmt || ''}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+
                     row.innerHTML = `
                         <div class="chama-ai-bubble user-bubble">
                             <div class="chama-ai-bubble-header">
                                 <span class="chama-ai-bubble-sender">Você</span>
                                 <span>${horaFmt}</span>
                             </div>
+                            ${anexoHtml}
                             <div class="chama-ai-bubble-body">${msg.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</div>
                         </div>
                     `;
@@ -10138,6 +11112,33 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 container.appendChild(row);
             });
 
+            // Configura clique nas imagens para abrir em nova janela (DOM seguro sem document.write)
+            container.querySelectorAll('.chama-ai-msg-attach-img').forEach(img => {
+                img.onclick = (e) => {
+                    e.stopPropagation();
+                    try {
+                        const win = window.open('');
+                        if (win && win.document) {
+                            win.document.title = img.alt || 'Imagem';
+                            win.document.body.style.margin = '0';
+                            win.document.body.style.background = '#0d0e12';
+                            win.document.body.style.display = 'flex';
+                            win.document.body.style.alignItems = 'center';
+                            win.document.body.style.justifyContent = 'center';
+                            win.document.body.style.height = '100vh';
+                            const elImg = win.document.createElement('img');
+                            elImg.src = img.src;
+                            elImg.style.maxWidth = '98%';
+                            elImg.style.maxHeight = '98%';
+                            elImg.style.objectFit = 'contain';
+                            elImg.style.boxShadow = '0 0 20px rgba(0,0,0,0.8)';
+                            elImg.style.borderRadius = '6px';
+                            win.document.body.appendChild(elImg);
+                        }
+                    } catch (_) { }
+                };
+            });
+
             // Configura botões de copiar
             container.querySelectorAll('.chama-ai-btn-copy').forEach(btn => {
                 btn.onclick = (e) => {
@@ -10161,7 +11162,10 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
 
         // Envia pergunta para a IA de forma totalmente autônoma e segura
         async function enviarPerguntaChamaAI(pergunta) {
-            if (!pergunta || gerandoRespostaChamaAI) return;
+            const temAnexo = chamaAIAnexoPendente !== null;
+            const textoDigitado = (typeof pergunta === 'string' ? pergunta : '').trim();
+
+            if ((!textoDigitado && !temAnexo) || gerandoRespostaChamaAI) return;
             gerandoRespostaChamaAI = true;
 
             const panel = garantirPainelChamaAI();
@@ -10170,13 +11174,31 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             if (textarea) {
                 textarea.value = '';
                 textarea.style.height = '22px';
+                textarea.style.overflowY = 'hidden';
             }
             if (btnSend) btnSend.disabled = true;
 
+            // Snapshot do anexo pendente e reset imediato do preview
+            const anexoEnviado = chamaAIAnexoPendente ? { ...chamaAIAnexoPendente } : null;
+            removerAnexoPendenteChamaAI();
+
+            // Texto de exibição da mensagem do usuário
+            const perguntaExibicao = textoDigitado || (anexoEnviado?.tipo === 'imagem'
+                ? 'Analise a imagem anexada'
+                : `Analise o arquivo anexado (${anexoEnviado?.nome || 'arquivo'})`);
+
             // 1. Registra mensagem do usuário no histórico local
+            const anexoHistorico = anexoEnviado ? {
+                tipo: anexoEnviado.tipo,
+                nome: anexoEnviado.nome,
+                tamanhoFmt: anexoEnviado.tamanhoFmt,
+                dataUrl: anexoEnviado.tipo === 'imagem' ? anexoEnviado.dataUrl : null
+            } : null;
+
             chamaAIHistorico.push({
                 role: 'user',
-                text: pergunta,
+                text: perguntaExibicao,
+                anexo: anexoHistorico,
                 timestamp: Date.now()
             });
             persistirHistoricoChamaAI();
@@ -10200,7 +11222,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
 
             try {
                 // 3. Busca inteligente nos 442 FAQs do Help Tools
-                const { textoFaqs, faqsUsados } = await buscarFaqsHelpToolsParaChamaAI(pergunta);
+                const { textoFaqs, faqsUsados } = await buscarFaqsHelpToolsParaChamaAI(perguntaExibicao);
 
                 // 4. Monta o histórico recente para o prompt (últimas 8 mensagens)
                 const ultimasMsgs = chamaAIHistorico.slice(-8, -1);
@@ -10210,23 +11232,51 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                         ultimasMsgs.map(m => `${m.role === 'user' ? 'Atendente' : 'ChamaAI'}: ${m.text}`).join('\n\n');
                 }
 
-                // 5. System Instruction dedicada ao ChamaAI - Focada em respostas ultra concisas, diretas e sem enrolação
+                // 5. System Instruction dedicada ao ChamaAI - Assistente versátil, criativo e objetivo para contexto Softcom e uso diário
                 const systemInstructionChamaAI =
-                    "Você é o ChamaAI, assistente inteligente e consultor prático para atendentes de suporte da Softcom. " +
-                    "SEJA EXTREMAMENTE DIRETO, CONCISO E OBJETIVO. NUNCA ENROLE OU SEJA PROLIXO.\n\n" +
+                    "Você é o ChamaAI, um assistente inteligente, versátil e criativo que apoia os atendentes tanto no contexto técnico/fiscal da Softcom quanto em qualquer pergunta de uso diário, tecnologia, ideias, redação de textos, cálculos ou conhecimentos gerais fora do contexto Softcom. " +
+                    "Tenha liberdade para desenvolver boas respostas, claras, úteis e completas, mas sem enrolação inútil.\n\n" +
                     "DIRETRIZES OBRIGATÓRIAS:\n" +
-                    "1. RESPOSTAS ULTRA CURTAS: Vá direto ao ponto. Proibido introduções prolixas, preâmbulos ou despedidas (ex: 'Espero ter ajudado', 'Se precisar de algo mais, é só chamar', 'Fico à disposição').\n" +
+                    "1. OBJETIVIDADE COM LIBERDADE CRIATIVA: Vá direto ao ponto, sem preâmbulos vazios ou despedidas prolixas (ex: 'Espero ter ajudado', 'Se precisar de algo mais, é só chamar', 'Fico à disposição'), mas desenvolva a explicação, ideia ou resposta com clareza e naturalidade na medida do que o usuário pediu.\n" +
                     "2. CORREÇÃO DE FRASES / TEXTOS:\n" +
-                    "   - Quando o atendente pedir para corrigir, melhorar ou reescrever uma frase ou texto: devolva EXCLUSIVAMENTE a frase corrigida em destaque (ex: '> O CFOP que o senhor deve utilizar é o 500.').\n" +
+                    "   - Quando o atendente pedir especificamente para corrigir, melhorar ou reescrever uma frase para enviar ao cliente: devolva EXCLUSIVAMENTE a frase corrigida em destaque (ex: '> Para venda com substituição tributária, utilize o CFOP 5.405 e o CSOSN 500.').\n" +
                     "   - É EXPRESSAMENTE PROIBIDO criar seções como 'Por que a correção foi feita?', 'Por que a correção foi boa?', 'Motivo da correção', justificativas gramaticais ou tabelas comparativas ('| Erro | Correção | Motivo |').\n" +
-                    "   - É EXPRESSAMENTE PROIBIDO adicionar 'Dicas rápidas para o atendimento' ou dicas extras não solicitadas. Entregue apenas o texto pronto.\n" +
-                    "3. DÚVIDAS E PROCEDIMENTOS:\n" +
-                    "   - Responda em no máximo 3 a 5 passos diretos e concisos.\n" +
-                    "   - Priorize os FAQs do Help Tools fornecidos quando a dúvida for sobre procedimentos do sistema Softcom.\n" +
-                    "   - Para outros assuntos gerais (Windows, redes, banco de dados, etc.), seja igualmente resumido e assertivo.";
+                    "   - É EXPRESSAMENTE PROIBIDO adicionar 'Dicas rápidas para o atendimento' ou dicas extras não solicitadas ao corrigir frases.\n" +
+                    "3. CONTEXTO SOFTCOM VS. USO DIÁRIO E CONHECIMENTOS GERAIS:\n" +
+                    "   - Quando a dúvida for sobre o sistema Softcom: priorize os FAQs do Help Tools fornecidos e explique o procedimento em passos claros e diretos.\n" +
+                    "   - Quando a pergunta for de uso diário ou fora do contexto Softcom (tecnologia em geral, Windows, redes, banco de dados, programação, ideias, textos criativos, cálculos, curiosidades ou qualquer outro tema): ignore os FAQs se não tiverem relação direta e responda livremente com criatividade, precisão e inteligência.\n" +
+                    "4. PRECISÃO FISCAL (QUANDO O TEMA FOR FISCAL / VAREJO E ATACADO SOFTCOM):\n" +
+                    "   - Nunca confunda CFOP (4 dígitos: operação/circulação) com CST (2 dígitos: Regime Normal) ou CSOSN (3 dígitos: Simples Nacional).\n" +
+                    "   - Corrija proativamente caso o atendente troque as siglas (ex: chamar CSOSN 500 de CFOP 500).\n" +
+                    "   - Referência rápida:\n" +
+                    "     * Tributado Normal: CFOP 5.102 (interna) / 6.102 (interestadual) | Simples: CSOSN 102 (sem crédito) ou 101 (com crédito) | Normal: CST 00.\n" +
+                    "     * Substituição Tributária (ST retido anteriormente): CFOP 5.405 (venda interna varejo/atacado) | Simples: CSOSN 500 | Normal: CST 60.\n" +
+                    "     * Entrada Comercialização: CFOP 1.102 / 2.102 (Tributado) | CFOP 1.403 / 2.403 (Mercadoria com ST).\n" +
+                    "     * Devolução de Compra: CFOP 5.202 / 6.202 (Tributado) ou 5.411 / 6.411 (ST) | Simples: CSOSN 900.\n" +
+                    "     * NCM: Obrigatório 8 dígitos válidos; se houver ST (CSOSN 500 / CST 60 / CFOP 5.405), o código CEST (7 dígitos) é obrigatório.\n" +
+                    "5. FOTOS E ARQUIVOS:\n" +
+                    "   - Se o usuário anexar uma captura de tela (print), foto ou arquivo: examine os dados visuais/textuais, identifique o que foi solicitado (erro de sistema, documento ou imagem geral) e responda de forma direta e resolutiva.";
 
-                // 6. Monta prompt final
-                const promptFinal = `${textoFaqs}${historicoDialogo}\n\nPERGUNTA DO ATENDENTE:\n"${pergunta}"\n\nInstrução: Responda de forma ultra concisa e direta. Se for correção ou ajuste de frase, forneça APENAS a frase corrigida em destaque (> Frase), sem justificativas, sem tabelas e sem dicas extras:`;
+                // 6. Concatena conteúdo de texto caso o anexo seja textual
+                let trechoAnexoPrompt = '';
+                if (anexoEnviado && anexoEnviado.tipo === 'texto' && anexoEnviado.conteudoTexto) {
+                    const txtTruncado = anexoEnviado.conteudoTexto.length > 30000
+                        ? anexoEnviado.conteudoTexto.slice(0, 30000) + '\n... [conteúdo truncado]'
+                        : anexoEnviado.conteudoTexto;
+                    trechoAnexoPrompt = `\n\n[CONTEÚDO DO ARQUIVO ANEXADO (${anexoEnviado.nome})]:\n\`\`\`\n${txtTruncado}\n\`\`\``;
+                }
+
+                // 7. Configura imageData para envio multimodal (imagens e PDFs)
+                let imageData = null;
+                if (anexoEnviado && (anexoEnviado.tipo === 'imagem' || anexoEnviado.tipo === 'documento') && anexoEnviado.base64) {
+                    imageData = {
+                        mimeType: anexoEnviado.mimeType,
+                        base64: anexoEnviado.base64
+                    };
+                }
+
+                // 8. Monta prompt final
+                const promptFinal = `${textoFaqs}${historicoDialogo}${trechoAnexoPrompt}\n\nPERGUNTA DO ATENDENTE:\n"${perguntaExibicao}"`;
 
                 const apiKey = (typeof obterChaveGeminiParaEnvio === 'function') ? obterChaveGeminiParaEnvio() : '';
                 const groqApiKey = (typeof obterChaveGroqParaEnvio === 'function') ? obterChaveGroqParaEnvio() : '';
@@ -10237,13 +11287,14 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                     groqApiKey: groqApiKey,
                     prompt: promptFinal,
                     systemInstruction: systemInstructionChamaAI,
-                    temperature: 0.2,
-                    maxTokens: 400
+                    temperature: 0.65,
+                    maxTokens: imageData ? 900 : 800,
+                    imageData: imageData
                 }, (response) => {
                     const typingEl = document.getElementById('chama-ai-typing-indicator');
                     if (typingEl) typingEl.remove();
                     gerandoRespostaChamaAI = false;
-                    if (btnSend && textarea) btnSend.disabled = !textarea.value.trim();
+                    atualizarBotaoEnvioChamaAI();
 
                     if (chrome.runtime.lastError || !response || !response.success) {
                         const erro = response?.error || chrome.runtime.lastError?.message || 'Erro ao consultar IA';
@@ -10272,7 +11323,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
                 const typingEl = document.getElementById('chama-ai-typing-indicator');
                 if (typingEl) typingEl.remove();
                 gerandoRespostaChamaAI = false;
-                if (btnSend && textarea) btnSend.disabled = !textarea.value.trim();
+                atualizarBotaoEnvioChamaAI();
 
                 chamaAIHistorico.push({
                     role: 'assistant',
@@ -10289,6 +11340,7 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             chamaAIPainelAberto = true;
             const panel = garantirPainelChamaAI();
             atualizarLarguraPainelChamaAI();
+            atualizarBotaoPinChamaAI();
             panel.classList.add('is-open');
 
             const btn = document.getElementById('btn-workdesk-chama-ai');
@@ -10486,18 +11538,26 @@ Retorne ESTRITAMENTE o texto final pronto para envio ao cliente, sem aspas, tít
             limparEspacoHistorico();
         }
 
-        // Listener global: se o atendente clicar em "Cliente", "Chama Gestor" ou "Histórico" nativos, fecha o ChamaAI
+        // Fechamento ao Clicar Fora (Click Outside): Quando o painel do ChamaAI estiver aberto e NÃO estiver fixado
         document.addEventListener('click', (e) => {
+            if (!chamaAIPainelAberto || chamaAIFixado) return;
+            const panel = document.getElementById('chama-ai-panel');
+            const btn = document.getElementById('btn-workdesk-chama-ai');
+            if (!panel || !panel.classList.contains('is-open')) return;
+
             const alvo = e.target;
-            if (!alvo || alvo.closest('#chama-ai-panel') || alvo.closest('#btn-workdesk-chama-ai')) return;
-            const t = (alvo.textContent || alvo.title || alvo.getAttribute?.('aria-label') || '').toLowerCase().trim();
-            if (t.includes('chama gestor') || t.includes('chamar gestor') || t === 'gestor' ||
-                t === 'histórico' || t === 'historico' || t.includes('histórico') ||
-                t === 'cliente' || t === 'dados do cliente') {
-                if (chamaAIPainelAberto) {
-                    fecharPainelChamaAI();
-                }
+            if (!alvo) return;
+
+            // Se o clique ocorreu dentro do painel ou no botão disparador do ChamaAI, mantém aberto
+            if (panel.contains(alvo) || (btn && btn.contains(alvo))) {
+                return;
             }
+            if (alvo.closest && (alvo.closest('#chama-ai-panel') || alvo.closest('#btn-workdesk-chama-ai'))) {
+                return;
+            }
+
+            // Qualquer outro clique fora do painel fecha o ChamaAI automaticamente
+            fecharPainelChamaAI();
         }, true);
 
         // Listener global de Esc para fechar o ChamaAI
